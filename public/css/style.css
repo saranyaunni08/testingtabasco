@@ -8,3 +8,51 @@
   border-radius: 8px !important;
   background: linear-gradient(195deg, #72c977, #43a047) !important;
 }
+
+    /* Custom styles for form and sidebar */
+    .form-label {
+      font-weight: bold;
+    }
+
+    .form-control {
+      border-color: #ccc;
+      border-radius: 8px;
+    }
+
+    .btn-primary {
+      background-color: #3366ff;
+      border-color: #3366ff;
+    }
+
+    .btn-primary:hover {
+      background-color: #2552cc;
+      border-color: #2552cc;
+    }
+
+    /* Sidebar styles */
+    .sidenav-header {
+      background-color: #212529;
+      color: #fff;
+    }
+
+    .navbar-brand span {
+      color: #fff;
+    }
+
+    .nav-link {
+      color: #fff;
+    }
+
+    .nav-link.active {
+      background-color: #3366ff !important;
+    }
+
+    .btn.bg-gradient-danger {
+      background-color: #dc3545;
+      border-color: #dc3545;
+    }
+
+    .btn.bg-gradient-danger:hover {
+      background-color: #c82333;
+      border-color: #c82333;
+    }

@@ -3,6 +3,7 @@
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\RoomController;
 
 Route::get('/', function () {
     return redirect('login');
@@ -20,6 +21,15 @@ Route::prefix('admin')->group(function () {
     Route::name('admin.')->group(function () {
         Route::controller(AdminController::class)->group(function () {
             Route::get('/', 'index')->name('dashboard');
-        });
+            
+            Route::resource('rooms', RoomController::class);
+
     });
 });
+
+
+Route::get('admin/rooms/create', [RoomController::class, 'create'])->name('rooms.create');
+Route::post('/admin/rooms', [RoomController::class, 'store'])->name('rooms.store');
+Route::resource('rooms', RoomController::class);
+
+}); 
