@@ -29,7 +29,6 @@
                                         <td>{{ $room->room_type }}</td>
                                         <td>{{ $room->square_footage }}</td>
                                         <td>
-                                            <a href="{{ route('rooms.edit', $room->id) }}" class="btn btn-sm btn-primary">Edit</a>
                                             <form action="{{ route('rooms.destroy', $room->id) }}" method="POST" style="display: inline-block;">
                                                 @csrf
                                                 @method('DELETE')

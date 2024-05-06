@@ -89,11 +89,12 @@ class RoomController extends Controller
      * @param  \App\Models\Room  $room
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Room $room)
+    public function destroy($id)
     {
-        $room->delete();
+        $room = Room::findOrFail($id);
+        $room->delete(); // Soft delete the room
 
-        return redirect()->route('rooms.index')->with('success', 'Room deleted successfully.');
+        return redirect()->route('rooms.index')->with('success', 'Room deleted successfully');
     }
 
 }
