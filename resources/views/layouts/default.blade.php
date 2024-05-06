@@ -36,14 +36,24 @@
       <ul class="navbar-nav">
         {{-- Sidebar menu items start --}}
         <li class="nav-item">
-          <a class="nav-link text-white {{ $page == 'dashboard' ? 'active bg-gradient-info' : '' }}"
-            href="{{ route('admin.dashboard') }}" href="{{ route('admin.dashboard') }}">
-            <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
-              <i class="material-icons opacity-10">dashboard</i>
-            </div>
-            <span class="nav-link-text ms-1">Dashboard</span>
-          </a>
-        </li>
+    <a class="nav-link text-white {{ $page == 'dashboard' ? 'active bg-gradient-info' : '' }}"
+       href="{{ route('admin.dashboard') }}">
+        <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+            <i class="material-icons opacity-10">dashboard</i>
+        </div>
+        <span class="nav-link-text ms-1">Dashboard</span>
+    </a>
+</li>
+
+<li class="nav-item">
+    <a class="nav-link text-white {{ $page == 'building' ? 'active bg-gradient-info' : '' }}"
+       href="{{ route('admin.building') }}">
+        <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+            <i class="material-icons opacity-10">dashboard</i>
+        </div>
+        <span class="nav-link-text ms-1">Building</span>
+    </a>
+</li>
 
         
 
@@ -89,7 +99,7 @@
   <script src="{{ asset('js/core/bootstrap.min.js') }}"></script>
   <script src="{{ asset('js/plugins/perfect-scrollbar.min.js') }}"></script>
   <script src="{{ asset('js/plugins/smooth-scrollbar.min.js') }}"></script>
-  <script>
+  <!-- <script>
     var win = navigator.platform.indexOf('Win') > -1;
     if (win && document.querySelector('#sidenav-scrollbar')) {
       var options = {
@@ -97,7 +107,7 @@
       }
       Scrollbar.init(document.querySelector('#sidenav-scrollbar'), options);
     }
-  </script>
+  </script> -->
   <script async defer src="https://buttons.github.io/buttons.js"></script>
   <script src="{{ asset('js/material-dashboard.min.js?v=3.1.0') }}"></script>
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
