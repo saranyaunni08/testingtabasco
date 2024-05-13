@@ -12,7 +12,11 @@ class AdminController extends Controller
     {
         return view('pages.dashboard');
     }
-
+  
+    public function view() {
+        return view('pages.sales');
+    }
+  
     public function addbuilding()
     {
         return view('pages.addbuilding');
