@@ -20,6 +20,9 @@ Route::prefix('admin')->group(function () {
     Route::name('admin.')->group(function () {
         Route::controller(AdminController::class)->group(function () {
             Route::get('/', 'index')->name('dashboard');
+            Route::get('/building', 'show')->name('building');
+            Route::get('/sales', 'view')->name('sales');
         });
     });
 });
+
