@@ -1,55 +1,77 @@
-@extends('layouts.default', ['title' => 'Dashboard', 'page' => 'dashboard'])
+@extends('layouts.default', ['title' => 'Buildings', 'page' => 'buildings'])
 @section('content')
 <div class="container-fluid py-4">
     <div class="row">
         <div class="col-12">
             <div class="card my-4">
                 <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
-                    <div class="bg-gradient-info shadow-info border-radius-lg pt-4 pb-3">
-                        <h6 class="text-white text-capitalize ps-3">Building A</h6>
+                    <div class="bg-gradient-info shadow-info border-radius-lg p-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h6 class="text-white text-capitalize ps-3 mb-0">Buildings</h6>
+                            <div class="pe-3">
+                                <a href="{{ route('admin.addbuilding') }}" class="btn btn-light m-0">Add Building</a>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="card-body px-0 pb-2">
                     <div class="row p-4">
-                        <div class="col-md-12">
-                            <h5 class="text-primary mb-3">Items in the Building:</h5>
-                            <div class="table-responsive">
-                                <table class="table">
-                                    <thead>
-                                        <tr>
-                                            <th scope="col">Item</th>
-                                            <th scope="col">Floor</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>Flats</td>
-                                            <td>4</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Shops</td>
-                                            <td>2</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Supermarket</td>
-                                            <td>1</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Others</td>
-                                            <td>5</td>
-                                        </tr>
-                                        <!-- Add more rows as needed -->
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                        <!-- Add a canvas element for the pie chart -->
-                        <div class="col-md-6">
-                            <canvas id="buildingChart" width="400" height="400"></canvas>
-                        </div>
-                        <!-- Add a canvas element for the histogram -->
-                        <div class="col-md-6">
-                            <canvas id="buildingHistogram" width="400" height="400"></canvas>
+                        <div class="table-responsive">
+                            <table class="table align-items-center mb-0">
+                                <thead>
+                                    <tr>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Name</th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Location</th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Number of Floors</th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Super Built up Area</th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Carpet Area</th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Amenities</th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($buildings as $building)
+                                    <tr>
+                                        <td>
+                                            <h6 class="mb-0 text-xs">{{ $building->building_name }}</h6>
+                                        </td>
+                                        <td>
+                                            <p class="text-xs text-dark font-weight-normal mb-0">{{ $building->building_address }}</p>
+                                        </td>
+                                        <td>
+                                            <p class="text-xs text-dark font-weight-normal mb-0">{{ $building->no_of_floors }}</p>
+                                        </td>
+                                        <td>
+                                            <p class="text-xs text-dark font-weight-normal mb-0">{{ $building->super_built_up_area }}</p>
+                                        </td>
+                                        <td>
+                                            <p class="text-xs text-dark font-weight-normal mb-0">{{ $building->carpet_area }}</p>
+                                        </td>
+                                        <td>
+                                            <p class="text-xs text-dark font-weight-normal mb-0">
+                                                @foreach(explode(',', $building->building_amenities) as $amenity)
+                                                  {{ $amenity }},
+                                                @endforeach
+                                                 @if ($building->additional_amenities)
+                                                  {{ $building->additional_amenities }}
+                                                 @endif
+                                            </p>
+                                        </td>
+
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                <a href="{{ route('admin.building.editbuilding', ['id' => $building->id]) }}" class="btn btn-sm btn-primary me-1">Edit</a>
+                                                <form method="POST" action="{{ route('admin.building.delete', ['id' => $building->id]) }}">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -57,61 +79,4 @@
         </div>
     </div>
 </div>
-
-<!-- Include Chart.js library -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<script>
-    // Get the canvas element for the pie chart
-    var pieCtx = document.getElementById('buildingChart').getContext('2d');
-
-    // Define data for the pie chart
-    var pieData = {
-        labels: ['Sold', 'Remaining'],
-        datasets: [{
-            data: [45, 55], // Sample data, you can replace this with actual data
-            backgroundColor: ['#28a745', '#ffc107'], // Colors for each segment
-        }]
-    };
-
-    // Create a new pie chart
-    var pieChart = new Chart(pieCtx, {
-        type: 'pie',
-        data: pieData,
-        options: {
-            responsive: true, // Make the chart responsive
-            maintainAspectRatio: false, // Maintain aspect ratio
-            legend: {
-                position: 'bottom' // Position of the legend
-            }
-        }
-    });
-
-    // Get the canvas element for the histogram
-    var histogramCtx = document.getElementById('buildingHistogram').getContext('2d');
-
-    // Define data for the histogram
-    var histogramData = {
-        labels: ['Flates', 'Super Market', 'Shops', 'Others'],
-        datasets: [{
-            label: 'Sales Report',
-            data: [12, 19, 3, 5, 2], // Sample data, you can replace this with actual data
-            backgroundColor: '#007bff' // Color for the bars
-        }]
-    };
-
-    // Create a new histogram
-    var histogram = new Chart(histogramCtx, {
-        type: 'bar',
-        data: histogramData,
-        options: {
-            responsive: true, // Make the chart responsive
-            maintainAspectRatio: false, // Maintain aspect ratio
-            legend: {
-                display: false // Hide the legend
-            }
-        }
-    });
-</script>
-
 @endsection
