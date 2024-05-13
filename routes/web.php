@@ -29,9 +29,9 @@ Route::prefix('admin')->group(function () {
 
 
 Route::get('admin/rooms/create', [RoomController::class, 'create'])->name('rooms.create');
-Route::post('/admin/rooms', [RoomController::class, 'store'])->name('rooms.store');
 Route::resource('rooms', RoomController::class);
 Route::delete('/rooms/{id}', 'App\Http\Controllers\RoomController@destroy')->name('rooms.destroy');
+Route::post('/rooms', [RoomController::class, 'store'])->name('rooms.store');
 
 
 }); 
