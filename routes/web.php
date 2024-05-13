@@ -20,6 +20,15 @@ Route::prefix('admin')->group(function () {
     Route::name('admin.')->group(function () {
         Route::controller(AdminController::class)->group(function () {
             Route::get('/', 'index')->name('dashboard');
+            Route::get('/buildings', 'buildingpage')->name('building');
+            Route::get('/add-building', 'addbuilding')->name('addbuilding');
+            Route::get('/edit-building/{id}', 'editbuilding')->name('building.editbuilding');
+            Route::post('/update-building/{id}', 'updatebuilding')->name('building.update');
+            Route::post('/buildingstore', 'buildingstore')->name('addbuilding.store');
+            Route::delete('/buildings/{id}', 'destroy')->name('building.delete');
+
+
+           
         });
     });
 });
