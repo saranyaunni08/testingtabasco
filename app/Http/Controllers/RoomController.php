@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Room;
 use Illuminate\Http\Request;
+use Illuminate\Database\Eloquent\Builder;
+
 
 class RoomController extends Controller
 {
@@ -14,6 +16,74 @@ class RoomController extends Controller
         return view('rooms.create');
     }
 
+    public function edit($id)
+    {
+        // Retrieve the room by ID for editing
+        $room = Room::findOrFail($id);
+    
+        // Define the $page variable
+        $page = 'edit';
+    
+        // Pass the room data and $page variable to the edit view
+        return view('rooms.edit', compact('room', 'page'));
+    }
+    public function update(Request $request, $id)
+    {
+        // Validate the incoming request data
+        $validatedData = $request->validate([
+            'room_number' => 'required|string|max:255',
+            // Add more validation rules as needed
+        ]);
+    
+        // Find the room by ID
+        $room = Room::findOrFail($id);
+    
+        // Update the room attributes
+        $room->update($validatedData);
+    
+        // Redirect back or return a response as needed
+        return redirect()->route('rooms.index', $id)->with('success', 'Room updated successfully');
+    }
+    
+    public function index()
+    {
+        // Fetch all rooms
+        $rooms = Room::all();
+
+        // Filter rooms by type
+        $flats = $rooms->where('room_type', 'Flat');
+        $shops = $rooms->where('room_type', 'Shops');
+        $carParking = $rooms->where('room_type', 'Car parking');
+        $tableSpaces = $rooms->where('room_type', 'Table space');
+        $chairSpaces = $rooms->where('room_type', 'Chair space');
+        $kiosks = $rooms->where('room_type', 'Kiosk');
+
+        // Pass data to the view
+        return view('rooms.index', [
+            'flats' => $flats,
+            'shops' => $shops,
+            'carParking' => $carParking,
+            'tableSpaces' => $tableSpaces,
+            'chairSpaces' => $chairSpaces,
+            'kiosks' => $kiosks,
+        ]);
+
+        $rooms = Room::withTrashed()->get();
+
+        return view('rooms.index', compact('rooms'));
+    }
+
+    protected function getRoomsWithTrashed(bool $withTrashed = true): Builder|Room
+    {
+        return Room::withTrashed($withTrashed);
+    }
+    public function destroy($id)
+    {
+        $room = Room::findOrFail($id);
+        $room->delete(); // Soft delete the room
+    
+        return redirect()->route('rooms.index')->with('success', 'Room deleted successfully');
+    }
     public function store(Request $request)
     {
         // Validate incoming request data

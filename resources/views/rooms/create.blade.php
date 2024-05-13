@@ -1,5 +1,5 @@
 
-@extends('layouts.default', ['title' => 'Dashboard', 'page' => 'dashboard'])
+@extends('layouts.default', ['title' => 'Add New Building', 'page' => 'building'])
 
 @section('content')
 <div class="container-fluid py-4">
@@ -11,10 +11,8 @@
             <h6 class="text-white text-capitalize ps-3">Add Room</h6>
           </div>
         </div>
-
-
-        </div>
         <div class="card-body px-0 pb-2">
+          <div class="row p-4">
           <form action="{{ route('rooms.store') }}" method="POST">
             @csrf
             <div class="row justify-content-center">
@@ -78,7 +76,6 @@
                         <input type="text" name="shop_number" class="form-control">
                     </div>
                     <div class="input-group input-group-dynamic mb-4">
-                        <label for="shop_type" class="form-label">Shop Type</label>
                         <select name="shop_type" class="form-select">
                             <option value="" disabled selected>Select Shop Type</option>
                             <option value="Retail">Retail Shop</option>

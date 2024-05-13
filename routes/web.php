@@ -34,4 +34,13 @@ Route::delete('/rooms/{id}', 'App\Http\Controllers\RoomController@destroy')->nam
 Route::post('/rooms', [RoomController::class, 'store'])->name('rooms.store');
 
 
+Route::get('rooms/{room}/edit', [RoomController::class, 'edit'])->name('rooms.edit');
+Route::put('rooms/{room}', [RoomController::class, 'update'])->name('rooms.update');
+
+
+Route::get('/shops/{id}/edit', 'RoomController@edit')->name('shops.edit');
+Route::put('/shops/{id}', 'RoomController@update')->name('shops.update');
+Route::delete('/shops/{id}', 'RoomController@destroy')->name('shops.destroy');
+
+
 }); 
