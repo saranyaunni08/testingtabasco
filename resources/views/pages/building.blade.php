@@ -1,51 +1,83 @@
-@extends('layouts.default', ['title' => 'Dashboard', 'page' => 'building'])
+@extends('layouts.default', ['title' => 'Buildings', 'page' => 'buildings'])
 
 @section('content')
-
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-12">
-            <div class="card mb-4">
-                <div class="card-header" style="background-color: blue;">
-                    <h5 class="text-center" style="color: white;">BUILDING LIST</h5>
-                </div>
-                <div class="card-body">
-                    <div class="text-center mb-3">
-                        <a href="{{ route('admin.addbuilding') }}" class="btn btn-primary btn-md" style="background-color: green;">Add Building</a>
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card my-4">
+                <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
+                    <div class="bg-gradient-info shadow-info border-radius-lg p-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h6 class="text-white text-capitalize ps-3 mb-0">Buildings</h6>
+                            <div class="pe-3">
+                                <a href="{{ route('admin.addbuilding') }}" class="btn btn-light m-0">Add Building</a>
+                            </div>
+                        </div>
                     </div>
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Address</th>
-                                <th>Number of Floors</th>
-                                <th>Amenities</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($buildings as $building)
-                            <tr>
-                                <td>{{ $building->building_name }}</td>
-                                <td>{{ $building->building_address }}</td>
-                                <td>{{ $building->no_of_floors }}</td>
-                                <td>{{ $building->building_amenities }}</td>
-                               
-                                <td>
-                                    <form method="POST" action="{{ route('admin.building.delete', ['id' => $building->id]) }}">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-danger">Delete</button>
-                                    </form>
-                                </td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+                </div>
+                <div class="card-body px-0 pb-2">
+                    <div class="row p-4">
+                        <div class="table-responsive">
+                            <table class="table align-items-center mb-0">
+                                <thead>
+                                    <tr>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Name</th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Location</th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Number of Floors</th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Super Built up Area</th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Carpet Area</th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Amenities</th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($buildings as $building)
+                                    <tr>
+                                        <td>
+                                            <h6 class="mb-0 text-xs">{{ $building->building_name }}</h6>
+                                        </td>
+                                        <td>
+                                            <p class="text-xs text-dark font-weight-normal mb-0">{{ $building->building_address }}</p>
+                                        </td>
+                                        <td>
+                                            <p class="text-xs text-dark font-weight-normal mb-0">{{ $building->no_of_floors }}</p>
+                                        </td>
+                                        <td>
+                                            <p class="text-xs text-dark font-weight-normal mb-0">{{ $building->super_built_up_area }}</p>
+                                        </td>
+                                        <td>
+                                            <p class="text-xs text-dark font-weight-normal mb-0">{{ $building->carpet_area }}</p>
+                                        </td>
+                                        <td>
+                                            <p class="text-xs text-dark font-weight-normal mb-0">
+                                                @foreach(explode(',', $building->building_amenities) as $amenity)
+                                                  {{ $amenity }},
+                                                @endforeach
+                                                 @if ($building->additional_amenities)
+                                                  {{ $building->additional_amenities }}
+                                                 @endif
+                                            </p>
+                                        </td>
+
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                <a href="{{ route('admin.building.editbuilding', ['id' => $building->id]) }}" class="btn btn-sm btn-primary me-1">Edit</a>
+                                                <form method="POST" action="{{ route('admin.building.delete', ['id' => $building->id]) }}">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
-
 @endsection

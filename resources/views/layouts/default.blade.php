@@ -36,27 +36,24 @@
       <ul class="navbar-nav">
         {{-- Sidebar menu items start --}}
         <li class="nav-item">
-    <a class="nav-link text-white {{ $page == 'dashboard' ? 'active bg-gradient-info' : '' }}"
-       href="{{ route('admin.dashboard') }}">
-        <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
-            <i class="material-icons opacity-10">dashboard</i>
-        </div>
-        <span class="nav-link-text ms-1">Dashboard</span>
-    </a>
-</li>
+          <a class="nav-link text-white {{ $page == 'dashboard' ? 'active bg-gradient-info' : '' }}"
+            href="{{ route('admin.dashboard') }}">
+            <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+              <i class="material-icons opacity-10">dashboard</i>
+            </div>
+            <span class="nav-link-text ms-1">Dashboard</span>
+          </a>
+        </li>
 
-<li class="nav-item">
-    <a class="nav-link text-white {{ $page == 'building' ? 'active bg-gradient-info' : '' }}"
-       href="{{ route('admin.building') }}">
-        <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
-            <i class="material-icons opacity-10">dashboard</i>
-        </div>
-        <span class="nav-link-text ms-1">Building</span>
-    </a>
-</li>
-
-        
-
+        <li class="nav-item">
+          <a class="nav-link text-white {{ $page == 'buildings' ? 'active bg-gradient-info' : '' }}"
+            href="{{ route('admin.building') }}">
+            <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+              <i class="material-icons opacity-10">apartment</i>
+            </div>
+            <span class="nav-link-text ms-1">Buildings</span>
+          </a>
+        </li>
         {{-- Sidebar menu items end --}}
       </ul>
     </div>
