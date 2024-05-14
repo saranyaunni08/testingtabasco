@@ -1,4 +1,5 @@
 @extends('layouts.default', ['title' => 'Dashboard', 'page' => 'dashboard'])
+
 @section('content')
   <div class="container-fluid py-4">
     <div class="row">
@@ -18,7 +19,7 @@
                 <div class="row">
                   <div class="col-lg-3 col-sm-6">
                     <div class="card gradient-1">
-                      <a href="{{ route('admin.building') }}">
+                      <a href="">
                       <div class="card-body">
                         <h3 class="card-title text-black">Building A</h3>
                         <div class="d-inline-block">
@@ -190,26 +191,4 @@
         </div>
       </div>
   
-@endsection
-
-@section('sidebar')
-  @parent {{-- Include parent content from the default layout --}}
-  {{-- Add room module link in the sidebar --}}
-  <li class="nav-item">
-    <a class="nav-link" href="{{ route('rooms.create') }}">
-      <i class="fas fa-plus"></i>
-      <span class="nav-link-text ms-1">Add Room</span>
-    </a>
-  </li>
-@endsection
-
-@section('sidebar')
-  @parent {{-- Include parent content from the default layout --}}
-  {{-- Add room module link in the sidebar --}}
-  <li class="nav-item">
-    <a class="nav-link" href="{{ route('rooms.index') }}"> <!-- Assuming 'rooms.index' is your route for the rooms index -->
-      <i class="fas fa-list"></i> <!-- You can use an appropriate icon here -->
-      <span class="nav-link-text ms-1">Rooms List</span>
-    </a>
-  </li>
 @endsection
