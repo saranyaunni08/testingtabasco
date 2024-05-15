@@ -196,7 +196,7 @@
   @parent {{-- Include parent content from the default layout --}}
   {{-- Add room module link in the sidebar --}}
   <li class="nav-item">
-    <a class="nav-link" href="{{ route('rooms.create') }}">
+    <a class="nav-link" href="{{ route('admin.rooms.create') }}">
       <i class="fas fa-plus"></i>
       <span class="nav-link-text ms-1">Add Room</span>
     </a>
@@ -207,7 +207,7 @@
   @parent {{-- Include parent content from the default layout --}}
   {{-- Add room module link in the sidebar --}}
   <li class="nav-item">
-    <a class="nav-link" href="{{ route('rooms.index') }}"> <!-- Assuming 'rooms.index' is your route for the rooms index -->
+    <a class="nav-link" href="{{ route('admin.rooms.index') }}"> <!-- Assuming 'rooms.index' is your route for the rooms index -->
       <i class="fas fa-list"></i> <!-- You can use an appropriate icon here -->
       <span class="nav-link-text ms-1">Rooms List</span>
     </a>

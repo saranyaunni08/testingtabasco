@@ -90,7 +90,7 @@
       </li>
       <!-- Add Room -->
       <li class="nav-item">
-        <a class="nav-link text-white {{ $page == 'add-room' ? 'active bg-gradient-info' : '' }}" href="{{ route('rooms.create') }}">
+        <a class="nav-link text-white {{ $page == 'add-room' ? 'active bg-gradient-info' : '' }}" href="{{ route('admin.rooms.create') }}">
           <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
             <i class="material-icons opacity-10">add</i>
           </div>
@@ -98,7 +98,7 @@
         </a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="{{ route('rooms.index') }}"> <!-- Assuming 'rooms.index' is your route for the rooms index -->
+        <a class="nav-link" href="{{ route('admin.`rooms.index') }}"> <!-- Assuming 'rooms.index' is your route for the rooms index -->
           <i class="fas fa-list"></i> <!-- You can use an appropriate icon here -->
           <span class="nav-link-text ms-1">Rooms List</span>
         </a>
