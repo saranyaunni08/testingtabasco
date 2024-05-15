@@ -44,6 +44,8 @@ class RoomController extends Controller
         ]);
     
         return redirect()->route('admin.rooms.index')->with('success', 'Room updated successfully');
+        // Redirect back or return a response as needed
+        return redirect()->route('admin.rooms.index', $id)->with('success', 'Room updated successfully');
     }
     public function index()
     {

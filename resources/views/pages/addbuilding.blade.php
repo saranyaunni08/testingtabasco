@@ -116,6 +116,7 @@
               </div>
               <div class="text-center"> 
                 <button type="submit" class="btn btn-info">Submit</button>
+                <button type="button" class="btn btn-secondary" onclick="window.history.back();">Cancel</button>
               </div>
             </form>
           </div>

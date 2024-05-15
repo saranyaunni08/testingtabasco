@@ -15,6 +15,9 @@
     <div class="card-body px-0 pb-2">
         <div class="row p-4">
             <form action="{{ route('admin.rooms.update', $room->id) }}" method="POST">
+    <div class="container">
+        <h1>Edit Room</h1>
+        <form action="{{ route('admin.rooms.update', $room->id) }}" method="POST">
             @csrf
             @method('PUT')
             <div class="row justify-content-center">
