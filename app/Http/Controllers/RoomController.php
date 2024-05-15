@@ -42,7 +42,7 @@ class RoomController extends Controller
         $room->update($validatedData);
     
         // Redirect back or return a response as needed
-        return redirect()->route('rooms.index', $id)->with('success', 'Room updated successfully');
+        return redirect()->route('admin.rooms.index', $id)->with('success', 'Room updated successfully');
     }
     
     public function index()

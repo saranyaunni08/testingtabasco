@@ -14,11 +14,7 @@
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
   <link id="pagestyle" href="{{ asset('css/material-dashboard.css?v=3.1.0') }}" rel="stylesheet" />
   <link rel="stylesheet" href="{{ asset('css/style.css') }}">
-  <link rel="stylesheet" href="{{ asset('css/buildings-card.css') }}">
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
-  <!-- Include Chart.js library -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
   @yield('pagestyles')
   <title>{{ $title }}</title>
 </head>
@@ -49,6 +45,8 @@
           </a>
         </li>
 
+        
+         <!--Add Building -->
         <li class="nav-item">
           <a class="nav-link text-white {{ $page == 'buildings' ? 'active bg-gradient-info' : '' }}"
             href="{{ route('admin.building') }}">
@@ -58,6 +56,34 @@
             <span class="nav-link-text ms-1">Buildings</span>
           </a>
         </li>
+
+
+         <!-- Add Room -->
+    
+
+      <li class="nav-item">
+        <a class="nav-link text-white {{ $page == 'rooms' ? 'active bg-gradient-info' : '' }}" 
+        href="{{ route('admin.rooms.index') }}">
+          <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+          <i class="fas fa-list"></i> 
+          </div>
+          <span class="nav-link-text ms-1">Room List</span>
+        </a>
+      </li>
+
+
+
+
+        <!-- sales-->
+        <li class="nav-item">
+    <a class="nav-link text-white {{ $page == 'sales' ? 'active bg-gradient-info' : '' }}"
+        href="{{ route('admin.sales') }}">
+        <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+            <i class="material-icons opacity-10">monetization_on</i>
+        </div>
+        <span class="nav-link-text ms-1">Sales</span>
+    </a>
+</li>
         {{-- Sidebar menu items end --}}
       </ul>
     </div>
@@ -68,6 +94,7 @@
     </div>
   </aside>
   <div class="main-content position-relative max-height-vh-100 h-100">
+<<<<<<< HEAD
 <!-- Sidebar -->
 <nav class="sidenav navbar navbar-vertical navbar-expand-xs border-0 border-radius-xl my-3 fixed-start ms-3 bg-gradient-dark" id="sidenav-main">
   <div class="sidenav-header text-center">
@@ -112,6 +139,34 @@
   </div>
 </nav>
 
+=======
+    <nav class="navbar navbar-main navbar-expand-lg px-0 mx-4 shadow-none border-radius-xl" id="navbarBlur"
+      data-scroll="true">
+      <div class="container-fluid py-1 px-3">
+        <nav aria-label="breadcrumb" class="pt-3">
+          <ol class="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0 me-sm-6 me-5">
+            <li class="breadcrumb-item text-sm"><a class="opacity-5 text-dark" href="javascript:;">Admin</a></li>
+            <!-- <li class="breadcrumb-item text-sm text-dark active" aria-current="page">{{ $page }}</li> -->
+          </ol>
+          <h6 class="font-weight-bolder mb-0">{{ $title }}</h6>
+        </nav>
+        <div class="collapse navbar-collapse mt-sm-0 mt-2 me-md-0 me-sm-4" id="navbar">
+          <ul class="navbar-nav  justify-content-end">
+            <li class="nav-item d-xl-none ps-3 d-flex align-items-center">
+              <a href="javascript:;" class="nav-link text-body p-0" id="iconNavbarSidenav">
+                <div class="sidenav-toggler-inner">
+                  <i class="sidenav-toggler-line"></i>
+                  <i class="sidenav-toggler-line"></i>
+                  <i class="sidenav-toggler-line"></i>
+                  <i class="sidenav-toggler-line"></i>
+                </div>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+>>>>>>> 3da1fdeb00d84a06fdc9982aae9d1a2cae63cb47
     @yield('content')
   </div>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>

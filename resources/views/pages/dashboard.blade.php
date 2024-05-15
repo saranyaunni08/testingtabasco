@@ -1,4 +1,5 @@
 @extends('layouts.default', ['title' => 'Dashboard', 'page' => 'dashboard'])
+
 @section('content')
   <div class="container-fluid py-4">
     <div class="row">
@@ -18,7 +19,7 @@
                 <div class="row">
                   <div class="col-lg-3 col-sm-6">
                     <div class="card gradient-1">
-                      <a href="{{ route('admin.building') }}">
+                      <a href="">
                       <div class="card-body">
                         <h3 class="card-title text-black">Building A</h3>
                         <div class="d-inline-block">
@@ -191,6 +192,7 @@
       </div>
   
 @endsection
+<<<<<<< HEAD
 
 @section('sidebar')
   @parent {{-- Include parent content from the default layout --}}
@@ -213,3 +215,5 @@
     </a>
   </li>
 @endsection
+=======
+>>>>>>> 3da1fdeb00d84a06fdc9982aae9d1a2cae63cb47
