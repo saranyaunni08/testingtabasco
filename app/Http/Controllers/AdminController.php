@@ -27,6 +27,8 @@ class AdminController extends Controller
         $buildings = DB::table('building')->get();
         return view('pages.building', compact('buildings'));
     }
+
+    
     public function buildingstore(Request $request)
     {
         $validatedData = $request->validate([

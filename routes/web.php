@@ -23,6 +23,12 @@ Route::prefix('admin')->group(function () {
           Route::get('/', 'index')->name('dashboard');
           Route::get('/sales', 'view')->name('sales');
           Route::resource('rooms', RoomController::class);
+          Route::get('/buildings', 'buildingpage')->name('building');
+          Route::get('/add-building', 'addbuilding')->name('addbuilding');
+          Route::get('/edit-building/{id}', 'editbuilding')->name('building.editbuilding');
+          Route::post('/update-building/{id}', 'updatebuilding')->name('building.update');
+          Route::post('/buildingstore', 'buildingstore')->name('addbuilding.store');
+          Route::delete('/buildings/{id}', 'destroy')->name('building.delete');
       });
       
       Route::get('rooms/create', [RoomController::class, 'create'])->name('rooms.create');
@@ -37,11 +43,8 @@ Route::prefix('admin')->group(function () {
       Route::put('/shops/{id}', 'RoomController@update')->name('shops.update');
       Route::delete('/shops/{id}', 'RoomController@destroy')->name('shops.destroy');
 
-      Route::get('/buildings', 'buildingpage')->name('building');
-      Route::get('/add-building', 'addbuilding')->name('addbuilding');
-      Route::get('/edit-building/{id}', 'editbuilding')->name('building.editbuilding');
-      Route::post('/update-building/{id}', 'updatebuilding')->name('building.update');
-      Route::post('/buildingstore', 'buildingstore')->name('addbuilding.store');
-      Route::delete('/buildings/{id}', 'destroy')->name('building.delete');
+      Route::delete('/admin/rooms/{id}', 'App\Http\Controllers\RoomController@destroy')->name('admin.rooms.destroy');
+
+
     });
 });

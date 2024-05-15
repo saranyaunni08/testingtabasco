@@ -29,22 +29,22 @@ class RoomController extends Controller
     }
     public function update(Request $request, $id)
     {
-        // Validate the incoming request data
-        $validatedData = $request->validate([
-            'room_number' => 'required|string|max:255',
-            // Add more validation rules as needed
-        ]);
-    
-        // Find the room by ID
         $room = Room::findOrFail($id);
     
-        // Update the room attributes
-        $room->update($validatedData);
+        // Update room properties based on the form data
+        $room->update([
+            'room_number' => $request->input('room_number'),
+            'room_floor' => $request->input('room_floor'),
+            'room_type' => $request->input('room_type'),
+            'build_up_area' => $request->input('build_up_area'),
+            'carpet_area' => $request->input('carpet_area'),
+            'flat_rate' => $request->input('flat_rate'),
+            'super_build_up_area' => $request->input('super_build_up_area'),
+            'carpet_area_price' => $request->input('carpet_area_price'),
+        ]);
     
-        // Redirect back or return a response as needed
-        return redirect()->route('rooms.index', $id)->with('success', 'Room updated successfully');
+        return redirect()->route('admin.rooms.index')->with('success', 'Room updated successfully');
     }
-    
     public function index()
     {
         // Fetch all rooms
@@ -82,7 +82,7 @@ class RoomController extends Controller
         $room = Room::findOrFail($id);
         $room->delete(); // Soft delete the room
     
-        return redirect()->route('rooms.index')->with('success', 'Room deleted successfully');
+        return redirect()->route('admin.rooms.create')->with('success', 'Room deleted successfully');
     }
     public function store(Request $request)
     {
