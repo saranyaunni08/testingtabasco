@@ -1,4 +1,4 @@
-@extends('layouts.default', ['title' => 'Buildings', 'page' => 'buildings'])
+@extends('layouts.default', ['title' => 'Building View', 'page' => 'buildings'])
 @section('content')
 <div class="container-fluid py-4">
     <div class="row">

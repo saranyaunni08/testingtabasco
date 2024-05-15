@@ -1,5 +1,4 @@
-
-@extends('layouts.default', ['title' => 'Add New Building', 'page' => 'building'])
+@extends('layouts.default', ['title' => 'Add Room', 'page' => 'rooms'])
 
 @section('content')
 <div class="container-fluid py-4">
@@ -13,7 +12,7 @@
         </div>
         <div class="card-body px-0 pb-2">
           <div class="row p-4">
-          <form action="{{ route('rooms.store') }}" method="POST">
+          <form action="{{ route('admin.rooms.store') }}" method="POST">
             @csrf
             <div class="row justify-content-center">
               <div class="col-lg-8">
@@ -194,9 +193,9 @@
                 </div>
               </div>
               
-
-                  <div class="text-center">
+              <div class="text-center">
                     <button type="submit" class="btn btn-primary">Add</button>
+                    <button type="button" class="btn btn-secondary" onclick="window.history.back();">Cancel</button>
                   </div>
                 </div>
               </div>
@@ -254,5 +253,4 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-</body>
-</html>
+@endsection
