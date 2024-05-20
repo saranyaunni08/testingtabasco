@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Room;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\Builder;
+use App\Models\Building; 
+
 
 
 class RoomController extends Controller
@@ -12,69 +14,83 @@ class RoomController extends Controller
 
     public function create()
     {
-        // This method should return the view for creating a new room
-        return view('rooms.create');
-    }
+        $buildings = Building::all(); 
+        return view('rooms.create', compact('buildings')); 
 
-    public function edit($id)
+        
+        
+    }
+    public function show($id)
     {
-        // Retrieve the room by ID for editing
+
+
         $room = Room::findOrFail($id);
     
-        // Define the $page variable
+
+        return view('rooms.show', compact('room'));
+    }
+    
+    public function edit($id)
+    {
+
+        $room = Room::findOrFail($id);
+    
+
         $page = 'edit';
     
-        // Pass the room data and $page variable to the edit view
+
         return view('rooms.edit', compact('room', 'page'));
     }
     public function update(Request $request, $id)
     {
         $room = Room::findOrFail($id);
+        $room->update($request->all());
+        return redirect()->route('admin.rooms.index')->with('success', 'Room updated successfully');
+    }
     
-        // Update room properties based on the form data
-        $room->update([
-            'room_number' => $request->input('room_number'),
-            'room_floor' => $request->input('room_floor'),
-            'room_type' => $request->input('room_type'),
-            'build_up_area' => $request->input('build_up_area'),
-            'carpet_area' => $request->input('carpet_area'),
-            'flat_rate' => $request->input('flat_rate'),
-            'super_build_up_area' => $request->input('super_build_up_area'),
-            'carpet_area_price' => $request->input('carpet_area_price'),
+    public function sell($id)
+    {
+        $room = Room::findOrFail($id);
+        // Implement the logic for selling the room.
+        // This could involve updating a status, creating a sale record, etc.
+    
+        // For now, let's assume we're just marking the room as sold.
+        $room->status = 'sold';
+        $room->save();
+    
+        return redirect()->route('admin.rooms.index')->with('success', 'Room marked as sold.');
+    }
+    public function showSellForm($id)
+    {
+        $room = Room::findOrFail($id);
+        return view('rooms.sell', [
+            'room' => $room,
+            'page' => 'rooms' // Define the page variable
+        ]);
+    }
+    public function processSell(Request $request, $id)
+    {
+        $room = Room::findOrFail($id);
+        
+        // Validate request if necessary
+        $request->validate([
+            'sale_price' => 'required|numeric|min:0',
         ]);
     
-        return redirect()->route('admin.rooms.index')->with('success', 'Room updated successfully');
-        // Redirect back or return a response as needed
-        return redirect()->route('admin.rooms.index', $id)->with('success', 'Room updated successfully');
+        // Implement the logic for selling the room
+        $room->status = 'sold';
+        $room->sale_price = $request->input('sale_price'); // Assuming you have a sale_price column
+        $room->save();
+    
+        return redirect()->route('admin.rooms.index')->with('success', 'Room marked as sold.');
     }
+    
     public function index()
     {
-        // Fetch all rooms
-        $rooms = Room::all();
-
-        // Filter rooms by type
-        $flats = $rooms->where('room_type', 'Flat');
-        $shops = $rooms->where('room_type', 'Shops');
-        $carParking = $rooms->where('room_type', 'Car parking');
-        $tableSpaces = $rooms->where('room_type', 'Table space');
-        $chairSpaces = $rooms->where('room_type', 'Chair space');
-        $kiosks = $rooms->where('room_type', 'Kiosk');
-
-        // Pass data to the view
-        return view('rooms.index', [
-            'flats' => $flats,
-            'shops' => $shops,
-            'carParking' => $carParking,
-            'tableSpaces' => $tableSpaces,
-            'chairSpaces' => $chairSpaces,
-            'kiosks' => $kiosks,
-        ]);
-
-        $rooms = Room::withTrashed()->get();
-
+        $rooms = Room::all(); // Or however you retrieve your room data
         return view('rooms.index', compact('rooms'));
     }
-
+    
     protected function getRoomsWithTrashed(bool $withTrashed = true): Builder|Room
     {
         return Room::withTrashed($withTrashed);
@@ -82,13 +98,13 @@ class RoomController extends Controller
     public function destroy($id)
     {
         $room = Room::findOrFail($id);
-        $room->delete(); // Soft delete the room
+        $room->delete(); 
     
-        return redirect()->route('admin.rooms.create')->with('success', 'Room deleted successfully');
+        return redirect()->route('admin.rooms.index')->with('success', 'Room deleted successfully');
     }
     public function store(Request $request)
     {
-        // Validate incoming request data
+
         $validatedData = $request->validate([
             'room_number' => 'required|string',
             'room_floor' => 'nullable|string',
@@ -119,15 +135,21 @@ class RoomController extends Controller
             'chair_type' => 'nullable|string',
             'chair_material' => 'nullable|string',
             'chair_price' => 'nullable|numeric',
+            'building_id' => 'required|exists:building,id', 
+    
         ]);
 
-        // Create a new Room instance and fill it with validated data
+
         $room = new Room();
         $room->room_number = $validatedData['room_number'];
         $room->room_floor = $validatedData['room_floor'];
         $room->room_type = $validatedData['room_type'];
+        $room->building_id = $validatedData['building_id'];
+        $room->fill($validatedData);
 
-        // Fill specific fields based on room type
+
+
+
         switch ($validatedData['room_type']) {
             case 'Flat':
                 $room->build_up_area = $validatedData['build_up_area'];
@@ -169,10 +191,10 @@ class RoomController extends Controller
                 break;
         }
 
-        // Save the room
+
         $room->save();
 
-        // Redirect back or to a success page
+
         return redirect()->back()->with('success', 'Room added successfully!');
     }
 }

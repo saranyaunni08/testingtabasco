@@ -26,6 +26,8 @@
                                         <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Super Built up Area</th>
                                         <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Carpet Area</th>
                                         <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Amenities</th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">City</th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">State</th>
                                         <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Action</th>
                                     </tr>
                                 </thead>
@@ -57,14 +59,22 @@
                                                  @endif
                                             </p>
                                         </td>
+                                        <td>
+                                            <p class="text-xs text-dark font-weight-normal mb-0">{{ $building->city }}</p>
+                                        </td>
+                                        <td>
+                                            <p class="text-xs text-dark font-weight-normal mb-0">{{ $building->state }}</p>
+                                        </td>
+                                      
 
                                         <td>
                                             <div class="btn-group" role="group">
+                                                <a href="{{ route('admin.buildings.show', ['id' => $building->id]) }}" class="btn btn-sm btn-success me-1">View</a>
                                                 <a href="{{ route('admin.building.editbuilding', ['id' => $building->id]) }}" class="btn btn-sm btn-primary me-1">Edit</a>
                                                 <form method="POST" action="{{ route('admin.building.delete', ['id' => $building->id]) }}">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                                                    <button type="submit" class="btn btn-sm btn-danger me-1">Delete</button>
                                                 </form>
                                             </div>
                                         </td>

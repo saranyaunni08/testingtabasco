@@ -1,4 +1,5 @@
 @extends('layouts.default', ['title' => 'Room View', 'page' => 'rooms'])
+
 @section('content')
 <div class="container-fluid py-4">
     <div class="row">
@@ -23,49 +24,79 @@
                                         <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Room Number</th>
                                         <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Floor</th>
                                         <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Type</th>
-                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Built up Area</th>
-                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Carpet Area</th>
-                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Flate area</th>
-                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Super build up price</th>
-                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Carpet Area price</th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Additional Information</th>
                                         <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                @foreach ($flats as $flat)
+                                    @foreach ($rooms as $room)
                                     <tr>
                                         <td>
-                                            <h6 class="mb-0 text-xs">{{ $flat->room_number }}</h6>
+                                            <h6 class="mb-0 text-xs">{{ $room->room_number }}</h6>
                                         </td>
                                         <td>
-                                            <p class="text-xs text-dark font-weight-normal mb-0">{{ $flat->room_floor }}</p>
+                                            <p class="text-xs text-dark font-weight-normal mb-0">{{ $room->room_floor }}</p>
                                         </td>
                                         <td>
-                                            <p class="text-xs text-dark font-weight-normal mb-0">{{ $flat->room_type }}</p>
+                                            <p class="text-xs text-dark font-weight-normal mb-0">{{ $room->room_type }}</p>
                                         </td>
                                         <td>
-                                            <p class="text-xs text-dark font-weight-normal mb-0">{{ $flat->build_up_area }}</p>
-                                        </td>
-                                        <td>
-                                            <p class="text-xs text-dark font-weight-normal mb-0">{{ $flat->carpet_area }}</p>
-                                        </td>
-                                        <td>
-                                            <p class="text-xs text-dark font-weight-normal mb-0">{{ $flat->flat_rate }}</p>
-                                        </td>
-                                        <td>
-                                            <p class="text-xs text-dark font-weight-normal mb-0">{{ $flat->super_build_up_price }}</p>
-                                        </td>
-                                        <td>
-                                            <p class="text-xs text-dark font-weight-normal mb-0">{{ $flat->carpet_area_price }}</p>
+                                            <!-- Conditionally display fields based on room type -->
+                                            @switch($room->room_type)
+                                                @case('Flat')
+                                                    <p>Build-Up Area: {{ $room->build_up_area }}</p>
+                                                    <p>Carpet Area: {{ $room->carpet_area }}</p>
+                                                    <p>Flat Rate: {{ $room->flat_rate }}</p>
+                                                    <p>Super Build-Up Area Price: {{ $room->super_build_up_price }}</p>
+                                                    <p>Carpet Area Price: {{ $room->carpet_area_price }}</p>
+                                                    <!-- Add other fields specific to Flat type -->
+                                                    @break
+                                                @case('Shop')
+                                                    <p>Shop Number: {{ $room->shop_number }}</p>
+                                                    <p>Shop Type: {{ $room->shop_type }}</p>
+                                                    <p>Shop Area: {{ $room->shop_area }}</p>
+                                                    <p>Shop Rate: {{ $room->shop_rate }}</p>
+                                                    <p>Rental Period: {{ $room->shop_rental_period }}</p>
+                                                    <!-- Add other fields specific to Shop type -->
+                                                    @break
+                                                @case('Car Parking')
+                                                    <p>Parking Number: {{ $room->parking_number }}</p>
+                                                    <p>Parking Type: {{ $room->parking_type }}</p>
+                                                    <p>Parking Area: {{ $room->parking_area }}</p>
+                                                    <p>Parking Rate: {{ $room->parking_rate }}</p>
+                                                    <!-- Add other fields specific to Car Parking type -->
+                                                    @break
+                                                @case('Table Space')
+                                                    <p>Space Name: {{ $room->space_name }}</p>
+                                                    <p>Space Type: {{ $room->space_type }}</p>
+                                                    <p>Space Area: {{ $room->space_area }}</p>
+                                                    <p>Space Rate: {{ $room->space_rate }}</p>
+                                                    <!-- Add other fields specific to Table Space type -->
+                                                    @break
+                                                @case('Kiosk')
+                                                    <p>Kiosk Name: {{ $room->kiosk_name }}</p>
+                                                    <p>Kiosk Type: {{ $room->kiosk_type }}</p>
+                                                    <p>Kiosk Area: {{ $room->kiosk_area }}</p>
+                                                    <p>Kiosk Rate: {{ $room->kiosk_rate }}</p>
+                                                    <!-- Add other fields specific to Kiosk type -->
+                                                    @break
+                                                @case('Chair Space')
+                                                    <p>Chair Name: {{ $room->chair_name }}</p>
+                                                    <p>Chair Type: {{ $room->chair_type }}</p>
+                                                    <p>Chair Material: {{ $room->chair_material }}</p>
+                                                    <p>Chair Price: {{ $room->chair_price }}</p>
+                                                    <!-- Add other fields specific to Chair Space type -->
+                                                    @break
+                                                <!-- Add cases for other room types -->
+                                            @endswitch
                                         </td>
                                         <td>
                                             <div class="btn-group" role="group">
-                                            <a href="{{ route('admin.rooms.edit', $flat->id) }}" class="btn btn-sm btn-primary me-1">Edit</a>
-                                                <form method="POST" action="{{ route('admin.rooms.destroy', $flat->id) }}">
+                                                <a href="{{ route('admin.rooms.edit', $room->id) }}" class="btn btn-sm btn-primary me-1">Edit</a>
+                                                <form method="POST" action="{{ route('admin.rooms.destroy', $room->id) }}">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this room?')">Delete</button>
-                                                 
                                                 </form>
                                             </div>
                                         </td>
@@ -75,191 +106,9 @@
                             </table>
                         </div>
                     </div>
-
-     <!-- Shops Table -->
-      <div class="card my-4">
-        <div class="card-header">
-          <h5 class="card-title">Shops List</h5>
-        </div>
-        <div class="card-body">
-          <table class="table">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Shop Number</th>
-                <th>Shop Type</th>
-                <!-- Add more columns as needed -->
-              </tr>
-            </thead>
-            <tbody>
-              @foreach ($shops as $shop)
-              <tr>
-                  <!-- Display shop information -->
-                  <td>{{ $shop->id }}</td>
-                  <td>{{ $shop->shop_number }}</td>
-                  <td>{{ $shop->shop_type }}</td>
-              
-                  <!-- Edit Button -->
-                  <td>
-                    <a  class="btn btn-sm btn-primary">Edit</a>
-                </td>
-                
-              
-                  <!-- Delete Form -->
-                  <td>
-                      <form action="{{ route('admin.shops.destroy', $shop->id) }}" method="POST" class="d-inline">
-                          @csrf
-                          @method('DELETE')
-                          <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this shop?')">Delete</button>
-                      </form> 
-                  </td>
-              </tr>
-              @endforeach
-              
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-
-      
-      <!-- Car Parking Table -->
-      <div class="card my-4">
-        <div class="card-header">
-          <h5 class="card-title">Car Parking List</h5>
-        </div>
-        <div class="card-body">
-          <table class="table">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Parking Number</th>
-                <th>Parking Type</th>
-                <!-- Add more columns as needed -->
-              </tr>
-            </thead>
-            <tbody>
-              @foreach ($carParking as $parking)
-              <tr>
-                <td>{{ $parking->id }}</td>
-                <td>{{ $parking->parking_number }}</td>
-                <td>{{ $parking->parking_type }}</td>
-                <td>
-                    <a  class="btn btn-sm btn-primary">Edit</a>
-                </td>
-                <td>
-                    <form method="POST" action="{{ route('admin.rooms.destroy', $parking->id) }}">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this parking?')">Delete</button>
-                    </form> 
-                </td>
-                              </tr>
-              @endforeach
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <div class="card my-4">
-        <div class="card-header">
-            <h5 class="card-title">Table Spaces List</h5>
-        </div>
-        <div class="card-body">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Space Name</th>
-                        <th>Space Type</th>
-                        <!-- Add more columns as needed -->
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($tableSpaces as $space)
-                    <tr>
-                        <td>{{ $space->id }}</td>
-                        <td>{{ $space->space_name }}</td>
-                        <td>{{ $space->space_type }}</td>
-                        <!-- Add more columns as needed -->
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <div class="card my-4">
-      <div class="card-header">
-          <h5 class="card-title">Chair Spaces List</h5>
-      </div>
-      <div class="card-body">
-          <table class="table">
-              <thead>
-                  <tr>
-                      <th>ID</th>
-                      <th>Chair Name</th>
-                      <th>Chair Type</th>
-                      <!-- Add more columns as needed -->
-                  </tr>
-              </thead>
-              <tbody>
-                  @foreach ($chairSpaces as $chair)
-                  <tr>
-                      <td>{{ $chair->id }}</td>
-                      <td>{{ $chair->chair_name }}</td>
-                      <td>{{ $chair->chair_type }}</td>
-                      <!-- Add more columns as needed -->
-                  </tr>
-                  @endforeach
-              </tbody>
-          </table>
-      </div>
-  </div>
-
-  <!-- Kiosk Table -->
-  <div class="card my-4">
-      <div class="card-header">
-          <h5 class="card-title">Kiosk List</h5>
-      </div>
-      <div class="card-body">
-          <table class="table">
-              <thead>
-                  <tr>
-                      <th>ID</th>
-                      <th>Kiosk Name</th>
-                      <th>Kiosk Type</th>
-                      <!-- Add more columns as needed -->
-                  </tr>
-              </thead>
-              <tbody>
-                  @foreach ($kiosks as $kiosk)
-                  <tr>
-                      <td>{{ $kiosk->id }}</td>
-                      <td>{{ $kiosk->kiosk_name }}</td>
-                      <td>{{ $kiosk->kiosk_type }}</td>
-                      <!-- Add more columns as needed -->
-                  </tr>
-                  @endforeach
-              </tbody>
-          </table>
-      </div>
-  </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 @endsection
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-
-
-
-
-
-

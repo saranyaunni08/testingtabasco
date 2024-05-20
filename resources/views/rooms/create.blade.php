@@ -23,6 +23,17 @@
                       <input type="text" name="room_number" class="form-control" required>
                     </div>
                   </div>
+                  <div class="col-md-6">
+                    <div class="input-group input-group-dynamic mb-4">
+                        <select name="building_id" class="form-select">
+                            <option value="" disabled selected>Select Building</option>
+                            @foreach ($buildings as $building)
+                                <option value="{{ $building->id }}">{{ $building->building_name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+                
 
                   <div class="col-md-6">
                     <div class="input-group input-group-dynamic mb-4">

@@ -45,6 +45,9 @@ class Room extends Model
         'chair_type',
         'chair_material',
         'chair_price',
-        // Add other fillable fields as needed
+        'room_type', // other attributes
+        'status',
+        'sale_price',
+
     ];
 }

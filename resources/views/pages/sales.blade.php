@@ -4,7 +4,8 @@
   <div class="container-fluid py-4">
     <div class="row">
       <div class="col-12">
-        <div class="card my-4">
+        <div class="card my-4" id="personal-details-section">
+          <!-- Personal Details Section -->
           <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
             <div class="bg-gradient-info shadow-info border-radius-lg pt-4 pb-3">
               <h6 class="text-white text-capitalize ps-3">Personal Details</h6>
@@ -77,7 +78,8 @@
 
     <div class="row">
       <div class="col-12">
-        <div class="card my-4">
+        <div class="card my-4" id="payment-details-section" style="display: none;">
+          <!-- Payment Details Section -->
           <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
             <div class="bg-gradient-info shadow-info border-radius-lg pt-4 pb-3">
               <h6 class="text-white text-capitalize ps-3">Payment Details</h6>
@@ -100,6 +102,12 @@
                         <div class="mb-3">
                           <label for="discount_amount" class="form-label">Discount</label>
                           <input type="text" id="discount_amount" name="discount_amount" value="12%" class="form-control border-0" readonly>
+                        </div>
+                      </div>
+                      <div class="col-md-6">
+                        <div class="mb-3">
+                          <label for="sale_amount" class="form-label">Advance amount</label>
+                          <input type="text" id="sale_amount" name="sale_amount" value="" class="form-control border-0">
                         </div>
                       </div>
                       <div class="col-md-6">
@@ -136,6 +144,7 @@
                           <select id="payment_using" name="payment_using" class="form-select border-0">
                             <option value="">Select Payment Method</option>
                             <option value="Bank Transfer">Bank Transfer</option>
+                            <option value="Cheque">Cheque</option>
                             <option value="UPI Payment">UPI Payment</option>
                           </select>
                         </div>
@@ -150,10 +159,10 @@
       </div>
     </div>
 
-    
     <div class="row">
       <div class="col-12">
-        <div class="card my-4">
+        <div class="card my-4" id="bank-details-section" style="display: none;">
+          <!-- Bank Details Section -->
           <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
             <div class="bg-gradient-info shadow-info border-radius-lg pt-4 pb-3">
               <h6 class="text-white text-capitalize ps-3">Bank Details</h6>
@@ -199,10 +208,83 @@
         </div>
       </div>
     </div>
-    <div class="row justify-content-center">
-      <div class="col-lg-8">
-        <button type="submit" class="btn btn-primary">Submit</button>
-      </div>
+  </div>
+
+  <!-- Next Buttons -->
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <button id="next-personal" class="btn btn-primary">Next (Payment Details)</button>
+      <button id="next-payment" class="btn btn-primary" style="display: none;">Next (Bank Details)</button>
+      <button id="next-bank" class="btn btn-primary" style="display: none;">Next (Bank Details)</button>
+      <button id="submit-form" class="btn btn-primary" style="display: none;">Submit</button>
     </div>
   </div>
+
+  <!-- Back Buttons -->
+  <div class="row justify-content-center mt-4">
+    <div class="col-lg-8">
+      <button id="back-personal" class="btn btn-secondary" style="display: none;">Back to Personal Details</button>
+      <button id="back-payment" class="btn btn-secondary" style="display: none;">Back to Payment Details</button>
+    </div>
+  </div>
+
+  <!-- JavaScript for Step-by-Step Form -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const personalDetailsSection = document.getElementById('personal-details-section');
+      const paymentDetailsSection = document.getElementById('payment-details-section');
+      const bankDetailsSection = document.getElementById('bank-details-section');
+
+      const backPersonalBtn = document.getElementById('back-personal');
+      const backPaymentBtn = document.getElementById('back-payment');
+      const nextPersonalBtn = document.getElementById('next-personal');
+      const nextPaymentBtn = document.getElementById('next-payment');
+      const nextBankBtn = document.getElementById('next-bank');
+      const submitFormBtn = document.getElementById('submit-form');
+
+      backPersonalBtn.addEventListener('click', function () {
+        personalDetailsSection.style.display = 'block';
+        paymentDetailsSection.style.display = 'none';
+        bankDetails Section.style.display = 'none';
+        backPersonalBtn.style.display = 'none';
+        nextPersonalBtn.style.display = 'block';
+        nextPaymentBtn.style.display = 'none';
+        nextBankBtn.style.display = 'none';
+        submitFormBtn.style.display = 'none';
+      });
+
+      backPaymentBtn.addEventListener('click', function () {
+        personalDetailsSection.style.display = 'none';
+        paymentDetailsSection.style.display = 'block';
+        bankDetailsSection.style.display = 'none';
+        backPersonalBtn.style.display = 'block';
+        nextPersonalBtn.style.display = 'none';
+        nextPaymentBtn.style.display = 'block';
+        nextBankBtn.style.display = 'none';
+        submitFormBtn.style.display = 'none';
+      });
+
+      nextPersonalBtn.addEventListener('click', function () {
+        personalDetailsSection.style.display = 'none';
+        paymentDetailsSection.style.display = 'block';
+        bankDetailsSection.style.display = 'none';
+        backPersonalBtn.style.display = 'block';
+        nextPersonalBtn.style.display = 'none';
+        nextPaymentBtn.style.display = 'block';
+        nextBankBtn.style.display = 'none';
+        submitFormBtn.style.display = 'none';
+      });
+
+      nextPaymentBtn.addEventListener('click', function () {
+        personalDetailsSection.style.display = 'none';
+        paymentDetailsSection.style.display = 'none';
+        bankDetailsSection.style.display = 'block';
+        backPersonalBtn.style.display = 'none';
+        nextPersonalBtn.style.display = 'none';
+        nextPaymentBtn.style.display = 'none';
+        nextBankBtn.style.display = 'none';
+        submitFormBtn.style.display = 'block';
+      });
+    });
+  </script>
 @endsection

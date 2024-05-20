@@ -39,6 +39,12 @@ class CreateRoomsTable extends Migration
             $table->string('chair_type')->nullable();
             $table->string('chair_material')->nullable();
             $table->string('chair_price')->nullable();
+            $table->unsignedBigInteger('building_id')->nullable();
+            $table->foreign('building_id')->references('id')->on('building')->onDelete('set null');
+            $table->string('building_name')->nullable();
+            $table->string('status')->default('available'); 
+            $table->decimal('sale_price', 10, 2)->nullable()->after('rent_price'); 
+            $table->softDeletes();
             $table->timestamps();
         });
     }
