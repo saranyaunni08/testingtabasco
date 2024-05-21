@@ -12,7 +12,7 @@
         </div>
         <div class="card-body px-0 pb-2">
           <div class="row p-4">
-            <form action="{{ route('admin.addbuilding.store') }}" method="POST">
+            <form action="/admin/buildingstore" method="POST">
               @csrf
               <div class="row justify-content-center">
                 <div class="col-lg-8">

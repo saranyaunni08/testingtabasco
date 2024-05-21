@@ -26,14 +26,16 @@
                                             <p class="text-xs text-center text-dark font-weight-bold mb-0">{{ $room->room_type }}</p>
                                             @foreach ($room->getAttributes() as $key => $value)
                                                 @if (!is_null($value) && !in_array($key, ['id', 'building_id', 'created_at', 'updated_at', 'deleted_at']))
-                                                    <div class="border p-2 mb-2">
+                                                    <div class="border p-2 mb-2 @if($key == 'status' && $value == 'sold') bg-danger text-white @endif">
                                                         <div class="font-weight-bold">{{ ucfirst(str_replace('_', ' ', $key)) }}</div>
                                                         <div>{{ $value }}</div>
                                                     </div>
                                                 @endif
                                             @endforeach
                                             <div class="d-flex justify-content-center mt-2">
-                                                <a href="{{ route('admin.rooms.showSellForm', $room->id) }}" class="btn btn-success btn-sm me-2">Sell</a>
+                                                @if ($room->status != 'sold')
+                                                    <a href="{{ route('admin.sales.create', ['room_id' => $room->id]) }}" class="btn btn-success btn-sm me-2">Sell</a>
+                                                @endif
                                                 <a href="{{ route('admin.rooms.edit', $room->id) }}" class="btn btn-warning btn-sm me-2">Edit</a>
                                                 <form action="{{ route('admin.rooms.destroy', $room->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this room?');">
                                                     @csrf
@@ -41,7 +43,6 @@
                                                     <button type="submit" class="btn btn-danger btn-sm">Delete</button>
                                                 </form>
                                             </div>
-                                            
                                         </td>
                                     </tr>
                                     @endforeach

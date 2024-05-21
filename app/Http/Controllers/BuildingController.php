@@ -54,7 +54,7 @@ class BuildingController extends Controller
             'updated_at' => now(),
         ]);
 
-        return redirect()->route('buildings.index')->with('success', 'Building added successfully');
+        return redirect()->route('admin.building')->with('success', 'Building added successfully');
     }
 
     public function edit($id)

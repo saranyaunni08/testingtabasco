@@ -5,6 +5,8 @@ use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\RoomController;
 use App\Http\Controllers\BuildingController; // Added BuildingController
+use App\Http\Controllers\SalesController;
+
 
 Route::get('/', function () {
     return redirect('login');
@@ -23,17 +25,24 @@ Route::prefix('admin')->group(function () {
             Route::get('/', 'index')->name('dashboard');
             Route::get('/sales', 'view')->name('sales');
             Route::resource('rooms', RoomController::class);
-            Route::get('/buildings', [BuildingController::class, 'index'])->name('building'); // Updated route
-            Route::get('/add-building', [BuildingController::class, 'create'])->name('addbuilding'); // Updated route
-            Route::get('/edit-building/{id}', [BuildingController::class, 'edit'])->name('building.editbuilding'); // Updated route
-            Route::post('/update-building/{id}', [BuildingController::class, 'update'])->name('building.update'); // Updated route
-            Route::post('/buildingstore', [BuildingController::class, 'store'])->name('addbuilding.store'); // Updated route
-            Route::delete('/buildings/{id}', [BuildingController::class, 'destroy'])->name('building.delete'); // Updated route
+            Route::get('/buildings', [BuildingController::class, 'index'])->name('building'); 
+            Route::get('/add-building', [BuildingController::class, 'create'])->name('addbuilding'); 
+            Route::get('/edit-building/{id}', [BuildingController::class, 'edit'])->name('building.editbuilding'); 
+            Route::post('/update-building/{id}', [BuildingController::class, 'update'])->name('building.update'); 
+            Route::post('/buildingstore', [BuildingController::class, 'store'])->name('addbuilding.store'); 
+            Route::delete('/buildings/{id}', [BuildingController::class, 'destroy'])->name('building.delete'); 
             Route::get('/buildings/{id}', [BuildingController::class, 'show'])->name('buildings.show');
+            Route::get('/admin/building', [BuildingController::class, 'index'])->name('admin.building');
+            Route::post('/sales/store', [SalesController::class, 'store'])->name('sales.store');
+
+
+
 
         });
 
         Route::resource('rooms', RoomController::class);
+
+        Route::get('rooms', [RoomController::class, 'index'])->name('rooms.index');
 
         Route::delete('/admin/rooms/{id}', [RoomController::class, 'destroy'])->name('admin.rooms.destroy');
 
@@ -53,6 +62,13 @@ Route::prefix('admin')->group(function () {
             Route::get('rooms/{id}/sell', [RoomController::class, 'showSellForm'])->name('rooms.showSellForm');
             Route::put('rooms/{id}/sell', [RoomController::class, 'processSell'])->name('rooms.sell');
         
+            Route::get('sales/create', [SalesController::class, 'create'])->name('sales.create');
+
+            Route::get('/admin/sales/create/{roomId}', [SalesController::class, 'viewSalesForm'])->name('admin.sales.create');
+
+            Route::get('/admin/sales/{roomId}', [SalesController::class, 'viewSalesForm'])->name('admin.sales.form');
+
+            Route::post('/admin/sales/store', [SalesController::class, 'store'])->name('admin.sales.store');
 
     });
 

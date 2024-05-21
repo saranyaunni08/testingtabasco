@@ -197,4 +197,14 @@ class RoomController extends Controller
 
         return redirect()->back()->with('success', 'Room added successfully!');
     }
+
+    public function viewSalesForm($roomId)
+{
+    $room = Room::find($roomId);
+    if (!$room) {
+        // Handle the case where the room is not found, perhaps show an error message or redirect
+    }
+
+    return view('pages.sales', compact('room'));
+}
 }
