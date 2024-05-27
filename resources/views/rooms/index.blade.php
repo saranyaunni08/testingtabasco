@@ -51,7 +51,7 @@
                                                     <p>Carpet Area Price: {{ $room->carpet_area_price }}</p>
                                                     <!-- Add other fields specific to Flat type -->
                                                     @break
-                                                @case('Shop')
+                                                @case('Shops')
                                                     <p>Shop Number: {{ $room->shop_number }}</p>
                                                     <p>Shop Type: {{ $room->shop_type }}</p>
                                                     <p>Shop Area: {{ $room->shop_area }}</p>
@@ -59,14 +59,14 @@
                                                     <p>Rental Period: {{ $room->shop_rental_period }}</p>
                                                     <!-- Add other fields specific to Shop type -->
                                                     @break
-                                                @case('Car Parking')
+                                                @case('Car parking')
                                                     <p>Parking Number: {{ $room->parking_number }}</p>
                                                     <p>Parking Type: {{ $room->parking_type }}</p>
                                                     <p>Parking Area: {{ $room->parking_area }}</p>
                                                     <p>Parking Rate: {{ $room->parking_rate }}</p>
                                                     <!-- Add other fields specific to Car Parking type -->
                                                     @break
-                                                @case('Table Space')
+                                                @case('Table space')
                                                     <p>Space Name: {{ $room->space_name }}</p>
                                                     <p>Space Type: {{ $room->space_type }}</p>
                                                     <p>Space Area: {{ $room->space_area }}</p>
@@ -80,7 +80,7 @@
                                                     <p>Kiosk Rate: {{ $room->kiosk_rate }}</p>
                                                     <!-- Add other fields specific to Kiosk type -->
                                                     @break
-                                                @case('Chair Space')
+                                                @case('Chair space')
                                                     <p>Chair Name: {{ $room->chair_name }}</p>
                                                     <p>Chair Type: {{ $room->chair_type }}</p>
                                                     <p>Chair Material: {{ $room->chair_material }}</p>

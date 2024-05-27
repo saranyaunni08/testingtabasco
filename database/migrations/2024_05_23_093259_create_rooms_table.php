@@ -1,16 +1,22 @@
 <?php
-
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 class CreateRoomsTable extends Migration
 {
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
     public function up()
     {
         Schema::create('rooms', function (Blueprint $table) {
             $table->id();
             $table->string('room_number');
+            $table->unsignedBigInteger('building_id');
+            $table->foreign('building_id')->references('id')->on('buildings')->onDelete('cascade');
             $table->string('room_floor')->nullable();
             $table->string('room_type');
             $table->string('build_up_area')->nullable();
@@ -39,16 +45,15 @@ class CreateRoomsTable extends Migration
             $table->string('chair_type')->nullable();
             $table->string('chair_material')->nullable();
             $table->string('chair_price')->nullable();
-            $table->unsignedBigInteger('building_id')->nullable();
-            $table->foreign('building_id')->references('id')->on('building')->onDelete('set null');
-            $table->string('building_name')->nullable();
-            $table->string('status')->default('available'); 
-            $table->decimal('sale_price', 10, 2)->nullable()->after('rent_price'); 
-            $table->softDeletes();
             $table->timestamps();
         });
     }
 
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
     public function down()
     {
         Schema::dropIfExists('rooms');

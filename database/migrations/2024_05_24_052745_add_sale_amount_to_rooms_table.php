@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddStatusToRoomsTable extends Migration
+class AddSaleAmountToRoomsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -14,7 +14,7 @@ class AddStatusToRoomsTable extends Migration
     public function up()
     {
         Schema::table('rooms', function (Blueprint $table) {
-            $table->string('status')->default('available'); // Add the status column with a default value
+            $table->decimal('sale_amount', 10, 2)->nullable(); 
         });
     }
 
@@ -26,7 +26,7 @@ class AddStatusToRoomsTable extends Migration
     public function down()
     {
         Schema::table('rooms', function (Blueprint $table) {
-            $table->dropColumn('status'); // Rollback the addition of the status column
+            $table->dropColumn('sale_amount');
         });
     }
 }

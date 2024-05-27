@@ -9,7 +9,7 @@ class Building extends Model
 {
     use HasFactory;
 
-    protected $table = 'building'; // Define the table name
+    protected $table = 'buildings'; // Define the table name
 
     protected $fillable = [
         'building_name',
@@ -25,4 +25,10 @@ class Building extends Model
         'building_amenities',
         'additional_amenities',
     ];
+
+    public function rooms()
+    {
+        return $this->hasMany(Room::class);
+    }
+
 }

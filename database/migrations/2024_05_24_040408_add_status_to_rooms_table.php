@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddRoomIdToSalesTable extends Migration
+class AddStatusToRoomsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,8 @@ class AddRoomIdToSalesTable extends Migration
      */
     public function up()
     {
-        Schema::table('sales', function (Blueprint $table) {
-            $table->foreignId('room_id')->constrained()->onDelete('cascade');
+        Schema::table('rooms', function (Blueprint $table) {
+            $table->string('status')->default('available'); // Add the status column with a default value
         });
     }
 
@@ -25,9 +25,8 @@ class AddRoomIdToSalesTable extends Migration
      */
     public function down()
     {
-        Schema::table('sales', function (Blueprint $table) {
-            $table->dropForeign(['room_id']);
-            $table->dropColumn('room_id');
+        Schema::table('rooms', function (Blueprint $table) {
+            $table->dropColumn('status');
         });
     }
 }

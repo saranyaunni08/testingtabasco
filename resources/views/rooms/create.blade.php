@@ -12,8 +12,8 @@
         </div>
         <div class="card-body px-0 pb-2">
           <div class="row p-4">
-          <form action="{{ route('admin.rooms.store') }}" method="POST">
-            @csrf
+            <form action="{{ route('admin.rooms.store') }}" method="POST">
+              @csrf
             <div class="row justify-content-center">
               <div class="col-lg-8">
                 <div class="row">
@@ -58,6 +58,13 @@
                   </div>
 
                   <div class="col-md-6" id="flatFields" style="display: none;">
+                    <div class="col-md-6">
+                      <div class="input-group input-group-dynamic mb-4">
+                          <label for="flat_model" class="form-label">Flat Model</label>
+                          <input type="text" name="flat_model" class="form-control">
+                      </div>
+                    </div>
+                 
                     <div class="input-group input-group-dynamic mb-4">
                       <label for="build_up_area" class="form-label">Build-Up Area (sq ft)</label>
                       <input type="text" name="build_up_area" class="form-control">
@@ -67,10 +74,6 @@
                       <input type="text" name="carpet_area" class="form-control">
                     </div>
                     <div class="input-group input-group-dynamic mb-4">
-                      <label for="flat_rate" class="form-label">Flat Rate</label>
-                      <input type="text" name="flat_rate" class="form-control">
-                    </div>
-                    <div class="input-group input-group-dynamic mb-4">
                       <label for="super_build_up_price" class="form-label">Super Build-Up Area Price</label>
                       <input type="text" name="super_build_up_price" class="form-control">
                     </div>
@@ -78,13 +81,16 @@
                       <label for="carpet_area_price" class="form-label">Carpet Area Price</label>
                       <input type="text" name="carpet_area_price" class="form-control">
                     </div>
+                    <div class="col-md-6">
+                      <div class="input-group input-group-dynamic mb-4">
+                        <label for="sale_amount" class="form-label">Sale Amount</label>
+                        <input type="text" name="sale_amount" class="form-control">
+                      </div>
+                    </div>
                   </div>
 
                   <div class="col-md-6" id="shopsFields" style="display: none;">
-                    <div class="input-group input-group-dynamic mb-4">
-                        <label for="shop_number" class="form-label">Shop Number</label>
-                        <input type="text" name="shop_number" class="form-control">
-                    </div>
+                   
                     <div class="input-group input-group-dynamic mb-4">
                         <select name="shop_type" class="form-select">
                             <option value="" disabled selected>Select Shop Type</option>
@@ -101,10 +107,6 @@
                     <div class="input-group input-group-dynamic mb-4">
                         <label for="shop_rate" class="form-label">Shop Rate</label>
                         <input type="text" name="shop_rate" class="form-control">
-                    </div>
-                    <div class="input-group input-group-dynamic mb-4">
-                        <label for="shop_rental_period" class="form-label">Rental Period</label>
-                        <input type="text" name="shop_rental_period" class="form-control">
                     </div>
                 </div>
                   

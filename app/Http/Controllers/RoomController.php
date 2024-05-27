@@ -6,12 +6,20 @@ use App\Models\Room;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\Builder;
 use App\Models\Building; 
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Redirect;
+
 
 
 
 class RoomController extends Controller
 {
 
+    public function index()
+    {
+        $rooms = Room::whereNull('deleted_at')->where('room_type', 'Flat')->get();
+        return view('rooms.index', compact('rooms'));
+    }
     public function create()
     {
         $buildings = Building::all(); 
@@ -20,14 +28,26 @@ class RoomController extends Controller
         
         
     }
+
+    public function destroy($id)
+    {
+        $room = Room::findOrFail($id);
+        $room->delete(); 
+        return redirect()->route('admin.rooms.index')->with('success', 'Room deleted successfully');
+    }
     public function show($id)
     {
+        // Fetch the room by ID
+        $room = Room::find($id);
 
+        // Check if the room exists
+        if (!$room) {
+            // Handle the error, maybe redirect back with a message
+            return redirect()->route('admin.dashboard')->with('error', 'Room not found');
+        }
 
-        $room = Room::findOrFail($id);
-    
-
-        return view('rooms.show', compact('room'));
+        // Pass the room to the view
+        return view('pages.room', compact('room'));
     }
     
     public function edit($id)
@@ -45,16 +65,12 @@ class RoomController extends Controller
     {
         $room = Room::findOrFail($id);
         $room->update($request->all());
-        return redirect()->route('admin.rooms.index')->with('success', 'Room updated successfully');
+        return Redirect::route('admin.buildings.show', ['id' => $room->building_id])->with('success', 'Room updated successfully');
     }
     
     public function sell($id)
     {
         $room = Room::findOrFail($id);
-        // Implement the logic for selling the room.
-        // This could involve updating a status, creating a sale record, etc.
-    
-        // For now, let's assume we're just marking the room as sold.
         $room->status = 'sold';
         $room->save();
     
@@ -65,43 +81,26 @@ class RoomController extends Controller
         $room = Room::findOrFail($id);
         return view('rooms.sell', [
             'room' => $room,
-            'page' => 'rooms' // Define the page variable
+            'page' => 'rooms' 
         ]);
     }
     public function processSell(Request $request, $id)
     {
         $room = Room::findOrFail($id);
         
-        // Validate request if necessary
+
         $request->validate([
             'sale_price' => 'required|numeric|min:0',
         ]);
     
-        // Implement the logic for selling the room
+
         $room->status = 'sold';
-        $room->sale_price = $request->input('sale_price'); // Assuming you have a sale_price column
+        $room->sale_price = $request->input('sale_price'); 
         $room->save();
     
         return redirect()->route('admin.rooms.index')->with('success', 'Room marked as sold.');
     }
-    
-    public function index()
-    {
-        $rooms = Room::all(); // Or however you retrieve your room data
-        return view('rooms.index', compact('rooms'));
-    }
-    
-    protected function getRoomsWithTrashed(bool $withTrashed = true): Builder|Room
-    {
-        return Room::withTrashed($withTrashed);
-    }
-    public function destroy($id)
-    {
-        $room = Room::findOrFail($id);
-        $room->delete(); 
-    
-        return redirect()->route('admin.rooms.index')->with('success', 'Room deleted successfully');
-    }
+
     public function store(Request $request)
     {
 
@@ -135,9 +134,15 @@ class RoomController extends Controller
             'chair_type' => 'nullable|string',
             'chair_material' => 'nullable|string',
             'chair_price' => 'nullable|numeric',
-            'building_id' => 'required|exists:building,id', 
+            'building_id' => 'required|exists:buildings,id', 
+            'flat_model' => 'nullable|string',
+            'sale_amount' => 'nullable|string',
     
         ]);
+
+
+
+        Room::create($validatedData);
 
 
         $room = new Room();
@@ -152,18 +157,17 @@ class RoomController extends Controller
 
         switch ($validatedData['room_type']) {
             case 'Flat':
+                $room->flat_model = $validatedData['flat_model'];
+                $room->sale_amount = $validatedData['sale_amount'];
                 $room->build_up_area = $validatedData['build_up_area'];
                 $room->carpet_area = $validatedData['carpet_area'];
-                $room->flat_rate = $validatedData['flat_rate'];
                 $room->super_build_up_price = $validatedData['super_build_up_price'];
                 $room->carpet_area_price = $validatedData['carpet_area_price'];
                 break;
             case 'Shops':
-                $room->shop_number = $validatedData['shop_number'];
                 $room->shop_type = $validatedData['shop_type'];
                 $room->shop_area = $validatedData['shop_area'];
                 $room->shop_rate = $validatedData['shop_rate'];
-                $room->shop_rental_period = $validatedData['shop_rental_period'];
                 break;
             case 'Car parking':
                 $room->parking_number = $validatedData['parking_number'];
@@ -192,19 +196,8 @@ class RoomController extends Controller
         }
 
 
-        $room->save();
-
 
         return redirect()->back()->with('success', 'Room added successfully!');
     }
 
-    public function viewSalesForm($roomId)
-{
-    $room = Room::find($roomId);
-    if (!$room) {
-        // Handle the case where the room is not found, perhaps show an error message or redirect
-    }
-
-    return view('pages.sales', compact('room'));
-}
 }

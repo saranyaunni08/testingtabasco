@@ -31,10 +31,7 @@
                                     <h5 class="form-label">Carpet Area (sq ft)</h5>
                                     <input type="text" name="carpet_area" class="form-control" value="{{ $room->carpet_area }}">
                                 </div>
-                                <div class="form-group mb-4">
-                                    <h5 class="form-label">Flat Rate</h5>
-                                    <input type="text" name="flat_rate" class="form-control" value="{{ $room->flat_rate }}">
-                                </div>
+                                
                                 <div class="form-group mb-4">
                                     <h5 class="form-label">Super Build-Up Area Price</h5>
                                     <input type="text" name="super_build_up_price" class="form-control" value="{{ $room->super_build_up_price }}">
@@ -76,7 +73,7 @@
                             </div>
 
                             <!-- Car Parking Fields -->
-                            <div class="col-md-6" id="carParkingFields" style="display: {{ $room->room_type == 'Car Parking' ? 'block' : 'none' }};">
+                            <div class="col-md-6" id="carParkingFields" style="display: {{ $room->room_type == 'Car parking' ? 'block' : 'none' }};">
                                 <div class="form-group mb-4">
                                     <h5 class="form-label">Parking Number</h5>
                                     <input type="text" name="parking_number" class="form-control" value="{{ $room->parking_number }}">
@@ -101,7 +98,7 @@
                             </div>
 
                             <!-- Table Space Fields -->
-                            <div class="col-md-6" id="tableSpaceFields" style="display: {{ $room->room_type == 'Table Space' ? 'block' : 'none' }};">
+                            <div class="col-md-6" id="tableSpaceFields" style="display: {{ $room->room_type == 'Table space' ? 'block' : 'none' }};">
                                 <div class="form-group mb-4">
                                     <h5 class="form-label">Space Name</h5>
                                     <input type="text" name="space_name" class="form-control" value="{{ $room->space_name }}">
@@ -152,7 +149,7 @@
                             </div>
 
                             <!-- Chair Space Fields -->
-                            <div class="col-md-6" id="chairSpaceFields" style="display: {{ $room->room_type == 'Chair Space' ? 'block' : 'none' }};">
+                            <div class="col-md-6" id="chairSpaceFields" style="display: {{ $room->room_type == 'Chair space' ? 'block' : 'none' }};">
                                 <div class="form-group mb-4">
                                     <h5 class="form-label">Chair Name</h5>
                                     <input type="text" name="chair_name" class="form-control" value="{{ $room->chair_name }}">

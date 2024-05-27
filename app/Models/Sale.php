@@ -1,4 +1,5 @@
 <?php
+// app/Models/Sale.php
 
 namespace App\Models;
 
@@ -9,26 +10,17 @@ class Sale extends Model
 {
     use HasFactory;
 
-    // Define the fillable fields for mass assignment
     protected $fillable = [
+        'room_id',
         'customer_name',
-        'customer_address',
-        'customer_street',
-        'customer_city',
-        'customer_phone',
-        'customer_pin',
-        'customer_state',
-        'customer_country',
+        'customer_contact',
+        'customer_email',
         'sale_amount',
-        'discount_amount',
-        'advance_amount',
-        'payment_method',
-        'installment_period',
-        'installment_amount',
-        'payment_using',
-        'bank_name',
-        'branch',
-        'account_num',
-        'ifsc',
     ];
+
+    // Define the relationship between Sale and Room
+    public function room()
+    {
+        return $this->belongsTo(Room::class);
+    }
 }

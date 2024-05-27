@@ -1,27 +1,34 @@
 <?php
 
+// app/Http/Controllers/AuthController.php
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
     public function login()
     {
-        return view('pages.login');
+        return view('auth.login');
     }
 
-    public function doLogin()
+    public function doLogin(Request $request)
     {
-        // Authentication code
+        $credentials = $request->only('username', 'password');
+
+        if (Auth::guard('admin')->attempt($credentials, $request->filled('remember'))) {
+            return redirect()->route('admin.dashboard');
+        }
+
+        return back()->withErrors([
+            'username' => 'The provided credentials do not match our records.',
+        ])->withInput($request->except('password'));
     }
 
-    public function forgotPassword()
+    public function logout()
     {
-        return view('pages.reset-password');
-    }
-
-    public function logout() {
-        
+        Auth::guard('admin')->logout();
+        return redirect()->route('login');
     }
 }

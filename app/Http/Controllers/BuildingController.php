@@ -11,7 +11,7 @@ class BuildingController extends Controller
 {
     public function index()
     {
-        $buildings = DB::table('building')->get();
+        $buildings = DB::table('buildings')->get();
         return view('pages.building', compact('buildings'));
     }
 
@@ -37,7 +37,7 @@ class BuildingController extends Controller
 
         $checkboxAmenities = implode(',', $request->input('building_amenities', []));
 
-        DB::table('building')->insert([
+        DB::table('buildings')->insert([
             'building_name' => $validatedData['building_name'],
             'no_of_floors' => $validatedData['no_of_floors'],
             'building_address' => $validatedData['building_address'],
@@ -108,7 +108,7 @@ class BuildingController extends Controller
             'updated_at' => now(),
         ]);
 
-        return redirect()->route('buildings.index')->with('success', 'Building updated successfully');
+        return redirect()->route('admin.building')->with('success', 'Building updated successfully');
     }
 
     public function destroy($id)

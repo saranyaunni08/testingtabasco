@@ -2,20 +2,12 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
-
 
 class Room extends Model
 {
-    use SoftDeletes;
-    protected $dates = ['deleted_at'];
-
-
-    use HasFactory;
-
     protected $fillable = [
+        // Add all your fillable attributes here
         'room_number',
         'room_floor',
         'room_type',
@@ -45,9 +37,34 @@ class Room extends Model
         'chair_type',
         'chair_material',
         'chair_price',
-        'room_type', // other attributes
-        'status',
-        'sale_price',
-
+        'building_id',
+        'flat_model',
+        'sale_amount',
+        // Add derived attributes here
+        'total_sq_ft',
+        'total_sq_rate',
+        'expected_amount',
+        'total_amount',
     ];
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::saving(function ($room) {
+            // Calculate total_sq_ft and total_sq_rate
+            $total_sq_ft = ($room->build_up_area ?? 0) + ($room->carpet_area ?? 0);
+            $total_sq_rate = ($room->super_build_up_price ?? 0) + ($room->carpet_area_price ?? 0);
+
+            // Calculate expected_amount and total_amount
+            $expected_amount = $total_sq_ft * $total_sq_rate;
+            $total_amount = $total_sq_ft * ($room->sale_amount ?? 0);
+
+            // Set derived attributes
+            $room->total_sq_ft = $total_sq_ft;
+            $room->total_sq_rate = $total_sq_rate;
+            $room->expected_amount = $expected_amount;
+            $room->total_amount = $total_amount;
+        });
+    }
 }

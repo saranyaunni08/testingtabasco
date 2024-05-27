@@ -131,15 +131,60 @@
                                                         <td>{{ $room->kiosk_rate }}</td>
                                                     @endif
                                                     <td>
-                                                        <a href="{{ route('admin.sales.create', ['room' => $room->id]) }}" class="btn btn-success btn-sm me-2">Sell</a>
-                                                        <a href="{{ route('admin.rooms.edit', $room->id) }}" class="btn btn-warning btn-sm me-2">Edit</a>
-                                                        <form action="{{ route('admin.rooms.destroy', $room->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this room?');" style="display:inline;">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-                                                        </form>
+                                                        @if ($room->status === 'available')
+                                                        <!-- Button trigger modal -->
+                                                        <button type="button" class="btn btn-success btn-sm me-2" data-toggle="modal" data-target="#sellModal{{ $room->id }}">
+                                                            Sell
+                                                        </button>
+                                                    @endif
+                                                    <a href="{{ route('admin.rooms.edit', $room->id) }}" class="btn btn-warning btn-sm me-2">Edit</a>
+                                                    <form action="{{ route('admin.rooms.destroy', $room->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this room?');" style="display:inline;">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                                    </form>
                                                     </td>
                                                 </tr>
+
+                                                <!-- Modal -->
+                                                <div class="modal fade" id="sellModal{{ $room->id }}" tabindex="-1" role="dialog" aria-labelledby="sellModalLabel{{ $room->id }}" aria-hidden="true">
+                                                    <div class="modal-dialog" role="document">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <h5 class="modal-title" id="sellModalLabel{{ $room->id }}">Sell Room: {{ $room->room_number }}</h5>
+                                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                                    <span aria-hidden="true">&times;</span>
+                                                                </button>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                <form action="{{ route('admin.sales.store') }}" method="POST">
+                                                                    @csrf
+                                                                    <input type="hidden" name="room_id" value="{{ $room->id }}">
+                                                                    <div class="form-group">
+                                                                        <label for="customer_name">Customer Name</label>
+                                                                        <input type="text" class="form-control" id="customer_name" name="customer_name" required>
+                                                                    </div>
+                                                                    <div class="form-group">
+                                                                        <label for="customer_contact">Customer Contact</label>
+                                                                        <input type="text" class="form-control" id="customer_contact" name="customer_contact" required>
+                                                                    </div>
+                                                                    <div class="form-group">
+                                                                        <label for="customer_email">Customer Email</label>
+                                                                        <input type="email" class="form-control" id="customer_email" name="customer_email">
+                                                                    </div>
+                                                                    <div class="form-group">
+                                                                        <label for="sale_amount">Sale Amount</label>
+                                                                        <input type="number" step="0.01" class="form-control" id="sale_amount" name="sale_amount" required>
+                                                                    </div>
+                                                                    <button type="submit" class="btn btn-primary">Save</button>
+                                                                </form>
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             @endforeach
                                         </tbody>
                                     </table>
@@ -154,4 +199,8 @@
         </div>
     </div>
 </div>
+
+<!-- Include Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
 @endsection

@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddSalePriceToRoomsTable extends Migration
+class AddFlatModelToRoomsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -14,7 +14,7 @@ class AddSalePriceToRoomsTable extends Migration
     public function up()
     {
         Schema::table('rooms', function (Blueprint $table) {
-            $table->decimal('sale_price', 10, 2)->nullable()->after('building_name');
+            $table->string('flat_model')->nullable(); // Add the flat_model column, nullable if it can be empty
         });
     }
 
@@ -26,7 +26,7 @@ class AddSalePriceToRoomsTable extends Migration
     public function down()
     {
         Schema::table('rooms', function (Blueprint $table) {
-            $table->dropColumn('sale_price');
+            $table->dropColumn('flat_model');
         });
     }
 }
