@@ -19,6 +19,7 @@ class SaleController extends Controller
             'customer_contact' => 'required|string|max:255',
             'customer_email' => 'nullable|email',
             'sale_amount' => 'required|numeric',
+            'parking_amount' => 'required|numeric',
         ]);
 
         // Calculate total amount based on room type
@@ -50,6 +51,7 @@ class SaleController extends Controller
         $sale->customer_contact = $validatedData['customer_contact'];
         $sale->customer_email = $validatedData['customer_email'];
         $sale->sale_amount = $validatedData['sale_amount'];
+        $sale->parking_amount = $validatedData['parking_amount'];
         $sale->total_amount = $totalAmount;
         $sale->save();
 
@@ -57,7 +59,7 @@ class SaleController extends Controller
         $room->status = 'sold';
         $room->save();
 
-        // Redirect back or do any other actions as needed
+        return redirect()->route('admin.sales.index');
     }
 
     public function create()
@@ -80,6 +82,17 @@ class SaleController extends Controller
     
         return view('sales.sales', compact('sales', 'room', 'page'));
     }
+    public function softDelete($id)
+    {
+        // Soft delete the sale
+        $sale = Sale::findOrFail($id);
+        $sale->delete();
     
+        // Update the status of the associated room to 'available'
+        $room = Room::findOrFail($sale->room_id);
+        $room->status = 'available';
+        $room->save();
     
+        return redirect()->back();
+    }    
 }

@@ -31,7 +31,7 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
             Route::post('/update-building/{id}', [BuildingController::class, 'update'])->name('building.update'); 
             Route::post('/buildingstore', [BuildingController::class, 'store'])->name('addbuilding.store'); 
             Route::delete('/buildings/{id}', [BuildingController::class, 'destroy'])->name('building.delete'); 
-            Route::get('/admin/building', [BuildingController::class, 'index'])->name('admin.building');
+            // Route::get('/admin/building', [BuildingController::class, 'index'])->name('admin.building');
             Route::get('/buildings/{id}', [BuildingController::class, 'show'])->name('buildings.show');
 
 
@@ -55,8 +55,10 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
             Route::get('sales', [SaleController::class, 'store'])->name('sales.store');
 
             Route::get('/sales', [SaleController::class, 'showSales'])->name('sales.index');
-            Route::delete('/sales/{sale}/soft-delete', [SaleController::class, 'softDelete'])->name('sales.soft-delete');
 
+            Route::get('/buildings/{building_id}/rooms', [RoomController::class, 'showRooms'])->name('buildings.rooms');
+
+            Route::delete('sales/{id}/soft-delete', [SaleController::class, 'softDelete'])->name('sales.soft-delete');
 
         });
 

@@ -43,7 +43,7 @@
                             </div>
 
                             <!-- Shops Fields -->
-                            <div class="col-md-6" id="shopsFields" style="display: {{ $room->room_type == 'Shop' ? 'block' : 'none' }};">
+                            <div class="col-md-6" id="shopsFields" style="display: {{ $room->room_type == 'Shops' ? 'block' : 'none' }};">
                                 <div class="form-group mb-4">
                                     <h5 class="form-label">Shop Number</h5>
                                     <input type="text" name="shop_number" class="form-control" value="{{ $room->shop_number }}">

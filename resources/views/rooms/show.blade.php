@@ -9,7 +9,7 @@
                     <div class="bg-gradient-info shadow-info border-radius-lg p-3">
                         <div class="d-flex justify-content-between align-items-center">
                             <div class="pe-3">
-                                <a href="{{ route('admin.rooms.create') }}" class="btn btn-light m-0">Add Room</a>
+                                <a href="{{ route('admin.rooms.create', ['building_id' => $building_id]) }}" class="btn btn-light m-0">Add Room</a>
                             </div>
                         </div>
                     </div>
@@ -25,13 +25,14 @@
                                 'Chair space' => [],
                                 'Kiosk' => []
                             ];
+
                             foreach ($rooms as $room) {
                                 $roomTypes[$room->room_type][] = $room;
                             }
                         @endphp
 
-                        @foreach ($roomTypes as $type => $rooms)
-                            @if (count($rooms) > 0)
+                        @foreach ($roomTypes as $type => $typeRooms)
+                            @if (count($typeRooms) > 0)
                                 <div class="table-responsive mb-4">
                                     <table class="table align-items-center mb-0">
                                         <thead>
@@ -46,8 +47,7 @@
                                                     <th>Total Sq. Ft</th>
                                                     <th>Total Sq. Rate</th>
                                                     <th>Expected Amount</th>
-                                                    <th>Sale Amount</th>
-                                                    <th>Total Amount</th>
+                                                   
                                                     <th>Actions</th>
                                                 @elseif ($type === 'Shops')
                                                     <th>Sl. No</th>
@@ -93,7 +93,7 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            @foreach ($rooms as $index => $room)
+                                            @foreach ($typeRooms as $index => $room)
                                                 <tr>
                                                     <td>{{ $index + 1 }}</td>
                                                     <td>{{ $room->room_number }}</td>
@@ -102,8 +102,7 @@
                                                         <td>{{ $room->total_sq_ft }}</td>
                                                         <td>{{ $room->total_sq_rate }}</td>
                                                         <td>{{ $room->expected_amount }}</td>
-                                                        <td>{{ $room->sale_amount }}</td>
-                                                        <td>{{ $room->total_amount }}</td>
+                                                        
                                                     @elseif ($type === 'Shops')
                                                         <td>{{ $room->shop_type }}</td>
                                                         <td>{{ $room->shop_area }}</td>
@@ -131,7 +130,12 @@
                                                         <td>{{ $room->kiosk_rate }}</td>
                                                     @endif
                                                     <td>
-                                                        <a href="{{ route('admin.sales.create', ['room' => $room->id]) }}" class="btn btn-success btn-sm me-2">Sell</a>
+                                                        @if ($room->status === 'available')
+                                                            <!-- Button trigger modal -->
+                                                            <button type="button" class="btn btn-success btn-sm me-2" data-toggle="modal" data-target="#sellModal{{ $room->id }}">
+                                                                Sell
+                                                            </button>
+                                                        @endif
                                                         <a href="{{ route('admin.rooms.edit', $room->id) }}" class="btn btn-warning btn-sm me-2">Edit</a>
                                                         <form action="{{ route('admin.rooms.destroy', $room->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this room?');" style="display:inline;">
                                                             @csrf
@@ -140,6 +144,51 @@
                                                         </form>
                                                     </td>
                                                 </tr>
+
+                                                <!-- Modal -->
+                                                <div class="modal fade" id="sellModal{{ $room->id }}" tabindex="-1" role="dialog" aria-labelledby="sellModalLabel{{ $room->id }}" aria-hidden="true">
+                                                    <div class="modal-dialog" role="document">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <h5 class="modal-title" id="sellModalLabel{{ $room->id }}">Sell Room: {{ $room->room_number }}</h5>
+                                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                                    <span aria-hidden="true">&times;</span>
+                                                                </button>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                <form action="{{ route('admin.sales.store') }}" method="POST">
+                                                                    @csrf
+                                                                    <input type="hidden" name="room_id" value="{{ $room->id }}">
+                                                                    <div class="form-group">
+                                                                        <label for="customer_name">Customer Name</label>
+                                                                        <input type="text" class="form-control" id="customer_name" name="customer_name" required>
+                                                                    </div>
+                                                                    <div class="form-group">
+                                                                        <label for="customer_contact">Customer Contact</label>
+                                                                        <input type="text" class="form-control" id="customer_contact" name="customer_contact" required>
+                                                                    </div>
+                                                                    <div class="form-group">
+                                                                        <label for="customer_email">Customer Email</label>
+                                                                        <input type="email" class="form-control" id="customer_email" name="customer_email">
+                                                                    </div>
+                                                                    <div class="form-group">
+                                                                        <label for="parking_amount">Parking Amount</label>
+                                                                        <input type="number"  class="form-control" id="parking_amount" name="parking_amount" required>
+                                                                    </div>
+                                                                    <div class="form-group">
+                                                                        <label for="sale_amount">Sale Amount</label>
+                                                                        <input type="number" step="0.01" class="form-control" id="sale_amount" name="sale_amount" required>
+                                                                    </div>
+                                                                    <button type="submit" class="btn btn-primary">Save</button>
+                                                                </form>
+                                                            </div>
+                                                            
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             @endforeach
                                         </tbody>
                                     </table>
@@ -147,11 +196,14 @@
                                 <hr>
                             @endif
                         @endforeach
-
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Include Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
 @endsection

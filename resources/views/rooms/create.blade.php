@@ -74,19 +74,14 @@
                       <input type="text" name="carpet_area" class="form-control">
                     </div>
                     <div class="input-group input-group-dynamic mb-4">
-                      <label for="super_build_up_price" class="form-label">Super Build-Up Area Price</label>
+                      <label for="super_build_up_price" class="form-label">Build-Up Area Price</label>
                       <input type="text" name="super_build_up_price" class="form-control">
                     </div>
                     <div class="input-group input-group-dynamic mb-4">
                       <label for="carpet_area_price" class="form-label">Carpet Area Price</label>
                       <input type="text" name="carpet_area_price" class="form-control">
                     </div>
-                    <div class="col-md-6">
-                      <div class="input-group input-group-dynamic mb-4">
-                        <label for="sale_amount" class="form-label">Sale Amount</label>
-                        <input type="text" name="sale_amount" class="form-control">
-                      </div>
-                    </div>
+                   
                   </div>
 
                   <div class="col-md-6" id="shopsFields" style="display: none;">

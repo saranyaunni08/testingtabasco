@@ -158,7 +158,6 @@ class RoomController extends Controller
         switch ($validatedData['room_type']) {
             case 'Flat':
                 $room->flat_model = $validatedData['flat_model'];
-                $room->sale_amount = $validatedData['sale_amount'];
                 $room->build_up_area = $validatedData['build_up_area'];
                 $room->carpet_area = $validatedData['carpet_area'];
                 $room->super_build_up_price = $validatedData['super_build_up_price'];

@@ -59,7 +59,7 @@ class BuildingController extends Controller
 
     public function edit($id)
     {
-        $building = DB::table('building')->where('id', $id)->first();
+        $building = DB::table('buildings')->where('id', $id)->first();
 
         $amenities = explode(',', $building->building_amenities);
         $checkboxAmenities = [];
@@ -92,7 +92,7 @@ class BuildingController extends Controller
 
         $checkboxAmenities = implode(',', $request->input('building_amenities', []));
 
-        DB::table('building')->where('id', $id)->update([
+        DB::table('buildingS')->where('id', $id)->update([
             'building_name' => $validatedData['building_name'],
             'no_of_floors' => $validatedData['no_of_floors'],
             'building_address' => $validatedData['building_address'],
@@ -124,24 +124,22 @@ class BuildingController extends Controller
         $rooms = Room::all(); 
         return view('pages.building', compact('buildings', 'rooms'));
     }
-
-    public function show($id)
+    public function show($building_id)
     {
-        // Fetch the rooms associated with the building
-        $rooms = Room::where('building_id', $id)->get();
-        
-        // Define the $page variable
-        $page = 'rooms';
-        
-        // Return the view with room data and the $page variable
-        return view('rooms.show', compact('rooms', 'page'));
+        $rooms = Room::where('building_id', $building_id)->get();
+        $page = 'buildings';  // Set the $page variable
+
+        return view('rooms.show', compact('rooms', 'building_id', 'page'));
     }
 
-    public function showRooms($buildingId)
+    public function showRooms($building_id)
     {
-        $building = Building::findOrFail($buildingId);
-        $rooms = $building->rooms()->whereNull('deleted_at')->get();
+        $rooms = Room::where('building_id', $building_id)->get();
     
-        return view('rooms.show', compact('building', 'rooms'));
+        return view('admin.rooms.index', compact('rooms', 'building_id'));
+    }
+    public function building()
+    {
+        return $this->belongsTo(Building::class);
     }
 }
