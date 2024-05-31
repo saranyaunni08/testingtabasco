@@ -38,8 +38,10 @@
                                 </div>
                                 <p class="mt-4 text-sm text-center">
                                     Forgot your password?
-                                    <a href="{{ route('pswreset') }}" class="text-info text-gradient font-weight-bold">Reset</a>
+                                    <a href="{{ route('password.request') }}" class="text-info text-gradient font-weight-bold">Reset Password</a>
                                 </p>
+                                
+                                
                             </form>
                         </div>
                     </div>

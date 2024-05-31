@@ -138,8 +138,5 @@ class BuildingController extends Controller
     
         return view('admin.rooms.index', compact('rooms', 'building_id'));
     }
-    public function building()
-    {
-        return $this->belongsTo(Building::class);
-    }
+   
 }

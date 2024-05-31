@@ -4,111 +4,30 @@ namespace App\Http\Controllers;
 
 use App\Models\Room;
 use Illuminate\Http\Request;
-use Illuminate\Database\Eloquent\Builder;
-use App\Models\Building; 
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redirect;
-
-
-
+use App\Models\Building;
 
 class RoomController extends Controller
 {
-
     public function index()
     {
         $rooms = Room::whereNull('deleted_at')->where('room_type', 'Flat')->get();
         return view('rooms.index', compact('rooms'));
     }
-    public function create()
+    public function create(Request $request)
     {
+        $buildingId = $request->input('building_id');
         $buildings = Building::all(); 
-        return view('rooms.create', compact('buildings')); 
-
-        
-        
-    }
-
-    public function destroy($id)
-    {
-        $room = Room::findOrFail($id);
-        $room->delete(); 
-        return redirect()->route('admin.rooms.index')->with('success', 'Room deleted successfully');
-    }
-    public function show($id)
-    {
-        // Fetch the room by ID
-        $room = Room::find($id);
-
-        // Check if the room exists
-        if (!$room) {
-            // Handle the error, maybe redirect back with a message
-            return redirect()->route('admin.dashboard')->with('error', 'Room not found');
-        }
-
-        // Pass the room to the view
-        return view('pages.room', compact('room'));
+        return view('rooms.create', compact('buildings', 'buildingId')); 
     }
     
-    public function edit($id)
-    {
-
-        $room = Room::findOrFail($id);
-    
-
-        $page = 'edit';
-    
-
-        return view('rooms.edit', compact('room', 'page'));
-    }
-    public function update(Request $request, $id)
-    {
-        $room = Room::findOrFail($id);
-        $room->update($request->all());
-        return Redirect::route('admin.buildings.show', ['id' => $room->building_id])->with('success', 'Room updated successfully');
-    }
-    
-    public function sell($id)
-    {
-        $room = Room::findOrFail($id);
-        $room->status = 'sold';
-        $room->save();
-    
-        return redirect()->route('admin.rooms.index')->with('success', 'Room marked as sold.');
-    }
-    public function showSellForm($id)
-    {
-        $room = Room::findOrFail($id);
-        return view('rooms.sell', [
-            'room' => $room,
-            'page' => 'rooms' 
-        ]);
-    }
-    public function processSell(Request $request, $id)
-    {
-        $room = Room::findOrFail($id);
-        
-
-        $request->validate([
-            'sale_price' => 'required|numeric|min:0',
-        ]);
-    
-
-        $room->status = 'sold';
-        $room->sale_price = $request->input('sale_price'); 
-        $room->save();
-    
-        return redirect()->route('admin.rooms.index')->with('success', 'Room marked as sold.');
-    }
-
     public function store(Request $request)
     {
-
         $validatedData = $request->validate([
             'room_number' => 'required|string',
             'room_floor' => 'nullable|string',
             'room_type' => 'required|string',
-            'build_up_area' => 'nullable|numeric', // Assuming these are numeric fields
+            'build_up_area' => 'nullable|numeric',
             'carpet_area' => 'nullable|numeric',
             'flat_rate' => 'nullable|numeric',
             'super_build_up_price' => 'nullable|numeric',
@@ -134,26 +53,13 @@ class RoomController extends Controller
             'chair_type' => 'nullable|string',
             'chair_material' => 'nullable|string',
             'chair_price' => 'nullable|numeric',
-            'building_id' => 'required|exists:buildings,id', 
+            'building_id' => 'required|exists:buildings,id',
             'flat_model' => 'nullable|string',
             'sale_amount' => 'nullable|string',
-    
         ]);
 
-
-
-        Room::create($validatedData);
-
-
         $room = new Room();
-        $room->room_number = $validatedData['room_number'];
-        $room->room_floor = $validatedData['room_floor'];
-        $room->room_type = $validatedData['room_type'];
-        $room->building_id = $validatedData['building_id'];
         $room->fill($validatedData);
-
-
-
 
         switch ($validatedData['room_type']) {
             case 'Flat':
@@ -194,9 +100,73 @@ class RoomController extends Controller
                 break;
         }
 
-
+        $room->save();
 
         return redirect()->back()->with('success', 'Room added successfully!');
     }
 
+    public function destroy($id)
+    {
+        $room = Room::findOrFail($id);
+        $room->delete();
+        return redirect()->route('admin.rooms.index')->with('success', 'Room deleted successfully');
+    }
+
+    public function show($id)
+    {
+        $room = Room::find($id);
+
+        if (!$room) {
+            return redirect()->route('admin.dashboard')->with('error', 'Room not found');
+        }
+
+        return view('pages.room', compact('room'));
+    }
+
+    public function edit($id)
+    {
+        $room = Room::findOrFail($id);
+        $page = 'edit';
+        return view('rooms.edit', compact('room', 'page'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $room = Room::findOrFail($id);
+        $room->update($request->all());
+        return Redirect::route('admin.buildings.show', ['id' => $room->building_id])->with('success', 'Room updated successfully');
+    }
+
+    public function sell($id)
+    {
+        $room = Room::findOrFail($id);
+        $room->status = 'sold';
+        $room->save();
+        return redirect()->route('admin.rooms.index')->with('success', 'Room marked as sold.');
+    }
+
+    public function showSellForm($id)
+    {
+        $room = Room::findOrFail($id);
+        return view('rooms.sell', [
+            'room' => $room,
+            'page' => 'rooms' 
+        ]);
+    }
+
+    public function processSell(Request $request, $id)
+    {
+        $room = Room::findOrFail($id);
+
+        $request->validate([
+            'sale_price' => 'required|numeric|min:0',
+        ]);
+
+        $room->status = 'sold';
+        $room->sale_price = $request->input('sale_price');
+        $room->save();
+
+        return redirect()->route('admin.rooms.index')->with('success', 'Room marked as sold.');
+    }
 }
+

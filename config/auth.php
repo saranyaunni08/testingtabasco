@@ -68,16 +68,15 @@ return [
     'providers' => [
         'users' => [
             'driver' => 'eloquent',
-            'model' => App\Models\User::class,
+            'model' => App\Models\admin::class,
         ],
     
         'admins' => [
             'driver' => 'eloquent',
-            'model' => App\Models\Admin::class,
+            'model' => App\Models\Admin::class, // Change to your actual Admin model
         ],
-    
-        // Other providers...
     ],
+    
     
 
     /*
@@ -102,12 +101,19 @@ return [
     'passwords' => [
         'users' => [
             'provider' => 'users',
-            'table' => env('AUTH_PASSWORD_RESET_TOKEN_TABLE', 'password_reset_tokens'),
+            'table' => 'password_resets',
+            'expire' => 60,
+            'throttle' => 60,
+        ],
+    
+        'admins' => [
+            'provider' => 'admins', // Ensure this matches your admin user provider
+            'table' => 'password_resets', // You can use the same table as users or a different one if needed
             'expire' => 60,
             'throttle' => 60,
         ],
     ],
-
+    
     /*
     |--------------------------------------------------------------------------
     | Password Confirmation Timeout
