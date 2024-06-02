@@ -1,3 +1,4 @@
+
 @extends('layouts.default', ['title' => 'Rooms'])
 
 @section('content')

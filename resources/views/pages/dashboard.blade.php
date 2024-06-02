@@ -17,7 +17,7 @@
                                 @foreach($buildings as $building)
                                 <div class="col-lg-3 col-sm-6">
                                     <div class="card gradient-1">
-                                        <a href="{{ route('admin.buildings.show', ['id' => $building->id]) }}">
+                                        <a href="{{ route('admin.rooms.index', ['building_id' => $building->id]) }}">
                                             <div class="card-body">
                                                 <h3 class="card-title text-black">{{ $building->building_name }}</h3>
                                                 <div class="d-inline-block">

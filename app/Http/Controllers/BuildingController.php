@@ -11,10 +11,9 @@ class BuildingController extends Controller
 {
     public function index()
     {
-        $buildings = DB::table('buildings')->get();
+        $buildings = Building::all();
         return view('pages.building', compact('buildings'));
     }
-
     public function create()
     {
         return view('pages.addbuilding');
@@ -54,7 +53,7 @@ class BuildingController extends Controller
             'updated_at' => now(),
         ]);
 
-        return redirect()->route('admin.building')->with('success', 'Building added successfully');
+        return redirect()->route('admin.building.index')->with('success', 'Building created successfully.');
     }
 
     public function edit($id)
@@ -124,19 +123,17 @@ class BuildingController extends Controller
         $rooms = Room::all(); 
         return view('pages.building', compact('buildings', 'rooms'));
     }
+
     public function show($building_id)
     {
-        $rooms = Room::where('building_id', $building_id)->get();
-        $page = 'buildings';  // Set the $page variable
-
-        return view('rooms.show', compact('rooms', 'building_id', 'page'));
+        $building = Building::findOrFail($building_id);
+        return view('pages.building', compact('building'));
     }
-
     public function showRooms($building_id)
     {
         $rooms = Room::where('building_id', $building_id)->get();
     
         return view('admin.rooms.index', compact('rooms', 'building_id'));
     }
-   
+ 
 }

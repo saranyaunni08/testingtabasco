@@ -11,14 +11,19 @@ class RoomController extends Controller
 {
     public function index()
     {
-        $rooms = Room::whereNull('deleted_at')->where('room_type', 'Flat')->get();
-        return view('rooms.index', compact('rooms'));
+        $rooms = Room::all(); // Fetching all rooms
+        $page = 'rooms'; // Defining the page variable
+    
+        // Fetching the building_id dynamically, for example, from a Building model
+        $building = Building::first(); // Adjust to fetch the desired building
+        $building_id = $building ? $building->id : null;
+    
+        return view('rooms.show', compact('rooms', 'building_id', 'page'));
     }
-    public function create(Request $request)
+
+    public function create($building_id)
     {
-        $buildingId = $request->input('building_id');
-        $buildings = Building::all(); 
-        return view('rooms.create', compact('buildings', 'buildingId')); 
+        return view('rooms.create', compact('building_id'));
     }
     
     public function store(Request $request)
@@ -114,15 +119,11 @@ class RoomController extends Controller
 
     public function show($id)
     {
-        $room = Room::find($id);
+        $building = Building::findOrFail($id);
+        $building_id = $building->id;
 
-        if (!$room) {
-            return redirect()->route('admin.dashboard')->with('error', 'Room not found');
-        }
-
-        return view('pages.room', compact('room'));
+        return view('pages.building', compact('building', 'building_id'));
     }
-
     public function edit($id)
     {
         $room = Room::findOrFail($id);
@@ -168,5 +169,6 @@ class RoomController extends Controller
 
         return redirect()->route('admin.rooms.index')->with('success', 'Room marked as sold.');
     }
+
 }
 

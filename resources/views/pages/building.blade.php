@@ -1,4 +1,4 @@
-@extends('layouts.default', ['title' => 'Building View', 'page' => 'buildings'])
+@extends('layouts.default', ['title' => $building->building_name ?? 'Buildings', 'page' => 'rooms'])
 @section('content')
 <div class="container-fluid py-4">
     <div class="row">
@@ -7,9 +7,9 @@
                 <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
                     <div class="bg-gradient-info shadow-info border-radius-lg p-3">
                         <div class="d-flex justify-content-between align-items-center">
-                            <h6 class="text-white text-capitalize ps-3 mb-0">Buildings</h6>
+                            <h6 class="text-white text-capitalize ps-3 mb-0">{{ $building->building_name }}</h6>
                             <div class="pe-3">
-                                <a href="{{ route('admin.addbuilding') }}" class="btn btn-light m-0">Add Building</a>
+                                <a href="{{ route('admin.rooms.create', ['building_id' => $building_id]) }}" class="btn btn-light m-0">Add Room</a>
                             </div>
                         </div>
                     </div>
@@ -32,46 +32,20 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach ($buildings as $building)
+                                    @foreach ($building->rooms as $room)
                                     <tr>
-                                        <td>
-                                            <h6 class="mb-0 text-xs">{{ $building->building_name }}</h6>
-                                        </td>
-                                        <td>
-                                            <p class="text-xs text-dark font-weight-normal mb-0">{{ $building->building_address }}</p>
-                                        </td>
-                                        <td>
-                                            <p class="text-xs text-dark font-weight-normal mb-0">{{ $building->no_of_floors }}</p>
-                                        </td>
-                                        <td>
-                                            <p class="text-xs text-dark font-weight-normal mb-0">{{ $building->super_built_up_area }}</p>
-                                        </td>
-                                        <td>
-                                            <p class="text-xs text-dark font-weight-normal mb-0">{{ $building->carpet_area }}</p>
-                                        </td>
-                                        <td>
-                                            <p class="text-xs text-dark font-weight-normal mb-0">
-                                                @foreach(explode(',', $building->building_amenities) as $amenity)
-                                                  {{ $amenity }},
-                                                @endforeach
-                                                 @if ($building->additional_amenities)
-                                                  {{ $building->additional_amenities }}
-                                                 @endif
-                                            </p>
-                                        </td>
-                                        <td>
-                                            <p class="text-xs text-dark font-weight-normal mb-0">{{ $building->city }}</p>
-                                        </td>
-                                        <td>
-                                            <p class="text-xs text-dark font-weight-normal mb-0">{{ $building->state }}</p>
-                                        </td>
-                                      
-
+                                        <td><h6 class="mb-0 text-xs">{{ $room->name }}</h6></td>
+                                        <td><p class="text-xs text-dark font-weight-normal mb-0">{{ $room->location }}</p></td>
+                                        <td><p class="text-xs text-dark font-weight-normal mb-0">{{ $room->number_of_floors }}</p></td>
+                                        <td><p class="text-xs text-dark font-weight-normal mb-0">{{ $room->super_built_up_area }}</p></td>
+                                        <td><p class="text-xs text-dark font-weight-normal mb-0">{{ $room->carpet_area }}</p></td>
+                                        <td><p class="text-xs text-dark font-weight-normal mb-0">{{ $room->amenities }}</p></td>
+                                        <td><p class="text-xs text-dark font-weight-normal mb-0">{{ $room->city }}</p></td>
+                                        <td><p class="text-xs text-dark font-weight-normal mb-0">{{ $room->state }}</p></td>
                                         <td>
                                             <div class="btn-group" role="group">
-                                                <a href="{{ route('admin.buildings.show', ['id' => $building->id]) }}" class="btn btn-sm btn-success me-1">View</a>
-                                                <a href="{{ route('admin.building.editbuilding', ['id' => $building->id]) }}" class="btn btn-sm btn-primary me-1">Edit</a>
-                                                <form method="POST" action="{{ route('admin.building.delete', ['id' => $building->id]) }}">
+                                                <a href="{{ route('admin.rooms.edit', ['room' => $room->id]) }}" class="btn btn-sm btn-primary me-1">Edit</a>
+                                                <form method="POST" action="{{ route('admin.rooms.destroy', ['room' => $room->id]) }}">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit" class="btn btn-sm btn-danger me-1">Delete</button>
