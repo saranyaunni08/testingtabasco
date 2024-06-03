@@ -40,7 +40,6 @@ class Room extends Model
         'building_id',
         'flat_model',
         'sale_amount',
-        // Add derived attributes here
         'total_sq_ft',
         'total_sq_rate',
         'expected_amount',
@@ -66,5 +65,10 @@ class Room extends Model
             $room->expected_amount = $expected_amount;
             $room->total_amount = $total_amount;
         });
+    }
+
+    public function building()
+    {
+        return $this->belongsTo(Building::class);
     }
 }

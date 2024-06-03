@@ -15,7 +15,7 @@
             <form id="addRoomForm" action="{{ route('admin.rooms.store') }}" method="POST">
               @csrf
               
-              <input type="hidden" name="building_id" value="{{ $buildingId }}">
+              <input type="hidden" name="building_id" value="{{ $building_id }}">
 
               <div class="row justify-content-center">
                 <div class="col-lg-8">

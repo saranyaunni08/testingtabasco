@@ -9,23 +9,27 @@ use App\Models\Building;
 
 class RoomController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $rooms = Room::all(); // Fetching all rooms
-        $page = 'rooms'; // Defining the page variable
-    
-        // Fetching the building_id dynamically, for example, from a Building model
-        $building = Building::first(); // Adjust to fetch the desired building
-        $building_id = $building ? $building->id : null;
-    
+        $building_id = $request->input('building_id');
+        $rooms = Room::where('building_id', $building_id)->get();
+        $page = 'rooms';
+        
         return view('rooms.show', compact('rooms', 'building_id', 'page'));
     }
-
     public function create($building_id)
     {
-        return view('rooms.create', compact('building_id'));
+        // Check if the building ID exists
+        $building = Building::find($building_id);
+
+        // Check if the building was found
+        if (!$building) {
+            // Handle case where the building is not found
+            abort(404, 'Building not found');
+        }
+
+        return view('rooms.create', ['building_id' => $building_id]);
     }
-    
     public function store(Request $request)
     {
         $validatedData = $request->validate([
@@ -116,14 +120,13 @@ class RoomController extends Controller
         $room->delete();
         return redirect()->route('admin.rooms.index')->with('success', 'Room deleted successfully');
     }
-
-    public function show($id)
+    public function show($buildingId)
     {
-        $building = Building::findOrFail($id);
-        $building_id = $building->id;
-
-        return view('pages.building', compact('building', 'building_id'));
+        $building = Building::findOrFail($buildingId);  // Ensure you are fetching the building object
+        $rooms = Room::where('building_id', $buildingId)->get();  // Fetch rooms associated with the building
+        return view('rooms.show', compact('building', 'rooms'));
     }
+    
     public function edit($id)
     {
         $room = Room::findOrFail($id);

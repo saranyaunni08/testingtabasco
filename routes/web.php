@@ -41,6 +41,9 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
         Route::get('/buildings/{id}', [BuildingController::class, 'show'])->name('buildings.show');
         Route::get('/buildings/{building_id}/rooms', [RoomController::class, 'showRooms'])->name('buildings.rooms');
         Route::resource('rooms', RoomController::class)->except(['show']);
+
+        Route::get('/buildings/{buildingId}/rooms', [RoomController::class, 'show'])->name('rooms.show');
+
         Route::get('/buildings/{building_id}/rooms/create', [RoomController::class, 'create'])->name('rooms.create');
 
         Route::post('admin/rooms', [RoomController::class, 'store'])->name('admin.rooms.store');
@@ -61,17 +64,16 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
         Route::get('/sales', [SaleController::class, 'showSales'])->name('sales.index');
         Route::get('/buildings/{building_id}/rooms', [RoomController::class, 'showRooms'])->name('buildings.rooms');
         Route::delete('sales/{id}/soft-delete', [SaleController::class, 'softDelete'])->name('sales.soft-delete');
+
+
+        //customers
+
+        Route::get('/customers', [SaleController::class, 'index'])->name('customers.index');
+        Route::get('/customers/{id}', [SaleController::class, 'showCustomer'])->name('customers.show');
+
+
     });
 });
 
-
-
-Route::get('/test-email', function () {
-    Mail::raw('This is a test email', function ($message) {
-        $message->to('yourtestemail@example.com')->subject('Test Email');
-    });
-
-    return 'Test email sent';
-});
  
 

@@ -95,4 +95,25 @@ class SaleController extends Controller
     
         return redirect()->back();
     }    
+
+
+    //customers
+    public function index()
+    {
+        $customerNames = Sale::pluck('customer_name')->unique();
+        $sales = Sale::all(); // Fetch all sales records
+        return view('customers.index', compact('customerNames', 'sales'));
+    }
+    public function showCustomer($customerName)
+{
+    // Fetch sales records for the given customer name
+    $sales = Sale::with('room.building')
+                 ->where('customer_name', $customerName)
+                 ->get();
+
+    $page = 'customer_details'; // or any relevant page identifier
+
+    return view('customers.show', compact('sales', 'customerName', 'page'));
+}
+
 }

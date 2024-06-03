@@ -38,51 +38,51 @@
                     <span class="nav-link-text ms-1">Dashboard</span>
                 </a>
             </li>
+            @if ($page == 'rooms')
+                <li class="nav-item">
+                    <a class="nav-link text-white {{ $page == 'rooms' ? 'active bg-gradient-info' : '' }}" href="{{ route('admin.rooms.index') }}">
+                        <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+                            <i class="material-icons opacity-10">meeting_room</i>
+                        </div>
+                        <span class="nav-link-text ms-1">Rooms</span>
+                    </a>
+                </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="{{ route('admin.rooms.create', ['building_id' => $building_id]) }}">
+
+                            <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+                                <i class="material-icons opacity-10">add</i>
+                            </div>
+                            <span class="nav-link-text ms-1">Add Room</span>
+                        </a>
+                    </li>
+            @endif
             <li class="nav-item">
-                <a class="nav-link text-white {{ $page == 'buildings' ? 'active bg-gradient-info' : '' }}" href="{{ route('admin.building') }}">
+              <a class="nav-link text-white {{ $page == 'customers' ? 'active bg-gradient-info' : '' }}" href="{{ route('admin.customers.index') }}">
+                  <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+                      <i class="material-icons opacity-10">person</i>
+                  </div>
+                  <span class="nav-link-text ms-1">Customers</span>
+              </a>
+          </li>
+            <li class="nav-item">
+                <a class="nav-link text-white {{ $page == 'sales' ? 'active bg-gradient-info' : '' }}" href="{{ route('admin.sales.index') }}">
                     <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
-                        <i class="material-icons opacity-10">store</i>
+                        <i class="material-icons opacity-10">monetization_on</i>
                     </div>
-                    <span class="nav-link-text ms-1">Buildings</span>
+                    <span class="nav-link-text ms-1">Sales</span>
                 </a>
             </li>
-        @if ($page == 'rooms')
-        <li class="nav-item">
-            <a class="nav-link text-white {{ $page == 'rooms' ? 'active bg-gradient-info' : '' }}" href="{{ route('admin.rooms.index') }}">
-                <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
-                    <i class="material-icons opacity-10">meeting_room</i>
-                </div>
-                <span class="nav-link-text ms-1">Rooms</span>
-            </a>
-        </li>
-        @if (isset($building))
-            <li class="nav-item">
-                <a class="nav-link text-white" href="{{ route('admin.rooms.create', ['building_id' => $building->id]) }}">
-                    <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
-                        <i class="material-icons opacity-10">add</i>
-                    </div>
-                    <span class="nav-link-text ms-1">Add Room</span>
-                </a>
-            </li>
-        @endif
-    @endif
-    <li class="nav-item">
-        <a class="nav-link text-white {{ $page == 'sales' ? 'active bg-gradient-info' : '' }}" href="{{ route('admin.sales.index') }}">
-            <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
-                <i class="material-icons opacity-10">monetization_on</i>
-            </div>
-            <span class="nav-link-text ms-1">Sales</span>
-        </a>
-    </li>
-</ul>
+           
+    </ul>
+        </ul>
     </div>
-    <div class="sidenav-footer position-absolute w-100 bottom-0 ">
+    <div class="sidenav-footer position-absolute w-100 bottom-0">
         <div class="mx-3">
             <a class="btn bg-gradient-danger w-100" href="#" type="button">Logout</a>
         </div>
     </div>
-</aside>
-
+  </aside>
 
   <div class="main-content position-relative max-height-vh-100 h-100">
     <nav class="navbar navbar-main navbar-expand-lg px-0 mx-4 shadow-none border-radius-xl" id="navbarBlur"
@@ -91,12 +91,11 @@
         <nav aria-label="breadcrumb" class="pt-3">
           <ol class="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0 me-sm-6 me-5">
             <li class="breadcrumb-item text-sm"><a class="opacity-5 text-dark" href="javascript:;">Admin</a></li>
-            <!-- <li class="breadcrumb-item text-sm text-dark active" aria-current="page">{{ $page }}</li> -->
           </ol>
           <h6 class="font-weight-bolder mb-0">{{ $title }}</h6>
         </nav>
         <div class="collapse navbar-collapse mt-sm-0 mt-2 me-md-0 me-sm-4" id="navbar">
-          <ul class="navbar-nav  justify-content-end">
+          <ul class="navbar-nav justify-content-end">
             <li class="nav-item d-xl-none ps-3 d-flex align-items-center">
               <a href="javascript:;" class="nav-link text-body p-0" id="iconNavbarSidenav">
                 <div class="sidenav-toggler-inner">
@@ -118,15 +117,6 @@
   <script src="{{ asset('js/core/bootstrap.min.js') }}"></script>
   <script src="{{ asset('js/plugins/perfect-scrollbar.min.js') }}"></script>
   <script src="{{ asset('js/plugins/smooth-scrollbar.min.js') }}"></script>
-  <!-- <script>
-    var win = navigator.platform.indexOf('Win') > -1;
-    if (win && document.querySelector('#sidenav-scrollbar')) {
-      var options = {
-        damping: '0.5'
-      }
-      Scrollbar.init(document.querySelector('#sidenav-scrollbar'), options);
-    }
-  </script> -->
   <script async defer src="https://buttons.github.io/buttons.js"></script>
   <script src="{{ asset('js/material-dashboard.min.js?v=3.1.0') }}"></script>
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>

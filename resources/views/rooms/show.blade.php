@@ -1,7 +1,7 @@
-
 @extends('layouts.default', ['title' => 'Rooms'])
 
 @section('content')
+
 <div class="container-fluid py-4">
     <div class="row">
         <div class="col-12">
@@ -48,7 +48,6 @@
                                                     <th>Total Sq. Ft</th>
                                                     <th>Total Sq. Rate</th>
                                                     <th>Expected Amount</th>
-                                                   
                                                     <th>Actions</th>
                                                 @elseif ($type === 'Shops')
                                                     <th>Sl. No</th>
@@ -103,7 +102,6 @@
                                                         <td>{{ $room->total_sq_ft }}</td>
                                                         <td>{{ $room->total_sq_rate }}</td>
                                                         <td>{{ $room->expected_amount }}</td>
-                                                        
                                                     @elseif ($type === 'Shops')
                                                         <td>{{ $room->shop_type }}</td>
                                                         <td>{{ $room->shop_area }}</td>
