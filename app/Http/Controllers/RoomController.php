@@ -6,30 +6,32 @@ use App\Models\Room;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
 use App\Models\Building;
+use App\Models\Sale;
+use App\Models\MasterSetting; // Import the MasterSetting model
+
 
 class RoomController extends Controller
 {
     public function index(Request $request)
     {
-        $building_id = $request->input('building_id');
-        $rooms = Room::where('building_id', $building_id)->get();
+        $building = Building::findOrFail($request->building_id);
+        $rooms = Room::where('building_id', $building->id)->paginate(10);
         $page = 'rooms';
-        
-        return view('rooms.show', compact('rooms', 'building_id', 'page'));
-    }
-    public function create($building_id)
-    {
-        // Check if the building ID exists
-        $building = Building::find($building_id);
+        $building_id = $request->building_id;
 
-        // Check if the building was found
+        return view('rooms.show', compact('rooms', 'building', 'page', 'building_id'));
+    }public function create(Request $request)
+    {
+        $building_id = $request->building_id; // Define $building_id here
+        $building = Building::find($building_id);
+    
         if (!$building) {
-            // Handle case where the building is not found
             abort(404, 'Building not found');
         }
-
-        return view('rooms.create', ['building_id' => $building_id]);
+    
+        return view('rooms.create', compact('building_id'));
     }
+    
     public function store(Request $request)
     {
         $validatedData = $request->validate([
@@ -67,66 +69,43 @@ class RoomController extends Controller
             'sale_amount' => 'nullable|string',
         ]);
 
+        if ($validatedData['carpet_area'] && $validatedData['carpet_area_price']) {
+            $expected_carpet_area_price = $validatedData['carpet_area_price'] * $validatedData['carpet_area'];
+        } else {
+            $expected_carpet_area_price = null;
+        }
+
+        // Calculate expected super built-up area price if build up area and super build up price are provided
+        if ($validatedData['build_up_area'] && $validatedData['super_build_up_price']) {
+            $expected_super_buildup_area_price = $validatedData['build_up_area'] * $validatedData['super_build_up_price'];
+        } else {
+            $expected_super_buildup_area_price = null;
+        }
+
+        // Create a new Room instance and fill it with validated data
         $room = new Room();
         $room->fill($validatedData);
 
-        switch ($validatedData['room_type']) {
-            case 'Flat':
-                $room->flat_model = $validatedData['flat_model'];
-                $room->build_up_area = $validatedData['build_up_area'];
-                $room->carpet_area = $validatedData['carpet_area'];
-                $room->super_build_up_price = $validatedData['super_build_up_price'];
-                $room->carpet_area_price = $validatedData['carpet_area_price'];
-                break;
-            case 'Shops':
-                $room->shop_type = $validatedData['shop_type'];
-                $room->shop_area = $validatedData['shop_area'];
-                $room->shop_rate = $validatedData['shop_rate'];
-                break;
-            case 'Car parking':
-                $room->parking_number = $validatedData['parking_number'];
-                $room->parking_type = $validatedData['parking_type'];
-                $room->parking_area = $validatedData['parking_area'];
-                $room->parking_rate = $validatedData['parking_rate'];
-                break;
-            case 'Table space':
-                $room->space_name = $validatedData['space_name'];
-                $room->space_type = $validatedData['space_type'];
-                $room->space_area = $validatedData['space_area'];
-                $room->space_rate = $validatedData['space_rate'];
-                break;
-            case 'Kiosk':
-                $room->kiosk_name = $validatedData['kiosk_name'];
-                $room->kiosk_type = $validatedData['kiosk_type'];
-                $room->kiosk_area = $validatedData['kiosk_area'];
-                $room->kiosk_rate = $validatedData['kiosk_rate'];
-                break;
-            case 'Chair space':
-                $room->chair_name = $validatedData['chair_name'];
-                $room->chair_type = $validatedData['chair_type'];
-                $room->chair_material = $validatedData['chair_material'];
-                $room->chair_price = $validatedData['chair_price'];
-                break;
-        }
+        // Assign calculated expected prices to the room instance
+        $room->expected_carpet_area_price = $expected_carpet_area_price;
+        $room->expected_super_buildup_area_price = $expected_super_buildup_area_price;
 
+        // Save the room to the database
         $room->save();
 
+        // Redirect back with a success message
         return redirect()->back()->with('success', 'Room added successfully!');
     }
-
-    public function destroy($id)
-    {
-        $room = Room::findOrFail($id);
-        $room->delete();
-        return redirect()->route('admin.rooms.index')->with('success', 'Room deleted successfully');
-    }
-    public function show($buildingId)
-    {
-        $building = Building::findOrFail($buildingId);  // Ensure you are fetching the building object
-        $rooms = Room::where('building_id', $buildingId)->get();  // Fetch rooms associated with the building
-        return view('rooms.show', compact('building', 'rooms'));
-    }
     
+    public function destroy($building_id, $room_id)
+    {
+        $building = Building::findOrFail($building_id);
+        $room = $building->rooms()->findOrFail($room_id);
+        $room->delete();
+
+        return redirect()->back()->with('success', 'Room deleted successfully');
+    }
+
     public function edit($id)
     {
         $room = Room::findOrFail($id);
@@ -138,7 +117,7 @@ class RoomController extends Controller
     {
         $room = Room::findOrFail($id);
         $room->update($request->all());
-        return Redirect::route('admin.buildings.show', ['id' => $room->building_id])->with('success', 'Room updated successfully');
+        return redirect()->back()->with('success', 'Room updated successfully');
     }
 
     public function sell($id)
@@ -173,5 +152,47 @@ class RoomController extends Controller
         return redirect()->route('admin.rooms.index')->with('success', 'Room marked as sold.');
     }
 
-}
+    public function dashboard(Request $request)
+    {
+        $building_id = $request->query('building_id');
+        $building = Building::find($building_id);
+        $rooms = Room::where('building_id', $building_id)->get();
 
+        return view('rooms.room-dashboard', [
+            'building_id' => $building_id,
+            'building' => $building,
+            'rooms' => $rooms,
+            'page' => 'rooms',
+            'title' => 'Rooms'
+        ]);
+    }
+
+    public function showBuildingRooms($building_id)
+    {
+        $building = Building::with('rooms')->findOrFail($building_id);
+        $rooms = $building->rooms;
+        return view('rooms.show', compact('building', 'rooms'));
+    }
+
+    public function showRooms(Request $request)
+    {
+        $building_id = $request->query('building_id');
+        $building = Building::find($building_id);
+        $rooms = Room::where('building_id', $building_id)->get();
+
+        return view('rooms.show', [
+            'building_id' => $building_id,
+            'building' => $building,
+            'rooms' => $rooms,
+            'page' => 'rooms',
+            'title' => 'Rooms'
+        ]);
+    }
+    public function show($id) {
+        $room = Room::findOrFail($id);
+        $master_settings = MasterSetting::first(); // or however you get your master settings
+    
+        return view('rooms.show', compact('room', 'master_settings'));
+    }
+    
+}

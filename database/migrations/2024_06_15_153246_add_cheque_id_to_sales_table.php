@@ -4,25 +4,29 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
+class AddChequeIdToSalesTable extends Migration
 {
     /**
      * Run the migrations.
+     *
+     * @return void
      */
-    public function up(): void
+    public function up()
     {
         Schema::table('sales', function (Blueprint $table) {
-            $table->decimal('parking_amount', 10, 2)->after('sale_amount')->nullable();
+            $table->string('cheque_id')->nullable()->after('payment_method');
         });
     }
 
     /**
      * Reverse the migrations.
+     *
+     * @return void
      */
-    public function down(): void
+    public function down()
     {
         Schema::table('sales', function (Blueprint $table) {
-            $table->dropColumn('parking_amount');
+            $table->dropColumn('cheque_id');
         });
     }
-};
+}

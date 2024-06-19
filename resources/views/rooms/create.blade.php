@@ -59,7 +59,7 @@
                       </div>
                    
                       <div class="input-group input-group-dynamic mb-4">
-                        <label for="build_up_area" class="form-label">Build-Up Area (sq ft)</label>
+                        <label for="build_up_area" class="form-label">Super Build-Up Area (sq ft)</label>
                         <input type="text" name="build_up_area" class="form-control" style="text-transform: uppercase;">
                       </div>
                       <div class="input-group input-group-dynamic mb-4">
@@ -67,11 +67,11 @@
                         <input type="text" name="carpet_area" class="form-control" style="text-transform: uppercase;">
                       </div>
                       <div class="input-group input-group-dynamic mb-4">
-                        <label for="super_build_up_price" class="form-label">Build-Up Area Price</label>
+                        <label for="super_build_up_price" class="form-label">Build-Up Area Price in sq</label>
                         <input type="text" name="super_build_up_price" class="form-control" style="text-transform: uppercase;">
                       </div>
                       <div class="input-group input-group-dynamic mb-4">
-                        <label for="carpet_area_price" class="form-label">Carpet Area Price</label>
+                        <label for="carpet_area_price" class="form-label">Carpet Area Price in sq</label>
                         <input type="text" name="carpet_area_price" class="form-control" style="text-transform: uppercase;">
                       </div>
                      

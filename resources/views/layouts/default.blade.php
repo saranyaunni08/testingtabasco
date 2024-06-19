@@ -16,6 +16,10 @@
   <link rel="stylesheet" href="{{ asset('css/style.css') }}">
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
   @yield('pagestyles')
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+
   <title>{{ $title }}</title>
 </head>
 
@@ -38,43 +42,45 @@
                     <span class="nav-link-text ms-1">Dashboard</span>
                 </a>
             </li>
-            @if ($page == 'rooms')
-                <li class="nav-item">
-                    <a class="nav-link text-white {{ $page == 'rooms' ? 'active bg-gradient-info' : '' }}" href="{{ route('admin.rooms.index') }}">
-                        <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
-                            <i class="material-icons opacity-10">meeting_room</i>
-                        </div>
-                        <span class="nav-link-text ms-1">Rooms</span>
-                    </a>
-                </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-white" href="{{ route('admin.rooms.create', ['building_id' => $building_id]) }}">
 
-                            <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
-                                <i class="material-icons opacity-10">add</i>
-                            </div>
-                            <span class="nav-link-text ms-1">Add Room</span>
-                        </a>
-                    </li>
-            @endif
+            @if ($page == 'rooms')
             <li class="nav-item">
-              <a class="nav-link text-white {{ $page == 'customers' ? 'active bg-gradient-info' : '' }}" href="{{ route('admin.customers.index') }}">
-                  <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
-                      <i class="material-icons opacity-10">person</i>
-                  </div>
-                  <span class="nav-link-text ms-1">Customers</span>
-              </a>
-          </li>
-            <li class="nav-item">
-                <a class="nav-link text-white {{ $page == 'sales' ? 'active bg-gradient-info' : '' }}" href="{{ route('admin.sales.index') }}">
+                <a class="nav-link text-white" href="{{ route('admin.rooms.create', ['building_id' => $building_id]) }}">
                     <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
-                        <i class="material-icons opacity-10">monetization_on</i>
+                        <i class="material-icons opacity-10">add</i>
                     </div>
-                    <span class="nav-link-text ms-1">Sales</span>
+                    <span class="nav-link-text ms-1">Add Room</span>
                 </a>
             </li>
-           
-    </ul>
+        @endif
+        
+
+            @if ($page != 'rooms')
+                <li class="nav-item">
+                    <a class="nav-link text-white {{ $page == 'customers' ? 'active bg-gradient-info' : '' }}" href="{{ route('admin.customers.index') }}">
+                        <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+                            <i class="material-icons opacity-10">person</i>
+                        </div>
+                        <span class="nav-link-text ms-1">Customers</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-white {{ $page == 'sales' ? 'active bg-gradient-info' : '' }}" href="{{ route('admin.sales.index') }}">
+                        <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+                            <i class="material-icons opacity-10">monetization_on</i>
+                        </div>
+                        <span class="nav-link-text ms-1">Sales</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-white {{ $page == 'masters' ? 'active bg-gradient-info' : '' }}" href="{{ route('admin.masters.index') }}">
+                        <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+                            <i class="material-icons opacity-10">build</i>
+                        </div>
+                        <span class="nav-link-text ms-1">Masters</span>
+                    </a>
+                </li>
+            @endif
         </ul>
     </div>
     <div class="sidenav-footer position-absolute w-100 bottom-0">
@@ -82,7 +88,7 @@
             <a class="btn bg-gradient-danger w-100" href="#" type="button">Logout</a>
         </div>
     </div>
-  </aside>
+</aside>
 
   <div class="main-content position-relative max-height-vh-100 h-100">
     <nav class="navbar navbar-main navbar-expand-lg px-0 mx-4 shadow-none border-radius-xl" id="navbarBlur"

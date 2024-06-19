@@ -5,11 +5,14 @@
     <div class="row">
         <div class="col-12">
             <div class="card my-4">
+               
                 <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
-                    <div class="bg-gradient-info shadow-info border-radius-lg pt-4 pb-3">
+                    <div class="bg-gradient-info shadow-info border-radius-lg pt-4 pb-3 d-flex justify-content-between align-items-center">
                         <h6 class="text-white text-capitalize ps-3">Total Buildings</h6>
+                        <a href="{{ route('admin.addbuilding') }}" class="btn btn-light">Add Building</a>
                     </div>
                 </div>
+
                 <div class="card-body px-0 pb-2">
                     <div class="row p-4">
                         <div class="container-fluid mt-3">
@@ -25,8 +28,17 @@
                                                     $soldRoomsCount = $building->rooms()->where('status', 'sold')->count();
                                                     $availableRoomsCount = $building->rooms()->where('status', 'available')->count();
                                                     $totalRoomsCount = $soldRoomsCount + $availableRoomsCount;
-                                                    $soldPercentage = $totalRoomsCount > 0 ? ($soldRoomsCount / $totalRoomsCount) * 100 : 0;
-                                                    $availablePercentage = 100 - $soldPercentage;
+
+                                                    // Handle the case where there are no rooms
+                                                    if ($totalRoomsCount == 0) {
+                                                        $soldPercentage = 0;
+                                                        $availablePercentage = 0;
+                                                        $roomsStatus = "Empty"; // Or "No Rooms"
+                                                    } else {
+                                                        $soldPercentage = ($soldRoomsCount / $totalRoomsCount) * 100;
+                                                        $availablePercentage = 100 - $soldPercentage;
+                                                        $roomsStatus = "";
+                                                    }
                                                     @endphp
                                                     <p class="text-gray mb-0">Sold {{ $soldPercentage }}%
                                                         <div class="progress mb-2">
@@ -43,6 +55,7 @@
                                                                 aria-valuemax="100"></div>
                                                         </div>
                                                     </p>
+                                                    <p class="text-gray mb-0">{{ $roomsStatus }}</p>
                                                 </div>
                                             </div>
                                         </a>

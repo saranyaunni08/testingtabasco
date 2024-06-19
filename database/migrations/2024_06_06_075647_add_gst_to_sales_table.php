@@ -4,25 +4,19 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
+class AddGstToSalesTable extends Migration
 {
-    /**
-     * Run the migrations.
-     */
-    public function up(): void
+    public function up()
     {
         Schema::table('sales', function (Blueprint $table) {
-            $table->softDeletes();
+            $table->decimal('gst', 8, 2)->after('parking_amount');
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
+    public function down()
     {
         Schema::table('sales', function (Blueprint $table) {
-            //
+            $table->dropColumn('gst');
         });
     }
-};
+}

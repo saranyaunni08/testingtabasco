@@ -1,4 +1,5 @@
 @extends('layouts.default', ['title' => $building->building_name ?? 'Buildings', 'page' => 'rooms'])
+
 @section('content')
 <div class="container-fluid py-4">
     <div class="row">
@@ -9,7 +10,7 @@
                         <div class="d-flex justify-content-between align-items-center">
                             <h6 class="text-white text-capitalize ps-3 mb-0">{{ $building->building_name }}</h6>
                             <div class="pe-3">
-                                <a href="{{ route('admin.rooms.create', ['building_id' => $building_id]) }}" class="btn btn-light m-0">Add Room</a>
+                                <a href="{{ route('admin.rooms.create', ['building_id' => $building->id]) }}" class="btn btn-light m-0">Add Room</a>
                             </div>
                         </div>
                     </div>
@@ -28,7 +29,6 @@
                                         <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Amenities</th>
                                         <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">City</th>
                                         <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">State</th>
-                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>

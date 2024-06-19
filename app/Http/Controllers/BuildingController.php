@@ -4,15 +4,40 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Models\room; 
+use App\Models\Room; 
 use App\Models\Building; 
+use App\Models\Sale;
+
 
 class BuildingController extends Controller
 {
+    public function showRooms($building_id, Request $request)
+    {
+        // Retrieve rooms belonging to the specified building
+        $rooms = Room::where('building_id', $building_id)->get();
+        
+        // Check if a customer_id is provided in the request
+        if ($request->has('customer_id')) {
+            $customer_id = $request->input('customer_id');
+            // Retrieve customer names associated with the rooms in the specified building
+            $customerNames = Sale::whereIn('room_id', $rooms->pluck('id'))
+                                ->where('customer_id', $customer_id)
+                                ->pluck('customer_name');
+        } else {
+            // If no customer_id provided, set customerNames to null
+            $customerNames = null;
+        }
+
+        // Pass the rooms and customerNames to the view
+        return view('rooms.show', compact('rooms', 'customerNames'));
+    }
     public function index()
     {
-        $buildings = Building::all();
-        return view('pages.building', compact('buildings'));
+        // Fetch the building ID from the database, assuming you have a Building model
+        $building = Building::first(); // Adjust this according to your logic
+    
+        // Pass the building ID to the view
+        return view('customers.index', ['building' => $building]);
     }
     public function create()
     {
@@ -53,7 +78,7 @@ class BuildingController extends Controller
             'updated_at' => now(),
         ]);
 
-        return redirect()->route('admin.building.index')->with('success', 'Building created successfully.');
+        return redirect()->route('admin.dashboard')->with('success', 'Building created successfully.');
     }
 
     public function edit($id)
@@ -123,17 +148,28 @@ class BuildingController extends Controller
         $rooms = Room::all(); 
         return view('pages.building', compact('buildings', 'rooms'));
     }
-
-    public function show($building_id)
+    public function show($id)
     {
-        $building = Building::findOrFail($building_id);
-        return view('pages.building', compact('building'));
-    }
-    public function showRooms($building_id)
-    {
-        $rooms = Room::where('building_id', $building_id)->get();
+        $building = Building::findOrFail($id);
+        $rooms = $building->rooms()->get(); // Ensure rooms are retrieved
     
-        return view('admin.rooms.index', compact('rooms', 'building_id'));
+        // Define an empty array to store room types
+        $roomTypes = [
+            'Flat' => [],
+            'Shops' => [],
+            'Car parking' => [],
+            'Table space' => [],
+            'Chair space' => [],
+            'Kiosk' => []
+        ];
+    
+        // Iterate over the rooms and categorize them into different types
+        foreach ($rooms as $room) {
+            $roomTypes[$room->room_type][] = $room;
+        }
+    
+        // Pass the building and room types to the view
+        return view('rooms.show', compact('building', 'roomTypes'));
     }
- 
+    
 }

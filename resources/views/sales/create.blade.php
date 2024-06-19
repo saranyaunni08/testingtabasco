@@ -146,45 +146,57 @@
                                                     </td>
                                                 </tr>
 
-                                                <!-- Modal -->
-                                                <div class="modal fade" id="sellModal{{ $room->id }}" tabindex="-1" role="dialog" aria-labelledby="sellModalLabel{{ $room->id }}" aria-hidden="true">
-                                                    <div class="modal-dialog" role="document">
-                                                        <div class="modal-content">
-                                                            <div class="modal-header">
-                                                                <h5 class="modal-title" id="sellModalLabel{{ $room->id }}">Sell Room: {{ $room->room_number }}</h5>
-                                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                                    <span aria-hidden="true">&times;</span>
-                                                                </button>
-                                                            </div>
-                                                            <div class="modal-body">
-                                                                <form action="{{ route('admin.sales.store') }}" method="POST">
-                                                                    @csrf
-                                                                    <input type="hidden" name="room_id" value="{{ $room->id }}">
-                                                                    <div class="form-group">
-                                                                        <label for="customer_name">Customer Name</label>
-                                                                        <input type="text" class="form-control" id="customer_name" name="customer_name" required>
-                                                                    </div>
-                                                                    <div class="form-group">
-                                                                        <label for="customer_contact">Customer Contact</label>
-                                                                        <input type="text" class="form-control" id="customer_contact" name="customer_contact" required>
-                                                                    </div>
-                                                                    <div class="form-group">
-                                                                        <label for="customer_email">Customer Email</label>
-                                                                        <input type="email" class="form-control" id="customer_email" name="customer_email">
-                                                                    </div>
-                                                                    <div class="form-group">
-                                                                        <label for="sale_amount">Sale Amount</label>
-                                                                        <input type="number" step="0.01" class="form-control" id="sale_amount" name="sale_amount" required>
-                                                                    </div>
-                                                                    <button type="submit" class="btn btn-primary">Save</button>
-                                                                </form>
-                                                            </div>
-                                                            <div class="modal-footer">
-                                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                               <!-- Modal -->
+<div class="modal fade" id="sellModal{{ $room->id }}" tabindex="-1" role="dialog" aria-labelledby="sellModalLabel{{ $room->id }}" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="sellModalLabel{{ $room->id }}">Sell Room: {{ $room->room_number }}</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form action="{{ route('admin.sales.store') }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="room_id" value="{{ $room->id }}">
+                    <div class="form-group">
+                        <label for="customer_name">Customer Name</label>
+                        <input type="text" class="form-control" id="customer_name" name="customer_name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="customer_contact">Customer Contact</label>
+                        <input type="text" class="form-control" id="customer_contact" name="customer_contact" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="customer_email">Customer Email</label>
+                        <input type="email" class="form-control" id="customer_email" name="customer_email">
+                    </div>
+                    <div class="form-group">
+                        <label for="sale_amount">Sale Amount</label>
+                        <input type="number" step="0.01" class="form-control" id="sale_amount" name="sale_amount" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="parking_amount">Parking Amount</label>
+                        <input type="number" step="0.01" class="form-control" id="parking_amount" name="parking_amount" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="gst_option">GST Option</label>
+                        <select class="form-control" id="gst_option" name="gst_option">
+                            <option value="add_gst">Add GST</option>
+                            <option value="no_gst">Don't Add GST</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
                                             @endforeach
                                         </tbody>
                                     </table>
