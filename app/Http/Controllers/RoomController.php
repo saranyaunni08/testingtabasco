@@ -38,6 +38,10 @@ class RoomController extends Controller
             'room_number' => 'required|string',
             'room_floor' => 'nullable|string',
             'room_type' => 'required|string',
+            'flat_build_up_area' => 'nullable|numeric',
+            'flat_carpet_area' => 'nullable|numeric',
+            'flat_super_build_up_price' => 'nullable|numeric',
+            'flat_carpet_area_price' => 'nullable|numeric',
             'build_up_area' => 'nullable|numeric',
             'carpet_area' => 'nullable|numeric',
             'flat_rate' => 'nullable|numeric',
@@ -56,10 +60,12 @@ class RoomController extends Controller
             'space_type' => 'nullable|string',
             'space_area' => 'nullable|numeric',
             'space_rate' => 'nullable|numeric',
+            'space_expected_price' => 'nullable|numeric',
             'kiosk_name' => 'nullable|string',
             'kiosk_type' => 'nullable|string',
             'kiosk_area' => 'nullable|numeric',
             'kiosk_rate' => 'nullable|numeric',
+            'kiosk_expected_price' => 'nullable|numeric',
             'chair_name' => 'nullable|string',
             'chair_type' => 'nullable|string',
             'chair_material' => 'nullable|string',
@@ -67,6 +73,9 @@ class RoomController extends Controller
             'building_id' => 'required|exists:buildings,id',
             'flat_model' => 'nullable|string',
             'sale_amount' => 'nullable|string',
+            'chair_space_in_sq' => 'nullable|string',
+            'chair_space_rate' => 'nullable|string',
+            'chair_space_expected_rate' => 'nullable|string',
         ]);
 
         if ($validatedData['carpet_area'] && $validatedData['carpet_area_price']) {
@@ -82,6 +91,36 @@ class RoomController extends Controller
             $expected_super_buildup_area_price = null;
         }
 
+        if ($validatedData['flat_carpet_area'] && $validatedData['flat_carpet_area_price']) {
+            $flat_expected_carpet_area_price = $validatedData['flat_carpet_area'] * $validatedData['flat_carpet_area_price'];
+        }else {
+            $flat_expected_carpet_area_price = null;
+        }
+
+        if ($validatedData['flat_build_up_area'] && $validatedData['flat_super_build_up_price']) {
+            $flat_expected_super_buildup_area_price = $validatedData['flat_build_up_area'] * $validatedData['flat_super_build_up_price'];
+        }else {
+            $flat_expected_super_buildup_area_price = null;
+        }
+
+        if ($validatedData['space_area'] && $validatedData['space_rate']) {
+            $space_expected_price = $validatedData['space_area'] * $validatedData['space_rate'];
+        } else {
+            $space_expected_price =null;
+        }
+
+        if ($validatedData ['kiosk_area'] && $validatedData ['kiosk_rate']) {
+            $kiosk_expected_price = $validatedData ['kiosk_area'] * $validatedData ['kiosk_rate'];
+        } else {
+            $kiosk_expected_price = null;
+        }
+
+        if ($validatedData ['chair_space_in_sq'] && $validatedData ['chair_space_rate']) {
+            $chair_space_expected_rate = $validatedData ['chair_space_in_sq'] * $validatedData ['chair_space_rate'];
+        } else {
+            $chair_space_expected_rate = null;
+        }
+
         // Create a new Room instance and fill it with validated data
         $room = new Room();
         $room->fill($validatedData);
@@ -89,6 +128,12 @@ class RoomController extends Controller
         // Assign calculated expected prices to the room instance
         $room->expected_carpet_area_price = $expected_carpet_area_price;
         $room->expected_super_buildup_area_price = $expected_super_buildup_area_price;
+        $room-> flat_expected_carpet_area_price = $flat_expected_carpet_area_price;
+        $room-> flat_expected_super_buildup_area_price = $flat_expected_super_buildup_area_price;
+        $room-> space_expected_price = $space_expected_price;
+        $room-> kiosk_expected_price = $kiosk_expected_price;
+        $room-> chair_space_expected_rate = $chair_space_expected_rate;
+
 
         // Save the room to the database
         $room->save();

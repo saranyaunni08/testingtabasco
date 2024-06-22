@@ -38,10 +38,10 @@
                                                 @if ($type === 'Flat')
                                                     <th>Sl. No</th>
                                                     <th>Room Number</th>
-                                                    <th>Super Build Up Area in sq</th>
+                                                    <th>Flat Model</th>
                                                     <th>Carpet Area in sq</th>
-                                                    <th>Super Build Up Area price (sq)</th>
                                                     <th>Carpet area price(sq)</th>
+                                                    <th>Expected Amount</th>
                                                     <th>Actions</th>
                                                 @elseif ($type === 'Shops')
                                                     <th>Sl. No</th>
@@ -67,6 +67,7 @@
                                                     <th>Space Type</th>
                                                     <th>Space Area</th>
                                                     <th>Space Rate</th>
+                                                    <th>Expected Amount</th>
                                                     <th>Actions</th>
                                                 @elseif ($type === 'Chair space')
                                                     <th>Sl. No</th>
@@ -83,6 +84,7 @@
                                                     <th>Kiosk Type</th>
                                                     <th>Kiosk Area</th>
                                                     <th>Kiosk Rate</th>
+                                                    <th>Expected Amount</th>
                                                     <th>Actions</th>
                                                 @endif
                                             </tr>
@@ -94,15 +96,15 @@
                                                     <td>{{ $room->room_number }}</td>
                                                     <!-- Adjust columns based on $type -->
                                                     @if ($type === 'Flat')
-                                                        <td>{{ $room->build_up_area }}</td>
-                                                        <td>{{ $room->carpet_area }}</td>
-                                                        <td>{{ $room->super_build_up_price }}</td>
-                                                        <td>{{ $room->carpet_area_price }}</td>
+                                                        <td style="text-transform: uppercase;">{{ $room->flat_model }}</td>
+                                                        <td>{{ $room->flat_carpet_area }}</td>
+                                                        <td>{{ $room->flat_carpet_area_price }}</td>
+                                                        <td>{{ $room->flat_expected_carpet_area_price }}</td>
                                                     @elseif ($type === 'Shops')
-                                                        <td>{{ $room->shop_type }}</td>
-                                                        <td>{{ $room->shop_area }}</td>
-                                                        <td>{{ $room->shop_rate }}</td>
-                                                        <td>{{ $room->shop_area * $room->shop_rate }}</td>
+                                                        <td style="text-transform: uppercase;">{{ $room->shop_type }}</td>
+                                                        <td>{{ $room->carpet_area }}</td>
+                                                        <td>{{ $room->carpet_area_price }}</td>
+                                                        <td>{{ $room->expected_carpet_area_price }}</td>
                                                     @elseif ($type === 'Car parking')
                                                         <td>{{ $room->parking_number }}</td>
                                                         <td>{{ $room->parking_type }}</td>
@@ -125,13 +127,12 @@
                                                         <td>{{ $room->space_type }}</td>
                                                         <td>{{ $room->space_area }}</td>
                                                         <td>{{ $room->space_rate }}</td>
-                                                        <td>{{ $room->space_area * $room->space_rate }}</td>
+                                                        <td>{{ $room->space_expected_price }}</td>
                                                     @elseif ($type === 'Chair space')
                                                         <td>{{ $room->chair_name }}</td>
                                                         <td>{{ $room->chair_type }}</td>
                                                         <td>{{ $room->chair_material }}</td>
                                                         <td>{{ $room->chair_price }}</td>
-                                                        <td>Calculate Total Amount Here</td> <!-- Adjust this line -->
                                                     @elseif ($type === 'Kiosk')
                                                         <td>{{ $room->kiosk_name }}</td>
                                                         <td>{{ $room->kiosk_type }}</td>
@@ -186,7 +187,7 @@
                                                                         <label for="area_calculation_type">Area Calculation Type</label>
                                                                         <select class="form-control" id="area_calculation_type" name="area_calculation_type" required>
                                                                             <option value="carpet_area_rate">Carpet Area Rate</option>
-                                                                            <option value="built_up_area_rate">Built-up Area Rate</option>
+                                                                            <option value="built_up_area_rate">Super Built-up Area Rate</option>
                                                                         </select>
                                                                     </div>
                                                                     <div class="form-group">
@@ -196,7 +197,7 @@
                                                                     <div class="form-group">
                                                                         <label for="calculation_type">Calculation Type for Parking</label>
                                                                         <select class="form-control" id="calculation_type" name="calculation_type" required>
-                                                                            <option value="fixed_amount">Fixed Amount</option>
+                                                                            <option value="fixed_amount">Unparked</option>
                                                                             <option value="rate_per_sq_ft">Rate per sq ft</option>
                                                                         </select>
                                                                     </div>

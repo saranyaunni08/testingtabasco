@@ -13,7 +13,9 @@ class Room extends Model
         'parking_rate', 'space_name', 'space_type', 'space_area', 'space_rate', 'kiosk_name',
         'kiosk_type', 'kiosk_area', 'kiosk_rate', 'chair_name', 'chair_type', 'chair_material',
         'chair_price', 'building_id', 'flat_model', 'sale_amount', 'expected_carpet_area_price',
-        'expected_super_buildup_area_price', // Ensure these are included
+        'expected_super_buildup_area_price','flat_build_up_area','flat_super_build_up_price','flat_carpet_area',
+        'flat_carpet_area_price','flat_expected_carpet_area_price','flat_expected_super_buildup_area_price', 
+        'space_expected_price','kiosk_expected_price','chair_space_in_sq','chair_space_rate','chair_space_expected_rate',
     ];
 
        public function building()

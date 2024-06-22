@@ -41,7 +41,7 @@
                           <option value="" disabled selected>Select Room Type</option>
                           <option value="Flat">Flat</option>
                           <option value="Shops">Shops</option>
-                          <option value="Car parking">Car parking</option>
+                          {{-- <option value="Car parking">Car parking</option> --}}
                           <option value="Table space">Table space</option>
                           <option value="Chair space">Chair space</option>
                           <option value="Kiosk">Kiosk</option>
@@ -53,29 +53,29 @@
                     <div class="col-md-6" id="flatFields" style="display: none;">
                       <div class="col-md-6">
                         <div class="input-group input-group-dynamic mb-4">
-                            <label for="flat_model" class="form-label">Flat Model</label>
-                            <input type="text" name="flat_model" class="form-control" style="text-transform: uppercase;">
+                          <label for="flat_model" class="form-label">Flat Model</label>
+                          <input type="text" name="flat_model" class="form-control" style="text-transform: uppercase;">
                         </div>
                       </div>
-                   
+                    
                       <div class="input-group input-group-dynamic mb-4">
-                        <label for="build_up_area" class="form-label">Super Build-Up Area (sq ft)</label>
-                        <input type="text" name="build_up_area" class="form-control" style="text-transform: uppercase;">
+                        <label for="flat_build_up_area" class="form-label">Super Build-Up Area (sq ft)</label>
+                        <input type="text" name="flat_build_up_area" class="form-control" style="text-transform: uppercase;">
                       </div>
                       <div class="input-group input-group-dynamic mb-4">
-                        <label for="carpet_area" class="form-label">Carpet Area (sq ft)</label>
-                        <input type="text" name="carpet_area" class="form-control" style="text-transform: uppercase;">
+                        <label for="flat_super_build_up_price" class="form-label">Build-Up Area Price in sq</label>
+                        <input type="text" name="flat_super_build_up_price" class="form-control" style="text-transform: uppercase;">
                       </div>
                       <div class="input-group input-group-dynamic mb-4">
-                        <label for="super_build_up_price" class="form-label">Build-Up Area Price in sq</label>
-                        <input type="text" name="super_build_up_price" class="form-control" style="text-transform: uppercase;">
+                        <label for="flat_carpet_area" class="form-label">Carpet Area (sq ft)</label>
+                        <input type="text" name="flat_carpet_area" class="form-control" style="text-transform: uppercase;">
                       </div>
                       <div class="input-group input-group-dynamic mb-4">
-                        <label for="carpet_area_price" class="form-label">Carpet Area Price in sq</label>
-                        <input type="text" name="carpet_area_price" class="form-control" style="text-transform: uppercase;">
+                        <label for="flat_carpet_area_price" class="form-label">Carpet Area Price in sq</label>
+                        <input type="text" name="flat_carpet_area_price" class="form-control" style="text-transform: uppercase;">
                       </div>
-                     
                     </div>
+                    
 
                     <div class="col-md-6" id="shopsFields" style="display: none;">
                      
@@ -88,18 +88,29 @@
                               <!-- Add more shop types as needed -->
                           </select>
                       </div>
+                      
                       <div class="input-group input-group-dynamic mb-4">
-                          <label for="shop_area" class="form-label">Shop Area (sq ft)</label>
-                          <input type="text" name="shop_area" class="form-control" style="text-transform: uppercase;">
+                          <label for="build_up_area" class="form-label">Super Build-up Area (sq ft)</label>
+                          <input type="text" name="build_up_area" class="form-control" style="text-transform: uppercase;">
                       </div>
                       <div class="input-group input-group-dynamic mb-4">
-                          <label for="shop_rate" class="form-label">Shop Rate</label>
-                          <input type="text" name="shop_rate" class="form-control" style="text-transform: uppercase;">
+                        <label for="super_build_up_price" class="form-label">Super  Build up Area Rate</label>
+                        <input type="text" name="super_build_up_price" class="form-control" style="text-transform: uppercase;">
+                    </div>
+                      <div class="input-group input-group-dynamic mb-4">
+                        <label for="carpet_area" class="form-label">Shop Carpet Area (sq ft)</label>
+                        <input type="text" name="carpet_area" class="form-control" style="text-transform: uppercase;">
+                    </div>
+                   
+                      <div class="input-group input-group-dynamic mb-4">
+                          <label for="carpet_area_price" class="form-label">Shop Carpet Area Rate</label>
+                          <input type="text" name="carpet_area_price" class="form-control" style="text-transform: uppercase;">
                       </div>
+                     
                   </div>
                     
 
-                    <div class="col-md-6" id="carParkingFields" style="display: none;">
+                    {{-- <div class="col-md-6" id="carParkingFields" style="display: none;">
                       <div class="input-group input-group-dynamic mb-4">
                         <label for="parking_number" class="form-label">Parking Number</label>
                         <input type="text" name="parking_number" class="form-control" style="text-transform: uppercase;">
@@ -120,7 +131,7 @@
                         <label for="parking_rate" class="form-label">Parking Rate</label>
                         <input type="text" name="parking_rate" class="form-control" style="text-transform: uppercase;">
                       </div>
-                    </div>
+                    </div> --}}
 
                     <div class="col-md-6" id="tableSpaceFields" style="display: none;">
                       <div class="input-group input-group-dynamic mb-4">
@@ -184,12 +195,12 @@
                       </select>
                   </div>
                   <div class="input-group input-group-dynamic mb-4">
-                      <label for="chair_material" class="form-label">Chair Material</label>
-                      <input type="text" name="chair_material" class="form-control" style="text-transform: uppercase;">
+                      <label for="chair_space_in_sq" class="form-label">Chair space in sq</label>
+                      <input type="text" name="chair_space_in_sq" class="form-control" style="text-transform: uppercase;">
                   </div>
                   <div class="input-group input-group-dynamic mb-4">
-                      <label for="chair_price" class="form-label">Chair Price</label>
-                      <input type="text" name="chair_price" class="form-control" style="text-transform: uppercase;">
+                      <label for="chair_space_rate" class="form-label">Chair space rate in sq</label>
+                      <input type="text" name="chair_space_rate" class="form-control" style="text-transform: uppercase;">
                   </div>
                 </div>
                 
@@ -217,7 +228,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // Hide all specific fields initially
   document.getElementById('flatFields').style.display = 'none';
   document.getElementById('shopsFields').style.display = 'none';
-  document.getElementById('carParkingFields').style.display = 'none';
+  // document.getElementById('carParkingFields').style.display = 'none';
   document.getElementById('tableSpaceFields').style.display = 'none';
   document.getElementById('kioskFields').style.display = 'none';
   document.getElementById('chairSpaceFields').style.display = 'none';
@@ -227,7 +238,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Hide all specific fields first
     document.getElementById('flatFields').style.display = 'none';
     document.getElementById('shopsFields').style.display = 'none';
-    document.getElementById('carParkingFields').style.display = 'none';
+    // document.getElementById('carParkingFields').style.display = 'none';
     document.getElementById('tableSpaceFields').style.display = 'none';
     document.getElementById('kioskFields').style.display = 'none';
     document.getElementById('chairSpaceFields').style.display = 'none';
@@ -239,8 +250,8 @@ document.addEventListener('DOMContentLoaded', function() {
       document.getElementById('flatFields').style.display = 'block';
     } else if (selectedRoomType === 'Shops') {
       document.getElementById('shopsFields').style.display = 'block';
-    } else if (selectedRoomType === 'Car parking') {
-      document.getElementById('carParkingFields').style.display = 'block';
+    // } else if (selectedRoomType === 'Car parking') {
+    //   document.getElementById('carParkingFields').style.display = 'block';
     } else if (selectedRoomType === 'Table space') {
       document.getElementById('tableSpaceFields').style.display = 'block';
     } else if (selectedRoomType === 'Chair space') {

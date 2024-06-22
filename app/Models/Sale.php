@@ -18,7 +18,7 @@ class Sale extends Model
         'area_calculation_type', 
         'calculation_type', 'parking_rate_per_sq_ft', 'total_sq_ft_for_parking', 
         'gst_percent', 'advance_payment', 'advance_amount', 'payment_method', 
-        'transfer_id', 'cheque_id', 'last_date', 'discount_percent'
+        'transfer_id', 'cheque_id', 'last_date', 'discount_percent',
     ];
 
     public function room()

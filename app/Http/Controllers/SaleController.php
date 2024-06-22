@@ -1,7 +1,5 @@
 <?php
 
-// app/Http/Controllers/SaleController.php
-
 namespace App\Http\Controllers;
 
 use App\Models\Sale;
@@ -20,7 +18,7 @@ class SaleController extends Controller
             'customer_contact' => 'required|string|max:20',
             'area_calculation_type' => 'required|string',
             'sale_amount' => 'required|numeric',
-            'calculation_type' => 'required|string',
+            'calculation_type' => 'nullable|string',
             'parking_rate_per_sq_ft' => 'nullable|numeric',
             'total_sq_ft_for_parking' => 'nullable|numeric',
             'gst_percent' => 'required|numeric',
@@ -33,38 +31,23 @@ class SaleController extends Controller
             'discount_percent' => 'nullable|numeric',
         ]);
 
-        // Fetch the room details
         $room = Room::find($validatedData['room_id']);
+        $roomRate = $this->calculateRoomRate($validatedData, $room);
+        $parkingAmount = $this->calculateParkingAmount($validatedData);
 
-        // Calculate the room rate based on area calculation type
-        $roomRate = 0;
-        if ($validatedData['area_calculation_type'] == 'carpet_area_rate') {
-            $roomRate = $validatedData['sale_amount'] * $room->carpet_area;
-        } elseif ($validatedData['area_calculation_type'] == 'build_up_area_rate') {
-            $roomRate = $validatedData['sale_amount'] * $room->build_up_area;
-        }
-
-        // Calculate the parking amount based on calculation type
-        $parkingAmount = 0;
-        if ($validatedData['calculation_type'] == 'fixed_amount') {
-            $parkingAmount = config('master_setting.parking_fixed_rate');
-        } elseif ($validatedData['calculation_type'] == 'rate_per_sq_ft' && !is_null($validatedData['total_sq_ft_for_parking']) && !is_null($validatedData['parking_rate_per_sq_ft'])) {
-            $parkingAmount = $validatedData['total_sq_ft_for_parking'] * $validatedData['parking_rate_per_sq_ft'];
-        }
-
-        // Calculate the total amount including room rate and parking amount
         $totalAmount = $roomRate + $parkingAmount;
-
-        // Add GST to the total amount
         $totalWithGst = $totalAmount + ($totalAmount * ($validatedData['gst_percent'] / 100));
-
-        // Apply discount if provided
         $totalWithDiscount = isset($validatedData['discount_percent']) ? $totalWithGst - ($totalWithGst * ($validatedData['discount_percent'] / 100)) : $totalWithGst;
-
-        // Calculate remaining balance after advance payment
         $remainingBalance = $totalWithDiscount - ($validatedData['advance_amount'] ?? 0);
 
-        // Save the sale to the database
+        // Log the calculated values to debug
+        Log::info('Room Rate: ' . $roomRate);
+        Log::info('Parking Amount: ' . $parkingAmount);
+        Log::info('Total Amount: ' . $totalAmount);
+        Log::info('Total with GST: ' . $totalWithGst);
+        Log::info('Total with Discount: ' . $totalWithDiscount);
+        Log::info('Remaining Balance: ' . $remainingBalance);
+
         $sale = new Sale();
         $sale->room_id = $validatedData['room_id'];
         $sale->customer_name = $validatedData['customer_name'];
@@ -83,39 +66,71 @@ class SaleController extends Controller
         $sale->cheque_id = $validatedData['cheque_id'];
         $sale->last_date = $validatedData['last_date'];
         $sale->discount_percent = $validatedData['discount_percent'];
-        $sale->room_rate = $roomRate; // Add room rate
-        $sale->total_amount = $totalAmount; // Add room rate
-        $sale->parking_amount = $parkingAmount; // Add parking amount
-        $sale->total_with_gst = $totalWithGst; // Add total amount with GST
-        $sale->total_with_discount = $totalWithDiscount; // Add total amount after discount
-        $sale->remaining_balance = $remainingBalance; // Add remaining balance
+        $sale->room_rate = $roomRate;
+        $sale->total_amount = $totalAmount;
+        $sale->parking_amount = $parkingAmount;
+        $sale->total_with_gst = $totalWithGst;
+        $sale->total_with_discount = $totalWithDiscount;
+        $sale->remaining_balance = $remainingBalance;
         $sale->save();
 
-        // Update room status to 'sold'
         $room->status = 'sold';
         $room->save();
 
-        // Redirect back with a success message
         return back()->with('success', 'Room sold successfully!');
+    }
+
+    protected function calculateRoomRate($validatedData, $room)
+    {
+        $roomRate = 0;
+        switch ($room->room_type) {
+            case 'Shops':
+                if ($validatedData['area_calculation_type'] == 'carpet_area_rate') {
+                    $roomRate = $validatedData['sale_amount'] * $room->carpet_area;
+                } elseif ($validatedData['area_calculation_type'] == 'build_up_area_rate') {
+                    $roomRate = $validatedData['sale_amount'] * $room->build_up_area;
+                }
+                break;
+            case 'Flat':
+                if ($validatedData['area_calculation_type'] == 'carpet_area_rate') {
+                    $roomRate = $validatedData['sale_amount'] * $room->flat_carpet_area;
+                } elseif ($validatedData['area_calculation_type'] == 'build_up_area_rate') {
+                    $roomRate = $validatedData['sale_amount'] * $room->flat_build_up_area;
+                }
+                break;
+            case 'Table space':
+            case 'Chair space':
+                if ($validatedData['area_calculation_type'] == 'carpet_area_rate' || $validatedData['area_calculation_type'] == 'build_up_area_rate') {
+                    $roomRate = $validatedData['sale_amount'] * $room->space_area;
+                }
+                break;
+        }
+        return $roomRate;
+    }
+
+    protected function calculateParkingAmount($validatedData)
+    {
+        $parkingAmount = 0;
+        if ($validatedData['calculation_type'] == 'fixed_amount') {
+            $parkingAmount = config('master_setting.parking_fixed_rate');
+        } elseif ($validatedData['calculation_type'] == 'rate_per_sq_ft' && !is_null($validatedData['total_sq_ft_for_parking']) && !is_null($validatedData['parking_rate_per_sq_ft'])) {
+            $parkingAmount = $validatedData['total_sq_ft_for_parking'] * $validatedData['parking_rate_per_sq_ft'];
+        }
+        return $parkingAmount;
     }
 
     public function create()
     {
         $rooms = Room::all();
-
         $page = 'create';
-
         return view('sales.create', compact('rooms', 'page'));
     }
 
     public function showSales()
     {
         $sales = Sale::all();
-
-        $room = Room::first();
         $page = 'sales';
-
-        return view('sales.sales', compact('sales', 'room', 'page'));
+        return view('sales.sales', compact('sales', 'page'));
     }
 
     public function softDelete($id)
@@ -130,32 +145,27 @@ class SaleController extends Controller
         return redirect()->back();
     }
 
-    public function index()
+    public function index(Request $request)
     {
+        $search = $request->input('search');
         $customerNames = Sale::pluck('customer_name')->unique();
-        $sales = Sale::all();
-        return view('customers.index', compact('customerNames', 'sales'));
+        $salesQuery = Sale::query();
+
+        if ($search) {
+            $salesQuery->where('customer_name', 'like', '%' . $search . '%');
+        }
+
+        $sales = $salesQuery->paginate(10);
+        return view('customers.index', compact('customerNames', 'sales', 'search'));
     }
 
     public function showCustomer($customerName)
     {
-        // Fetch sales records for the given customer name
-        $sales = Sale::with('room.building')
+        $sales = Sale::with('room')
                      ->where('customer_name', $customerName)
                      ->get();
 
-        // Calculate total amount for each sale and attach room details
-        foreach ($sales as $sale) {
-            $room = $sale->room;
-            $sale->total_amount = $sale->sale_amount + ($sale->parking_amount ?? 0) - ($sale->sale_amount * ($sale->discount_percent / 100));
-            $sale->room_details = [
-                'room_number' => $room->room_number,
-                // Add other room details here as needed
-            ];
-        }
-
         $page = 'customer_details';
-
         return view('customers.show', compact('sales', 'customerName', 'page'));
     }
 }
