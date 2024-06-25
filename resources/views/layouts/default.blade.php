@@ -21,6 +21,7 @@
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
 
   <title>{{ $title }}</title>
+  
 </head>
 
 <body class="g-sidenav-show bg-gray-200">
@@ -28,7 +29,7 @@
     <div class="sidenav-header text-center">
         <i class="fas fa-times p-3 cursor-pointer text-white opacity-5 position-absolute end-0 top-0 d-none d-xl-none" aria-hidden="true" id="iconSidenav"></i>
         <a class="navbar-brand m-0" href="#" target="_blank">
-            <span class="ms-1 font-weight-bold text-white">{{ $building->building_name ?? 'Tabasco' }}</span>
+            <span class="ms-1 font-weight-bold text-white" style="text-transform:capitalize ">{{ $building->building_name ?? 'Tabasco' }}</span>
         </a>
     </div>
     <hr class="horizontal light mt-0 mb-2">

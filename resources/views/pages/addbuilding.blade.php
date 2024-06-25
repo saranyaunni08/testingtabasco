@@ -18,72 +18,72 @@
                 <div class="col-lg-8">
                   <div class="row">
                     <div class="col-md-6">
-                      <div class="input-group input-group-dynamic mb-4">
+                      <div class="form-group mb-4">
                         <label class="form-label">Building Name</label>
-                        <input name="building_name" type="text" class="form-control">
+                        <input name="building_name" type="text" class="form-control" required>
                       </div>
                     </div>
 
                     <div class="col-md-6">
-                      <div class="input-group input-group-dynamic mb-4">
+                      <div class="form-group mb-4">
                         <label class="form-label">Number of Floors</label>
-                        <input name="no_of_floors" type="text" class="form-control">
+                        <input name="no_of_floors" type="text" class="form-control" required>
                       </div>
                     </div>
 
                     <div class="col-md-12">
-                      <div class="input-group input-group-dynamic mb-4">
+                      <div class="form-group mb-4">
                         <label class="form-label">Address</label>
-                        <input name="building_address" type="text" class="form-control">
+                        <input name="building_address" type="text" class="form-control" required>
                       </div>
                     </div>
 
                     <div class="col-md-6">
-                      <div class="input-group input-group-dynamic mb-4">
+                      <div class="form-group mb-4">
                         <label class="form-label">Street</label>
-                        <input name="street" type="text" class="form-control">
+                        <input name="street" type="text" class="form-control" required>
                       </div>
                     </div>
 
                     <div class="col-md-6">
-                      <div class="input-group input-group-dynamic mb-4">
+                      <div class="form-group mb-4">
                         <label class="form-label">City</label>
-                        <input name="city" type="text" class="form-control">
+                        <input name="city" type="text" class="form-control" required>
                       </div>
                     </div>
 
                     <div class="col-md-6">
-                      <div class="input-group input-group-dynamic mb-4">
+                      <div class="form-group mb-4">
                         <label class="form-label">Pin Code</label>
-                        <input name="pin_code" type="text" class="form-control">
+                        <input name="pin_code" type="text" class="form-control" required>
                       </div>
                     </div>
 
                     <div class="col-md-6">
-                      <div class="input-group input-group-dynamic mb-4">
+                      <div class="form-group mb-4">
                         <label class="form-label">State</label>
-                        <input name="state" type="text" class="form-control">
+                        <input name="state" type="text" class="form-control" required>
                       </div>
                     </div>
 
                     <div class="col-md-6">
-                      <div class="input-group input-group-dynamic mb-4">
+                      <div class="form-group mb-4">
                         <label class="form-label">Country</label>
-                        <input name="country" type="text" class="form-control">
+                        <input name="country" type="text" class="form-control" required>
                       </div>
                     </div>
                     
                     <div class="col-md-6">
-                      <div class="input-group input-group-dynamic mb-4">
+                      <div class="form-group mb-4">
                         <label class="form-label">Super Buildup Area</label>
-                        <input name="super_built_up_area" type="text" class="form-control">
+                        <input name="super_built_up_area" type="text" class="form-control" required>
                       </div>
                     </div>
 
                     <div class="col-md-6">
-                      <div class="input-group input-group-dynamic mb-4">
+                      <div class="form-group mb-4">
                         <label class="form-label">Carpet Area</label>
-                        <input name="carpet_area" type="text" class="form-control">
+                        <input name="carpet_area" type="text" class="form-control" required>
                       </div>
                     </div>
                     
@@ -106,7 +106,7 @@
                     </div>
 
                     <div class="col-md-12">
-                      <div class="input-group input-group-dynamic mb-4">
+                      <div class="form-group mb-4">
                         <label class="form-label">Additional Amenities</label>
                         <input name="additional_amenities" type="text" class="form-control">
                       </div>

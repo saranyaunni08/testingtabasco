@@ -24,29 +24,30 @@
                             <!-- Flat Fields -->
                             <div class="col-md-6" id="flatFields" style="display: {{ $room->room_type == 'Flat' ? 'block' : 'none' }};">
                                 <div class="form-group mb-4">
-                                    <h5 class="form-label">Build-Up Area (sq ft)</h5>
-                                    <input type="text" name="build_up_area" class="form-control" value="{{ $room->build_up_area }}">
+                                    <h5 class="form-label">Room Number</h5>
+                                    <input type="text" name="room_number" class="form-control" style="text-transform: capitalize" value="{{ $room->room_number }}">
+                                </div>
+                                <div class="form-group mb-4">
+                                    <h5 class="form-label">Flat model</h5>
+                                    <input type="text" name="flat_model" class="form-control" value="{{ $room->flat_model }}">
                                 </div>
                                 <div class="form-group mb-4">
                                     <h5 class="form-label">Carpet Area (sq ft)</h5>
-                                    <input type="text" name="carpet_area" class="form-control" value="{{ $room->carpet_area }}">
+                                    <input type="text" name="flat_carpet_area" class="form-control" value="{{ $room->flat_carpet_area }}">
                                 </div>
                                 
                                 <div class="form-group mb-4">
-                                    <h5 class="form-label">Super Build-Up Area Price</h5>
-                                    <input type="text" name="super_build_up_price" class="form-control" value="{{ $room->super_build_up_price }}">
-                                </div>
-                                <div class="form-group mb-4">
                                     <h5 class="form-label">Carpet Area Price</h5>
-                                    <input type="text" name="carpet_area_price" class="form-control" value="{{ $room->carpet_area_price }}">
+                                    <input type="text" name="flat_carpet_area_price" class="form-control" value="{{ $room->flat_carpet_area_price }}">
                                 </div>
+                               
                             </div>
 
                             <!-- Shops Fields -->
                             <div class="col-md-6" id="shopsFields" style="display: {{ $room->room_type == 'Shops' ? 'block' : 'none' }};">
                                 <div class="form-group mb-4">
                                     <h5 class="form-label">Shop Number</h5>
-                                    <input type="text" name="shop_number" class="form-control" value="{{ $room->shop_number }}">
+                                    <input type="text" name="room_number" class="form-control" value="{{ $room->room_number }}">
                                 </div>
                                 <div class="form-group mb-4">
                                     <h5 class="form-label">Shop Type</h5>
@@ -55,24 +56,20 @@
                                         <option value="Retail" {{ $room->shop_type == 'Retail' ? 'selected' : '' }}>Retail Shop</option>
                                         <option value="Restaurant" {{ $room->shop_type == 'Restaurant' ? 'selected' : '' }}>Restaurant</option>
                                         <option value="Office" {{ $room->shop_type == 'Office' ? 'selected' : '' }}>Office</option>
-                                        <!-- Add more shop types as needed -->
                                     </select>
                                 </div>
                                 <div class="form-group mb-4">
-                                    <h5 class="form-label">Shop Area (sq ft)</h5>
-                                    <input type="text" name="shop_area" class="form-control" value="{{ $room->shop_area }}">
+                                    <h5 class="form-label">Shop Carpet Area (sq ft)</h5>
+                                    <input type="text" name="carpet_area" class="form-control" value="{{ $room->carpet_area }}">
                                 </div>
                                 <div class="form-group mb-4">
-                                    <h5 class="form-label">Shop Rate</h5>
-                                    <input type="text" name="shop_rate" class="form-control" value="{{ $room->shop_rate }}">
+                                    <h5 class="form-label">Shop Carpet Area Rate</h5>
+                                    <input type="text" name="carpet_area_price'" class="form-control" value="{{ $room->carpet_area_price }}">
                                 </div>
-                                <div class="form-group mb-4">
-                                    <h5 class="form-label">Rental Period</h5>
-                                    <input type="text" name="shop_rental_period" class="form-control" value="{{ $room->shop_rental_period }}">
-                                </div>
+                                
                             </div>
 
-                            <!-- Car Parking Fields -->
+                            {{-- <!-- Car Parking Fields -->
                             <div class="col-md-6" id="carParkingFields" style="display: {{ $room->room_type == 'Car parking' ? 'block' : 'none' }};">
                                 <div class="form-group mb-4">
                                     <h5 class="form-label">Parking Number</h5>
@@ -95,7 +92,7 @@
                                     <h5 class="form-label">Parking Rate</h5>
                                     <input type="text" name="parking_rate" class="form-control" value="{{ $room->parking_rate }}">
                                 </div>
-                            </div>
+                            </div> --}}
 
                             <!-- Table Space Fields -->
                             <div class="col-md-6" id="tableSpaceFields" style="display: {{ $room->room_type == 'Table space' ? 'block' : 'none' }};">

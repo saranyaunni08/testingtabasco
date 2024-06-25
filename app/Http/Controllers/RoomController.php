@@ -20,18 +20,15 @@ class RoomController extends Controller
         $building_id = $request->building_id;
 
         return view('rooms.show', compact('rooms', 'building', 'page', 'building_id'));
-    }public function create(Request $request)
-    {
-        $building_id = $request->building_id; // Define $building_id here
-        $building = Building::find($building_id);
-    
-        if (!$building) {
-            abort(404, 'Building not found');
-        }
-    
-        return view('rooms.create', compact('building_id'));
     }
     
+    public function create(Request $request)
+    {
+        $building_id = $request->building_id; // Define $building_id here
+        $building = Building::findOrFail($building_id);
+
+        return view('rooms.create', compact('building_id', 'building'));
+    }
     public function store(Request $request)
     {
         $validatedData = $request->validate([

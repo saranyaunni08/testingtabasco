@@ -22,4 +22,9 @@ class Room extends Model
     {
         return $this->belongsTo(Building::class);
     }
+
+    public function sale()
+{
+    return $this->hasOne(Sale::class, 'room_id'); // Adjust if the relationship is different
+}
 }

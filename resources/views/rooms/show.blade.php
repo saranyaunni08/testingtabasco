@@ -3,6 +3,40 @@
 @section('content')
 <div class="container-fluid py-4">
     <div class="row">
+        @php
+        $roomStats = [
+            'Flat Expected Amount' => ['count' => 10, 'total' => $rooms->where('room_type', 'Flat')->sum('flat_expected_carpet_area_price')],
+            'Shops Expected Amount' => ['count' => 5, 'total' => $rooms->where('room_type', 'Shops')->sum('expected_carpet_area_price')],
+            'Table space Expected Amount' => ['count' => 15, 'total' => $rooms->where('room_type', 'Table space')->sum('space_expected_price')],
+            'Kiosk Expected Amount' => ['count' => 3, 'total' => $rooms->where('room_type', 'Kiosk')->sum('kiosk_expected_price')],
+        ];
+    @endphp
+
+@foreach ($roomStats as $type => $stats)
+<div class="col-xl-3 col-lg-4 col-sm-5 col-7 mb-4">
+    <div class="card">
+        <div class="card-body">
+            <div class="card-title d-flex align-items-start justify-content-between">
+                <div class="avatar flex-shrink-0">
+                    <img src="{{ asset('img/image.png') }}" alt="Credit Card"  class="rounded">
+                </div>
+                <div class="dropdown">
+                    <button class="btn p-0" type="button" id="cardOpt1" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="bx bx-dots-vertical-rounded"></i>
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="cardOpt1">
+                        <a class="dropdown-item" href="javascript:void(0);">View More</a>
+                        <a class="dropdown-item" href="javascript:void(0);">Delete</a>
+                    </div>
+                </div>
+            </div>
+            <span class="fw-medium d-block mb-1">{{ $type }}</span>
+            <h4 class="card-title mb-2">₹{{ number_format($stats['total'], 2) }}</h4>
+        </div> 
+    </div>
+</div>
+@endforeach
+</div>
         <div class="col-12">
             <div class="card my-4">
                 <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
@@ -42,6 +76,7 @@
                                                     <th>Carpet Area in sq</th>
                                                     <th>Carpet area price(sq)</th>
                                                     <th>Expected Amount</th>
+                                                    <th></th>
                                                     <th>Actions</th>
                                                 @elseif ($type === 'Shops')
                                                     <th>Sl. No</th>
@@ -74,8 +109,11 @@
                                                     <th>Room Number</th>
                                                     <th>Chair Name</th>
                                                     <th>Chair Type</th>
-                                                    <th>Chair Material</th>
+                                                    <th>Chair Space in sq</th>
                                                     <th>Chair Price</th>
+                                                    <th> Expected Amount</th>
+                                                    <th></th>
+                                                    
                                                     <th>Actions</th>
                                                 @elseif ($type === 'Kiosk')
                                                     <th>Sl. No</th>
@@ -93,8 +131,7 @@
                                             @foreach ($typeRooms as $index => $room)
                                                 <tr>
                                                     <td>{{ $index + 1 }}</td>
-                                                    <td>{{ $room->room_number }}</td>
-                                                    <!-- Adjust columns based on $type -->
+                                                    <td style="text-transform: uppercase;">{{ $room->room_number }}</td>
                                                     @if ($type === 'Flat')
                                                         <td style="text-transform: uppercase;">{{ $room->flat_model }}</td>
                                                         <td>{{ $room->flat_carpet_area }}</td>
@@ -123,39 +160,54 @@
                                                             </div>
                                                         </td>
                                                     @elseif ($type === 'Table space')
-                                                        <td>{{ $room->space_name }}</td>
+                                                        <td style="text-transform: uppercase;">{{ $room->space_name }}</td>
                                                         <td>{{ $room->space_type }}</td>
                                                         <td>{{ $room->space_area }}</td>
                                                         <td>{{ $room->space_rate }}</td>
                                                         <td>{{ $room->space_expected_price }}</td>
+                                                        <td>{{ number_format($room->space_expected_price, 2) }}</td>
+
+
+
+
                                                     @elseif ($type === 'Chair space')
-                                                        <td>{{ $room->chair_name }}</td>
-                                                        <td>{{ $room->chair_type }}</td>
-                                                        <td>{{ $room->chair_material }}</td>
-                                                        <td>{{ $room->chair_price }}</td>
+                                                        <td style="text-transform: uppercase;">{{ $room->chair_name }}</td>
+                                                        <td style="text-transform: uppercase;">{{ $room->chair_type }}</td>
+                                                        <td>{{ $room->chair_space_in_sq }}</td>
+                                                        <td>{{ $room->chair_space_rate }}</td>
+                                                        <td>{{ $room->chair_space_expected_rate }}</td>
+                                                       
+
+
                                                     @elseif ($type === 'Kiosk')
-                                                        <td>{{ $room->kiosk_name }}</td>
-                                                        <td>{{ $room->kiosk_type }}</td>
+                                                        <td style="text-transform: uppercase;">{{ $room->kiosk_name }}</td>
+                                                        <td style="text-transform: uppercase;">{{ $room->kiosk_type }}</td>
                                                         <td>{{ $room->kiosk_area }}</td>
                                                         <td>{{ $room->kiosk_rate }}</td>
                                                         <td>{{ $room->kiosk_area * $room->kiosk_rate }}</td>
                                                     @endif
                                                     <td>
-                                                        @if ($room->status === 'available')
-                                                            <button type="button" class="btn btn-success btn-sm me-2" data-toggle="modal" data-target="#sellModal{{ $room->id }}" data-room-type="{{ $type }}" data-room-number="{{ $room->room_number }}">
-                                                                Sell
-                                                            </button>
-                                                            <a href="{{ route('admin.rooms.edit', $room->id) }}" class="btn btn-warning btn-sm me-2">Edit</a>
-                                                            <form action="{{ route('admin.rooms.destroy', ['building_id' => $building->id, 'room_id' => $room->id]) }}" method="POST" style="display: inline-block;">
-                                                                @csrf
-                                                                @method('DELETE')
-                                                                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-                                                            </form>
-                                                        @else
-                                                            <span style="color: #28a745; font-weight: bold; font-size: 1.2em; border: 2px solid #28a745; padding: 5px 10px; border-radius: 5px; background-color: #e9f7ef;">
-                                                                Sold
-                                                            </span>
-                                                        @endif
+                                                        <td>
+                                                            @if ($room->status === 'available')
+                                                                <button type="button" class="btn btn-success btn-sm me-2" data-toggle="modal" data-target="#sellModal{{ $room->id }}" data-room-type="{{ $type }}" data-room-number="{{ $room->room_number }}">
+                                                                    Sell
+                                                                </button>
+                                                                <a href="{{ route('admin.rooms.edit', $room->id) }}" class="btn btn-warning btn-sm me-2">Edit</a>
+                                                                <form action="{{ route('admin.rooms.destroy', ['building_id' => $building->id, 'room_id' => $room->id]) }}" method="POST" style="display: inline-block;">
+                                                                    @csrf
+                                                                    @method('DELETE')
+                                                                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                                                </form>
+                                                            @else
+                                                                <span style="color: #28a745; font-weight: bold; font-size: 1.2em; border: 2px solid #28a745; padding: 5px 10px; border-radius: 5px; background-color: #e9f7ef;">
+                                                                    Sold
+                                                                </span>&nbsp;
+                                                                <a href="{{ route('admin.customers.show', ['customerName' => $room->sale->customer_name]) }}" style="color: #28a745; font-weight: bold; font-size: 1.2em; border: 2px solid #28a745; padding: 5px 10px; border-radius: 5px; background-color: #e9f7ef; text-decoration:none;" >View</a>
+                                                            @endif
+                                                        </td>
+                                                        
+                                                      
+                                                                                                                
                                                     </td>
                                                 </tr>
                                                 <div class="modal fade" id="sellModal{{ $room->id }}" tabindex="-1" aria-labelledby="sellModalLabel{{ $room->id }}" aria-hidden="true">
@@ -186,6 +238,7 @@
                                                                     <div class="form-group">
                                                                         <label for="area_calculation_type">Area Calculation Type</label>
                                                                         <select class="form-control" id="area_calculation_type" name="area_calculation_type" required>
+                                                                            <option value="" selected disabled>Select</option>
                                                                             <option value="carpet_area_rate">Carpet Area Rate</option>
                                                                             <option value="built_up_area_rate">Super Built-up Area Rate</option>
                                                                         </select>
@@ -194,6 +247,8 @@
                                                                         <label for="sale_amount">Sale Amount in sq</label>
                                                                         <input type="number" class="form-control" id="sale_amount" name="sale_amount" required>
                                                                     </div>
+                                                            
+                                                    
                                                                     <div class="form-group">
                                                                         <label for="calculation_type">Calculation Type for Parking</label>
                                                                         <select class="form-control" id="calculation_type" name="calculation_type" required>
@@ -253,9 +308,7 @@
                                                                         <button type="submit" class="btn btn-primary">Sell Room</button>
                                                                     </div>
                                                                 </form>
-                                                                
                                                             </div>
-                                                            
                                                         </div>
                                                     </div>
                                                 </div>
@@ -273,15 +326,13 @@
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', (event) => {
+    document.addEventListener('DOMContentLoaded', () => {
         const modalElements = document.querySelectorAll('[id^="sellModal"]');
-    
+
         modalElements.forEach((modalElement) => {
             const roomId = modalElement.id.replace('sellModal', '');
             const calculationTypeSelect = modalElement.querySelector('#calculation_type');
             const areaCalculationTypeSelect = modalElement.querySelector('#area_calculation_type');
-            const buildUpAreaField = modalElement.querySelector('#build_up_area');
-            const carpetAreaField = modalElement.querySelector('#carpet_area');
             const parkingRatePerSqFtGroup = modalElement.querySelector(`#parking_rate_per_sq_ft_group${roomId}`);
             const totalSqFtGroup = modalElement.querySelector(`#total_sq_ft_group${roomId}`);
             const advancePaymentSelect = modalElement.querySelector('#advance_payment');
@@ -291,7 +342,39 @@
             const transferIdGroup = modalElement.querySelector('#transfer_id_group');
             const chequeIdGroup = modalElement.querySelector('#cheque_id_group');
             const lastDateGroup = modalElement.querySelector('#last_date_group');
-    
+
+            const flatFields = modalElement.querySelector('#flat_fields');
+            const shopFields = modalElement.querySelector('#shop_fields');
+            const tableSpaceFields = modalElement.querySelector('#table_space_fields');
+            const kioskFields = modalElement.querySelector('#kiosk_fields');
+            const chairSpaceFields = modalElement.querySelector('#chair_space_fields');
+
+            // Debugging: Confirm if elements are correctly selected
+            console.log("Modal Element ID:", modalElement.id);
+            console.log("Room ID:", roomId);
+            console.log("Calculation Type Select:", calculationTypeSelect);
+            console.log("Area Calculation Type Select:", areaCalculationTypeSelect);
+
+            function showRelevantAreaFields() {
+                if (flatFields) flatFields.classList.add('d-none');
+                if (shopFields) shopFields.classList.add('d-none');
+                if (tableSpaceFields) tableSpaceFields.classList.add('d-none');
+                if (kioskFields) kioskFields.classList.add('d-none');
+                if (chairSpaceFields) chairSpaceFields.classList.add('d-none');
+
+                if (roomType === 'Flat') {
+                    flatFields.classList.remove('d-none');
+                } else if (roomType === 'Shop') {
+                    shopFields.classList.remove('d-none');
+                } else if (roomType === 'Table Space') {
+                    tableSpaceFields.classList.remove('d-none');
+                } else if (roomType === 'Kiosk') {
+                    kioskFields.classList.remove('d-none');
+                } else if (roomType === 'Chair Space') {
+                    chairSpaceFields.classList.remove('d-none');
+                }
+            }
+
             function toggleAdvancePaymentFields() {
                 if (advancePaymentSelect && advancePaymentSelect.value === 'now') {
                     if (advanceAmountGroup) advanceAmountGroup.classList.remove('d-none');
@@ -303,7 +386,7 @@
                     if (chequeIdGroup) chequeIdGroup.classList.add('d-none');
                 }
             }
-    
+
             function togglePaymentMethodFields() {
                 if (paymentMethodSelect && paymentMethodSelect.value === 'bank_transfer') {
                     if (transferIdGroup) transferIdGroup.classList.remove('d-none');
@@ -316,7 +399,7 @@
                     if (chequeIdGroup) chequeIdGroup.classList.add('d-none');
                 }
             }
-    
+
             function toggleCalculationFields() {
                 if (calculationTypeSelect && calculationTypeSelect.value === 'rate_per_sq_ft') {
                     if (parkingRatePerSqFtGroup) parkingRatePerSqFtGroup.classList.remove('d-none');
@@ -326,8 +409,11 @@
                     if (totalSqFtGroup) totalSqFtGroup.classList.add('d-none');
                 }
             }
-    
+
             function toggleAreaCalculationFields() {
+                const buildUpAreaField = modalElement.querySelector('#build_up_area');
+                const carpetAreaField = modalElement.querySelector('#carpet_area');
+
                 if (areaCalculationTypeSelect && areaCalculationTypeSelect.value === 'build_up_area') {
                     if (buildUpAreaField) buildUpAreaField.classList.remove('d-none');
                     if (carpetAreaField) carpetAreaField.classList.add('d-none');
@@ -336,7 +422,7 @@
                     if (carpetAreaField) carpetAreaField.classList.remove('d-none');
                 }
             }
-    
+
             if (advancePaymentSelect) {
                 advancePaymentSelect.addEventListener('change', toggleAdvancePaymentFields);
             }
@@ -349,14 +435,17 @@
             if (areaCalculationTypeSelect) {
                 areaCalculationTypeSelect.addEventListener('change', toggleAreaCalculationFields);
             }
-    
+
             // Initial setup based on current values
             toggleAdvancePaymentFields();
             togglePaymentMethodFields();
             toggleCalculationFields();
             toggleAreaCalculationFields();
+            showRelevantAreaFields();
         });
     });
-    </script>
+</script>
+
+
     
 @endsection

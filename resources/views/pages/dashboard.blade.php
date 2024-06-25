@@ -8,7 +8,7 @@
                
                 <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
                     <div class="bg-gradient-info shadow-info border-radius-lg pt-4 pb-3 d-flex justify-content-between align-items-center">
-                        <h6 class="text-white text-capitalize ps-3">Total Buildings</h6>
+                        <h6 class="text-white text-capitalize ps-3" style="text-transform: capitalize">TOTAL BUILDINGS</h6>
                         <a href="{{ route('admin.addbuilding') }}" class="btn btn-light">Add Building</a>
                     </div>
                 </div>
@@ -22,7 +22,7 @@
                                     <div class="card gradient-1">
                                         <a href="{{ route('admin.rooms.index', ['building_id' => $building->id]) }}">
                                             <div class="card-body">
-                                                <h3 class="card-title text-black">{{ $building->building_name }}</h3>
+                                                <h3 class="card-title text-black" style="text-transform: capitalize">{{ $building->building_name }}</h3>
                                                 <div class="d-inline-block">
                                                     @php
                                                     $soldRoomsCount = $building->rooms()->where('status', 'sold')->count();

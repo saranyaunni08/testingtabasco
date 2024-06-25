@@ -3,7 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Sale;
-use App\Models\Room;
+use App\Models\Room; 
+use App\Models\building; 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -161,11 +162,15 @@ class SaleController extends Controller
 
     public function showCustomer($customerName)
     {
-        $sales = Sale::with('room')
-                     ->where('customer_name', $customerName)
-                     ->get();
+        // Fetch all sales for the given customer name
+        $sales = Sale::where('customer_name', $customerName)->get();
 
-        $page = 'customer_details';
-        return view('customers.show', compact('sales', 'customerName', 'page'));
+        // Handle case where no sales are found
+        if ($sales->isEmpty()) {
+            abort(404, 'Customer not found.');
+        }
+
+        // Pass the sales data to the view
+        return view('customers.show', compact('sales'));
     }
 }

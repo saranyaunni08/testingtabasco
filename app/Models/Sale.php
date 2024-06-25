@@ -1,6 +1,5 @@
 <?php
 
-// app/Models/Sale.php
 
 namespace App\Models;
 
@@ -21,8 +20,10 @@ class Sale extends Model
         'transfer_id', 'cheque_id', 'last_date', 'discount_percent',
     ];
 
+
     public function room()
-    {
-        return $this->belongsTo(Room::class);
-    }
+{
+    return $this->belongsTo(Room::class, 'room_id');
+}
+    
 }
