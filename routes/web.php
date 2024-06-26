@@ -3,7 +3,7 @@
 use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\RoomController;
-use App\Http\Controllers\BuildingController; 
+use App\Http\Controllers\BuildingController;
 use App\Http\Controllers\SaleController;
 use Illuminate\Support\Facades\Mail;
 use App\Http\Controllers\DashboardController;
@@ -59,7 +59,7 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
         Route::get('/buildings/{building_id}/rooms/create', [RoomController::class, 'create'])->name('rooms.create');
 
         Route::post('admin/rooms', [RoomController::class, 'store'])->name('admin.rooms.store');
-        
+
         Route::get('rooms', [RoomController::class, 'index'])->name('rooms.index');
         Route::delete('/buildings/{building_id}/rooms/{room_id}', 'RoomController@destroy')->name('rooms.destroy');
 
@@ -85,13 +85,14 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
 
 
         Route::post('/sales/store', [SaleController::class, 'store'])->name('sales.store');
+        Route::post('/sales/cac-type', [SaleController::class, 'getCalculationType'])->name('sales.caltype');
 
         Route::get('/customers', [SaleController::class, 'index'])->name('customers.index');
 
         Route::get('/customers/{customerName}', [SaleController::class, 'showCustomer'])->name('customers.show');
 
 
-     
+
         Route::get('/room-dashboard', [RoomController::class, 'dashboard'])->name('room-dashboard');
 
         Route::get('/room-dashboard/{building_id}', [RoomController::class, 'showBuildingRooms'])->name('building-room-dashboard');
@@ -105,5 +106,5 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
     });
 });
 
- 
+
 

@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Sale;
-use App\Models\Room; 
-use App\Models\building; 
+use App\Models\Room;
+use App\Models\building;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -172,5 +172,42 @@ class SaleController extends Controller
 
         // Pass the sales data to the view
         return view('customers.show', compact('sales'));
+    }
+
+    function getCalculationType(Request $request) {
+        $roomId = $request->input('room_id');
+        $type = $request->input('type');
+
+        $roomData = Room::find($roomId);
+
+        if($type === 'carpet_area_rate') {
+            if($roomData->room_type == 'Shops'){
+                $data = ['sqft' => $roomData->carpet_area];
+            }elseif($roomData->room_type ==  'Flat') {
+                $data = ['sqft' => $roomData->flat_carpet_area];
+            }elseif($roomData->room_type ==  'Table space') {
+                $data = ['sqft' => $roomData->space_area];
+            }elseif($roomData->room_type ==  'Kiosk') {
+                $data = ['sqft' => $roomData->kiosk_area];
+            }else {
+                $data = ['sqft' => $roomData->chair_space_in_sq];
+            }
+
+            return response()->json($data);
+        }else {
+            if($roomData->room_type ==  'Shops'){
+                $data = ['sqft' => $roomData->build_up_area];
+            }elseif($roomData->room_type ==  'Flat') {
+                $data = ['sqft' => $roomData->flat_build_up_area];
+            }elseif($roomData->room_type ==  'Table space') {
+                $data = ['sqft' => $roomData->space_area];
+            }elseif($roomData->room_type ==  'Kiosk') {
+                $data = ['sqft' => $roomData->kiosk_area];
+            }else {
+                $data = ['sqft' => $roomData->chair_space_in_sq];
+            }
+
+            return response()->json($data);
+        }
     }
 }

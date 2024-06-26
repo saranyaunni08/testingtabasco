@@ -25,10 +25,8 @@ class MasterSettingsController extends Controller
             'parking_rate_per_sq_ft' => 'nullable|numeric',
         ]);
 
-        // Retrieve existing settings or create new if not exist
         $settings = MasterSetting::firstOrCreate([]);
 
-        // Update settings with validated data
         $settings->gst_flat = $validatedData['gst_flat'];
         $settings->gst_shop = $validatedData['gst_shop'];
         $settings->advance_payment_days = $validatedData['advance_payment_days'];

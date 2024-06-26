@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
 use App\Models\Building;
 use App\Models\Sale;
-use App\Models\MasterSetting; // Import the MasterSetting model
+use App\Models\MasterSetting; 
 
 
 class RoomController extends Controller
@@ -24,7 +24,7 @@ class RoomController extends Controller
     
     public function create(Request $request)
     {
-        $building_id = $request->building_id; // Define $building_id here
+        $building_id = $request->building_id; 
         $building = Building::findOrFail($building_id);
 
         return view('rooms.create', compact('building_id', 'building'));
@@ -81,7 +81,6 @@ class RoomController extends Controller
             $expected_carpet_area_price = null;
         }
 
-        // Calculate expected super built-up area price if build up area and super build up price are provided
         if ($validatedData['build_up_area'] && $validatedData['super_build_up_price']) {
             $expected_super_buildup_area_price = $validatedData['build_up_area'] * $validatedData['super_build_up_price'];
         } else {
@@ -118,11 +117,9 @@ class RoomController extends Controller
             $chair_space_expected_rate = null;
         }
 
-        // Create a new Room instance and fill it with validated data
         $room = new Room();
         $room->fill($validatedData);
 
-        // Assign calculated expected prices to the room instance
         $room->expected_carpet_area_price = $expected_carpet_area_price;
         $room->expected_super_buildup_area_price = $expected_super_buildup_area_price;
         $room-> flat_expected_carpet_area_price = $flat_expected_carpet_area_price;
@@ -132,10 +129,8 @@ class RoomController extends Controller
         $room-> chair_space_expected_rate = $chair_space_expected_rate;
 
 
-        // Save the room to the database
         $room->save();
 
-        // Redirect back with a success message
         return redirect()->back()->with('success', 'Room added successfully!');
     }
     
@@ -232,8 +227,7 @@ class RoomController extends Controller
     }
     public function show($id) {
         $room = Room::findOrFail($id);
-        $master_settings = MasterSetting::first(); // or however you get your master settings
-    
+        $master_settings = MasterSetting::first(); 
         return view('rooms.show', compact('room', 'master_settings'));
     }
     
