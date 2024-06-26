@@ -365,6 +365,16 @@
                                                                             </div>
                                                                         </div>
                                                                         <div class="col-6">
+                                                                            <div class="form-group">
+                                                                                <label for="discount_percent">Discount
+                                                                                    (%)
+                                                                                </label>
+                                                                                <input type="number" class="form-control"
+                                                                                    id="discount_percent"
+                                                                                    name="discount_percent">
+                                                                            </div>
+                                                                        </div>  
+                                                                        <div class="col-6">
                                                                             <div class="form-group d-none"
                                                                                 id="advance_amount_group">
                                                                                 <label for="advance_amount">Advance
@@ -415,18 +425,12 @@
                                                                                     id="last_date" name="last_date">
                                                                             </div>
                                                                         </div>
-                                                                        <div class="col-6">
-                                                                            <div class="form-group">
-                                                                                <label for="discount_percent">Discount
-                                                                                    (%)
-                                                                                </label>
-                                                                                <input type="number" class="form-control"
-                                                                                    id="discount_percent"
-                                                                                    name="discount_percent">
-                                                                            </div>
-                                                                        </div>
+                                                                        
                                                                         <div class="col-12">
                                                                             <h4>Total amount: ₹<span id="total"></span></h4>
+                                                                        </div>
+                                                                        <div class="col-12">
+                                                                            <h4>Remaining Balance: ₹<span id="remaining_balance"></span></h4>
                                                                         </div>
                                                                         <div class="col-12">
                                                                             <div class="modal-footer">
@@ -476,6 +480,12 @@
                 const lastDateGroup = modalElement.querySelector('#last_date_group');
                 const saleInput = modalElement.querySelector('#sale_amount');
                 const totalElement = modalElement.querySelector('#total');
+                const parkingRateInput = modalElement.querySelector('#parking_rate_per_sq_ft');
+                const totalSqFtInput = modalElement.querySelector('#total_sq_ft_for_parking');
+                const gstInput = modalElement.querySelector('#gst_percent');
+                const discountInput = modalElement.querySelector('#discount_percent');
+                const advanceAmountInput = modalElement.querySelector('#advance_amount');
+                const remainingBalanceElement = modalElement.querySelector('#remaining_balance');
     
                 const flatFields = modalElement.querySelector('#flat_fields');
                 const shopFields = modalElement.querySelector('#shop_fields');
@@ -554,15 +564,15 @@
                     }
                 }
     
-                    function updateTotalAmount() {
-                    const saleAmount = saleInput ? saleInput.value : 0; // Default to 0 if saleInput is null
+                function updateTotalAmount() {
+                    const saleAmount = saleInput ? saleInput.value : 0; 
                     const areaCalculationType = areaCalculationTypeSelect ? areaCalculationTypeSelect.value : '';
-
+    
                     if (!roomId) {
                         console.error('Room ID is not defined.');
                         return;
                     }
-
+    
                     $.ajax({
                         type: 'POST',
                         url: "{{ route('admin.sales.caltype') }}",
@@ -574,16 +584,39 @@
                         dataType: "json",
                         success: function(resultData) {
                             console.log('Result Data:', resultData); 
-                            const totalRate = parseInt(resultData.sqft) * parseInt(saleAmount);
-                            console.log('Total Rate:', totalRate); 
-                            if (totalElement) totalElement.textContent = totalRate;
+                            let totalRate = parseInt(resultData.sqft) * parseInt(saleAmount);
+                            console.log('Total Rate:', totalRate);
+    
+                            // Add parking amount if applicable
+                            if (calculationTypeSelect.value === 'rate_per_sq_ft') {
+                                const parkingRate = parseFloat(parkingRateInput.value) || 0;
+                                const totalSqFt = parseFloat(totalSqFtInput.value) || 0;
+                                const parkingAmount = parkingRate * totalSqFt;
+                                totalRate += parkingAmount;
+                            }
+    
+                            // Apply discount if applicable
+                            const discountPercent = parseFloat(discountInput.value) || 0;
+                            const discountAmount = totalRate * (discountPercent / 100);
+                            totalRate -= discountAmount;
+    
+                            // Add GST if applicable
+                            const gstPercent = parseFloat(gstInput.value) || 0;
+                            const gstAmount = totalRate * (gstPercent / 100);
+                            totalRate += gstAmount;
+    
+                            if (totalElement) totalElement.textContent = totalRate.toFixed(2);
+    
+                            // Calculate remaining balance
+                            const advanceAmount = parseFloat(advanceAmountInput.value) || 0;
+                            const remainingBalance = totalRate - advanceAmount;
+                            if (remainingBalanceElement) remainingBalanceElement.textContent = remainingBalance.toFixed(2);
                         },
                         error: function(xhr, status, error) {
                             console.error('Error:', error);
                         }
                     });
                 }
-
     
                 if (advancePaymentSelect) {
                     advancePaymentSelect.addEventListener('change', toggleAdvancePaymentFields);
@@ -596,21 +629,41 @@
                 }
                 if (areaCalculationTypeSelect) {
                     areaCalculationTypeSelect.addEventListener('change', updateTotalAmount);
+    
                 }
                 if (saleInput) {
                     saleInput.addEventListener('input', updateTotalAmount);
                 }
-    
+                if (parkingRateInput) {
+                    parkingRateInput.addEventListener('input', updateTotalAmount);
+                }
+                if (totalSqFtInput) {
+                    totalSqFtInput.addEventListener('input', updateTotalAmount);
+                }
+                if (gstInput) {
+                    gstInput.addEventListener('input', updateTotalAmount);
+                }
+                if (discountInput) {
+                    discountInput.addEventListener('input', updateTotalAmount);
+                }
+                if (advanceAmountInput) {
+                    advanceAmountInput.addEventListener('input', updateTotalAmount);
+                }
+
                 toggleAdvancePaymentFields();
                 togglePaymentMethodFields();
                 toggleCalculationFields();
                 toggleAreaCalculationFields();
                 updateTotalAmount();
-    
+
                 const roomType = modalElement.getAttribute('data-room-type');
                 showRelevantAreaFields(roomType);
             });
         });
     </script>
+
+    
+    
+    
     
 @endsection
