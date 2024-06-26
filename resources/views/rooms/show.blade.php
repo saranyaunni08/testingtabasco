@@ -73,7 +73,7 @@
                         @endphp
 
                         @foreach ($roomTypes as $type => $typeRooms)
-                            @if (count($typeRooms) > 0)
+                            @if (count($typeRooms) > 0) 
                                 <div class="table-responsive mb-4">
                                     <table class="table align-items-center mb-0">
                                         <thead>
@@ -283,6 +283,15 @@
                                                                         </div>
                                                                         <div class="col-6">
                                                                             <div class="form-group">
+                                                                                <label for="sale_amount">Sale Amount in
+                                                                                    sq</label>
+                                                                                <input type="number" class="form-control"
+                                                                                    id="sale_amount" name="sale_amount"
+                                                                                    required>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="col-6">
+                                                                            <div class="form-group">
                                                                                 <label for="area_calculation_type">Area
                                                                                     Calculation Type</label>
                                                                                 <select class="form-control"
@@ -297,15 +306,7 @@
                                                                                 </select>
                                                                             </div>
                                                                         </div>
-                                                                        <div class="col-6">
-                                                                            <div class="form-group">
-                                                                                <label for="sale_amount">Sale Amount in
-                                                                                    sq</label>
-                                                                                <input type="number" class="form-control"
-                                                                                    id="sale_amount" name="sale_amount"
-                                                                                    required>
-                                                                            </div>
-                                                                        </div>
+                                                                       
                                                                         <div class="col-6">
                                                                             <div class="form-group">
                                                                                 <label for="calculation_type">Calculation
@@ -457,20 +458,14 @@
     </div>
 
     <script>
-        let roomId = '';
-        function getRoomId(id) {
-            roomId = id;
-        }
-
         document.addEventListener('DOMContentLoaded', () => {
             const modalElements = document.querySelectorAll('[id^="sellModal"]');
-
+    
             modalElements.forEach((modalElement) => {
                 const roomId = modalElement.id.replace('sellModal', '');
                 const calculationTypeSelect = modalElement.querySelector('#calculation_type');
                 const areaCalculationTypeSelect = modalElement.querySelector('#area_calculation_type');
-                const parkingRatePerSqFtGroup = modalElement.querySelector(
-                    `#parking_rate_per_sq_ft_group${roomId}`);
+                const parkingRatePerSqFtGroup = modalElement.querySelector(`#parking_rate_per_sq_ft_group${roomId}`);
                 const totalSqFtGroup = modalElement.querySelector(`#total_sq_ft_group${roomId}`);
                 const advancePaymentSelect = modalElement.querySelector('#advance_payment');
                 const advanceAmountGroup = modalElement.querySelector('#advance_amount_group');
@@ -479,39 +474,38 @@
                 const transferIdGroup = modalElement.querySelector('#transfer_id_group');
                 const chequeIdGroup = modalElement.querySelector('#cheque_id_group');
                 const lastDateGroup = modalElement.querySelector('#last_date_group');
-
+                const saleInput = modalElement.querySelector('#sale_amount');
+                const totalElement = modalElement.querySelector('#total');
+    
                 const flatFields = modalElement.querySelector('#flat_fields');
                 const shopFields = modalElement.querySelector('#shop_fields');
                 const tableSpaceFields = modalElement.querySelector('#table_space_fields');
                 const kioskFields = modalElement.querySelector('#kiosk_fields');
                 const chairSpaceFields = modalElement.querySelector('#chair_space_fields');
-
-                // Debugging: Confirm if elements are correctly selected
-                console.log("Modal Element ID:", modalElement.id);
-                console.log("Room ID:", roomId);
-                console.log("Calculation Type Select:", calculationTypeSelect);
-                console.log("Area Calculation Type Select:", areaCalculationTypeSelect);
-
-                function showRelevantAreaFields() {
+    
+                function showRelevantAreaFields(roomType) {
+                    hideAllFields();
+                    if (roomType === 'Flat' && flatFields) {
+                        flatFields.classList.remove('d-none');
+                    } else if (roomType === 'Shop' && shopFields) {
+                        shopFields.classList.remove('d-none');
+                    } else if (roomType === 'Table Space' && tableSpaceFields) {
+                        tableSpaceFields.classList.remove('d-none');
+                    } else if (roomType === 'Kiosk' && kioskFields) {
+                        kioskFields.classList.remove('d-none');
+                    } else if (roomType === 'Chair Space' && chairSpaceFields) {
+                        chairSpaceFields.classList.remove('d-none');
+                    }
+                }
+    
+                function hideAllFields() {
                     if (flatFields) flatFields.classList.add('d-none');
                     if (shopFields) shopFields.classList.add('d-none');
                     if (tableSpaceFields) tableSpaceFields.classList.add('d-none');
                     if (kioskFields) kioskFields.classList.add('d-none');
                     if (chairSpaceFields) chairSpaceFields.classList.add('d-none');
-
-                    if (roomType === 'Flat') {
-                        flatFields.classList.remove('d-none');
-                    } else if (roomType === 'Shop') {
-                        shopFields.classList.remove('d-none');
-                    } else if (roomType === 'Table Space') {
-                        tableSpaceFields.classList.remove('d-none');
-                    } else if (roomType === 'Kiosk') {
-                        kioskFields.classList.remove('d-none');
-                    } else if (roomType === 'Chair Space') {
-                        chairSpaceFields.classList.remove('d-none');
-                    }
                 }
-
+    
                 function toggleAdvancePaymentFields() {
                     if (advancePaymentSelect && advancePaymentSelect.value === 'now') {
                         if (advanceAmountGroup) advanceAmountGroup.classList.remove('d-none');
@@ -523,7 +517,7 @@
                         if (chequeIdGroup) chequeIdGroup.classList.add('d-none');
                     }
                 }
-
+    
                 function togglePaymentMethodFields() {
                     if (paymentMethodSelect && paymentMethodSelect.value === 'bank_transfer') {
                         if (transferIdGroup) transferIdGroup.classList.remove('d-none');
@@ -536,7 +530,7 @@
                         if (chequeIdGroup) chequeIdGroup.classList.add('d-none');
                     }
                 }
-
+    
                 function toggleCalculationFields() {
                     if (calculationTypeSelect && calculationTypeSelect.value === 'rate_per_sq_ft') {
                         if (parkingRatePerSqFtGroup) parkingRatePerSqFtGroup.classList.remove('d-none');
@@ -546,11 +540,11 @@
                         if (totalSqFtGroup) totalSqFtGroup.classList.add('d-none');
                     }
                 }
-
+    
                 function toggleAreaCalculationFields() {
                     const buildUpAreaField = modalElement.querySelector('#build_up_area');
                     const carpetAreaField = modalElement.querySelector('#carpet_area');
-
+    
                     if (areaCalculationTypeSelect && areaCalculationTypeSelect.value === 'build_up_area') {
                         if (buildUpAreaField) buildUpAreaField.classList.remove('d-none');
                         if (carpetAreaField) carpetAreaField.classList.add('d-none');
@@ -559,7 +553,38 @@
                         if (carpetAreaField) carpetAreaField.classList.remove('d-none');
                     }
                 }
+    
+                    function updateTotalAmount() {
+                    const saleAmount = saleInput ? saleInput.value : 0; // Default to 0 if saleInput is null
+                    const areaCalculationType = areaCalculationTypeSelect ? areaCalculationTypeSelect.value : '';
 
+                    if (!roomId) {
+                        console.error('Room ID is not defined.');
+                        return;
+                    }
+
+                    $.ajax({
+                        type: 'POST',
+                        url: "{{ route('admin.sales.caltype') }}",
+                        data: {
+                            room_id: roomId,
+                            type: areaCalculationType,
+                            _token: '{{ csrf_token() }}'
+                        },
+                        dataType: "json",
+                        success: function(resultData) {
+                            console.log('Result Data:', resultData); 
+                            const totalRate = parseInt(resultData.sqft) * parseInt(saleAmount);
+                            console.log('Total Rate:', totalRate); 
+                            if (totalElement) totalElement.textContent = totalRate;
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('Error:', error);
+                        }
+                    });
+                }
+
+    
                 if (advancePaymentSelect) {
                     advancePaymentSelect.addEventListener('change', toggleAdvancePaymentFields);
                 }
@@ -570,45 +595,22 @@
                     calculationTypeSelect.addEventListener('change', toggleCalculationFields);
                 }
                 if (areaCalculationTypeSelect) {
-                    areaCalculationTypeSelect.addEventListener('change', toggleAreaCalculationFields);
+                    areaCalculationTypeSelect.addEventListener('change', updateTotalAmount);
                 }
-
-                // Initial setup based on current values
+                if (saleInput) {
+                    saleInput.addEventListener('input', updateTotalAmount);
+                }
+    
                 toggleAdvancePaymentFields();
                 togglePaymentMethodFields();
                 toggleCalculationFields();
                 toggleAreaCalculationFields();
-                showRelevantAreaFields();
+                updateTotalAmount();
+    
+                const roomType = modalElement.getAttribute('data-room-type');
+                showRelevantAreaFields(roomType);
             });
         });
-
-        const saleInput = $('#sale_amount');
-        let saleAmount = 0;
-        const areaCalculationType = $('#area_calculation_type');
-
-        saleInput.change((event) => {
-           saleAmount = event.target.value;
-        })
-
-        areaCalculationType.change((event) => {
-            const type = event.target.value;
-
-            $.ajax({
-                type: 'POST',
-                url: "{{route('admin.sales.caltype')}}",
-                data: {
-                    room_id: roomId,
-                    type: type,
-                    _token: '{{ csrf_token() }}'
-                },
-                dataType: "text",
-                success: function(resultData) {
-                    let resultJson = JSON.parse(resultData);
-                    const totalRate = parseInt(resultJson.sqft) * parseInt(saleAmount);
-
-                    $('#total').text(totalRate)
-                }
-            });
-        })
     </script>
+    
 @endsection

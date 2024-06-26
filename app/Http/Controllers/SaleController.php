@@ -162,15 +162,12 @@ class SaleController extends Controller
 
     public function showCustomer($customerName)
     {
-        // Fetch all sales for the given customer name
         $sales = Sale::where('customer_name', $customerName)->get();
 
-        // Handle case where no sales are found
         if ($sales->isEmpty()) {
             abort(404, 'Customer not found.');
         }
 
-        // Pass the sales data to the view
         return view('customers.show', compact('sales'));
     }
 
