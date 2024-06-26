@@ -161,12 +161,12 @@
                                     </select>
                                 </div>
                                 <div class="form-group mb-4">
-                                    <h5 class="form-label">Chair Material</h5>
-                                    <input type="text" name="chair_material" class="form-control" value="{{ $room->chair_material }}">
+                                    <h5 class="form-label">Chair Space</h5>
+                                    <input type="text" name="chair_space_in_sq" class="form-control" value="{{ $room->chair_space_in_sq }}">
                                 </div>
                                 <div class="form-group mb-4">
-                                    <h5 class="form-label">Chair Price</h5>
-                                    <input type="text" name="chair_price" class="form-control" value="{{ $room->chair_price }}">
+                                    <h5 class="form-label">Chair Space Rate</h5>
+                                    <input type="text" name="chair_space_rate" class="form-control" value="{{ $room->chair_space_rate }}">
                                 </div>
                             </div>
 

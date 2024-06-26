@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Redirect;
 use App\Models\Building;
 use App\Models\Sale;
 use App\Models\MasterSetting; 
+use Illuminate\Support\Facades\Log;
+
 
 
 class RoomController extends Controller
@@ -230,5 +232,54 @@ class RoomController extends Controller
         $master_settings = MasterSetting::first(); 
         return view('rooms.show', compact('room', 'master_settings'));
     }
+    public function showFlats($building_id)
+    {
+        $building = Building::findOrFail($building_id);
+        $rooms = Room::where('building_id', $building_id)->where('room_type', 'flat')->get();
+        $page = 'rooms';
+
+        return view('rooms.flats', compact('rooms', 'page', 'building_id', 'building'));
+    }
+    public function showShops($building_id)
+    {
+        $rooms = Room::where('building_id', $building_id)->where('room_type', 'Shops')->get();
+        $building = Building::find($building_id);
+        $page = 'Shops'; 
+
+        Log::info('Fetched rooms:', $rooms->toArray());
     
+        return view('rooms.shops', compact('rooms', 'building', 'page'));
+    }
+    public function showTableSpaces($building_id)
+    {
+        $rooms = Room::where('building_id', $building_id)->where('room_type', 'table space')->get();
+        $building = Building::find($building_id);
+        $page = 'table-spaces'; // Set the $page variable to 'table-spaces'
+    
+        return view('rooms.table-spaces', compact('rooms', 'building', 'page'));
+    }
+    public function kiosks($building_id)
+    {
+        $building = Building::find($building_id);
+        $rooms = Room::where('building_id', $building_id)
+                     ->where('room_type', 'Kiosk')
+                     ->get();
+        $page = 'Kiosks'; // Define the $page variable
+    
+        return view('rooms.kiosk', compact('building', 'rooms', 'page'));
+    }
+    public function chairSpaces($building_id)
+    {
+        $type = 'Chair Space'; // This should reflect your actual room type
+    
+        // Retrieve chair spaces for the specified building_id
+        $chairSpaces = Room::where('building_id', $building_id)
+                           ->where('room_type', 'Chair Space')
+                           ->get();
+    
+        $page = 'chair-spaces'; // Set the $page variable to 'chair-spaces'
+    
+        return view('rooms.chair-space', compact('chairSpaces', 'type', 'page'));
+    }
+       
 }

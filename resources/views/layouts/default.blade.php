@@ -19,6 +19,8 @@
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/boxicons@2.1.0/css/boxicons.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
 
   <title>{{ $title }}</title>
   
@@ -53,6 +55,52 @@
                     <span class="nav-link-text ms-1">Add Room</span>
                 </a>
             </li>
+
+            <li class="nav-item">
+              <a class="nav-link text-white {{ $page == 'rooms' ? 'active bg-gradient-info' : '' }}" href="{{ route('admin.flats.index', ['building_id' => $building->id ?? 0]) }}">
+                  <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+                      <i class="material-icons opacity-10">home</i>
+                  </div>
+                  <span class="nav-link-text ms-1">Flats</span>
+              </a>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link text-white {{ $page == 'shops' ? 'active bg-gradient-info' : '' }}" href="{{ route('admin.shops.index', ['building_id' => $building->id ?? 0]) }}">
+                <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+                    <i class="material-icons opacity-10">store</i>
+                </div>
+                <span class="nav-link-text ms-1">Shops</span>
+            </a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link text-white {{ $page == 'table-spaces' ? 'active bg-gradient-info' : '' }}" href="{{ route('admin.table-spaces.index', ['building_id' => $building->id ?? 0]) }}">
+              <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+                  <i class="material-icons opacity-10">table_chart</i>
+              </div>
+              <span class="nav-link-text ms-1">Table Spaces</span>
+          </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link text-white {{ $page == 'kiosks' ? 'active bg-gradient-info' : '' }}" href="{{ route('admin.kiosks.index', ['building_id' => $building->id ?? 0]) }}">
+            <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+                <i class="material-icons opacity-10">store</i>
+            </div>
+            <span class="nav-link-text ms-1">Kiosks</span>
+        </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link text-white {{ $page == 'chair-spaces' ? 'active bg-gradient-info' : '' }}" href="{{ route('admin.chair-spaces', ['building_id' => $building->id ?? 0]) }}">
+          <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+              <i class="material-icons opacity-10">event_seat</i>
+          </div>
+          <span class="nav-link-text ms-1">Chair Spaces</span>
+      </a>
+  </li>
+  
+
+
         @endif
         
 

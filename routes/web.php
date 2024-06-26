@@ -102,6 +102,13 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
         Route::post('/masters', [MasterSettingsController::class, 'store'])->name('masters.store');
         Route::get('/get-gst-percentages', [MasterSettingsController::class, 'getGstPercentages'])->name('getGstPercentages');
 
+        Route::get('/flats/{building_id}', [RoomController::class, 'showFlats'])->name('flats.index');
+        Route::get('/shops/{building_id}', [RoomController::class, 'showShops'])->name('shops.index');
+        Route::get('/table-spaces/{building_id}', [RoomController::class, 'showTableSpaces'])->name('table-spaces.index');
+        Route::get('buildings/{building_id}/kiosks', [RoomController::class, 'kiosks'])->name('kiosks.index');
+        Route::get('/buildings/{building_id}/chair-spaces', 'App\Http\Controllers\RoomController@chairSpaces')->name('chair-spaces');
+
+
 
     });
 });
