@@ -14,32 +14,9 @@
                             <h5 class="font-weight-bolder">₹{{ number_format($ExpectedPrice) }}</h5>
                         </div>
                     </div>
+                   
                 </div>
-                {{-- <div class="col-md-6 col-xl-3">
-                    <div class="bg-light rounded d-flex flex-column align-items-center justify-content-center p-4 h-100">
-                        <i class="fa fa-chart-bar fa-4x text-primary mb-3"></i>
-                        <div class="text-center">
-                            <p class="mb-2">Total Sold Amount</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 col-xl-3">
-                    <div class="bg-light rounded d-flex flex-column align-items-center justify-content-center p-4 h-100">
-                        <i class="fa fa-chart-area fa-4x text-primary mb-3"></i>
-                        <div class="text-center">
-                            <p class="mb-2">Total with Gst</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 col-xl-3">
-                    <div class="bg-light rounded d-flex flex-column align-items-center justify-content-center p-4 h-100">
-                        <i class="fa fa-chart-pie fa-4x text-primary mb-3"></i>
-                        <div class="text-center">
-                            <p class="mb-2">Total Revenue</p>
-                            <h6 class="mb-0"></h6>
-                        </div>
-                    </div>
-                </div> --}}
+              
             </div>
         </div>
         

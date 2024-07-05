@@ -56,12 +56,11 @@
                                     
                                     <div class="modal fade" id="sellModal{{ $room->id }}" tabindex="-1"
                                         aria-labelledby="sellModalLabel{{ $room->id }}" aria-hidden="true">
-                                        <div class="modal-dialog">
+                                        <div class="modal-dialog modal-lg">
                                             <div class="modal-content">
                                                 <div class="modal-header">
-                                                    <h5 class="modal-title"
-                                                        id="sellModalLabel{{ $room->id }}">Sell Room
-                                                        {{ $room->name }}</h5>
+                                                    <h5 class="modal-title" id="sellModalLabel{{ $room->id }}">Sell {{ $room->room_type }} {{ $room->name }}</h5>
+
                                                     <button type="button" class="close" data-dismiss="modal"
                                                         aria-label="Close">
                                                         <span aria-hidden="true">&times;</span>
@@ -173,6 +172,21 @@
                                                                     <input type="number" step="0.01" class="form-control" id="gst_percent" name="gst_percent" required>
                                                                 </div>
                                                             </div>
+                                                            
+                                                          
+                                                            <div class="col-6">
+                                                                <div class="form-group">
+                                                                    <label for="cash_in_hand_percent">Cash in Hand %</label>
+                                                                    <input type="number" step="0.01" class="form-control" id="cash_in_hand_percent{{ $room->id }}" name="cash_in_hand_percent" oninput="calculateInHandAmount({{ $room->id }})">
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-6">
+                                                                <div class="form-group">
+                                                                    <label for="in_hand_amount">In Hand Amount</label>
+                                                                    <input type="number" step="0.01" class="form-control" id="in_hand_amount{{ $room->id }}" name="in_hand_amount" readonly>
+                                                                </div>
+                                                            </div>
+                                                        
                                                             <div class="col-6">
                                                                 <div class="form-group">
                                                                     <label for="advance_payment">Total Advance
@@ -187,8 +201,6 @@
                                                                     </select>
                                                                 </div>
                                                             </div>
-                                                          
-                                                           
                                                             <div class="col-6">
                                                                 <div class="form-group d-none"
                                                                     id="advance_amount_group">
@@ -269,6 +281,8 @@
                                                                 </div>
                                                             </div>
                                                         </div>
+                                                        </div>
+
                                                     </form>
                                                 </div>
                                             </div>
@@ -284,7 +298,6 @@
         </div>
     @endforeach
 </div>
-
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         const modalElements = document.querySelectorAll('[id^="sellModal"]');
@@ -310,6 +323,8 @@
             const discountInput = modalElement.querySelector('#discount_percent');
             const advanceAmountInput = modalElement.querySelector('#advance_amount');
             const remainingBalanceElement = modalElement.querySelector('#remaining_balance');
+            const cashInHandPercentInput = modalElement.querySelector(`#cash_in_hand_percent${roomId}`);
+            const inHandAmountInput = modalElement.querySelector(`#in_hand_amount${roomId}`);
 
             const flatFields = modalElement.querySelector('#flat_fields');
             const shopFields = modalElement.querySelector('#shop_fields');
@@ -389,7 +404,7 @@
             }
 
             function updateTotalAmount() {
-                const saleAmount = saleInput ? saleInput.value : 0; 
+                const saleAmount = saleInput ? parseFloat(saleInput.value) || 0 : 0;
                 const areaCalculationType = areaCalculationTypeSelect ? areaCalculationTypeSelect.value : '';
 
                 if (!roomId) {
@@ -407,8 +422,8 @@
                     },
                     dataType: "json",
                     success: function(resultData) {
-                        console.log('Result Data:', resultData); 
-                        let totalRate = parseInt(resultData.sqft) * parseInt(saleAmount);
+                        console.log('Result Data:', resultData);
+                        let totalRate = parseInt(resultData.sqft) * parseFloat(saleAmount);
                         console.log('Total Rate:', totalRate);
 
                         // Add parking amount if applicable
@@ -435,11 +450,21 @@
                         const advanceAmount = parseFloat(advanceAmountInput.value) || 0;
                         const remainingBalance = totalRate - advanceAmount;
                         if (remainingBalanceElement) remainingBalanceElement.textContent = remainingBalance.toFixed(2);
+
+                        // Update in hand amount
+                        calculateInHandAmount(roomId, totalRate);
                     },
                     error: function(xhr, status, error) {
                         console.error('Error:', error);
                     }
                 });
+            }
+
+            function calculateInHandAmount(roomId, totalRate) {
+                const cashInHandPercent = parseFloat(document.getElementById(`cash_in_hand_percent${roomId}`).value) || 0;
+                const cashInHandAmount = (cashInHandPercent / 100) * totalRate;
+                // const inHandAmount = totalRate - cashInHandAmount;
+                document.getElementById(`in_hand_amount${roomId}`).value = cashInHandAmount.toFixed(2);
             }
 
             if (advancePaymentSelect) {
@@ -453,7 +478,6 @@
             }
             if (areaCalculationTypeSelect) {
                 areaCalculationTypeSelect.addEventListener('change', updateTotalAmount);
-
             }
             if (saleInput) {
                 saleInput.addEventListener('input', updateTotalAmount);
@@ -473,6 +497,9 @@
             if (advanceAmountInput) {
                 advanceAmountInput.addEventListener('input', updateTotalAmount);
             }
+            if (cashInHandPercentInput) {
+                cashInHandPercentInput.addEventListener('input', () => calculateInHandAmount(roomId, parseFloat(totalElement.textContent)));
+            }
 
             toggleAdvancePaymentFields();
             togglePaymentMethodFields();
@@ -485,9 +512,6 @@
         });
     });
 </script>
-
-
-
 
 
 @endsection
