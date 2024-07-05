@@ -1,152 +1,167 @@
 @extends('layouts.default', ['title' => 'Customer Details'])
 
 @section('content')
-@php
-    $page = $page ?? 'default-page'; // Provide a default value for $page
-@endphp
-    <div class="container-fluid py-4">
-        <div class="row">
-            <div class="col-12">
-                <div class="card my-4">
-                    <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
-                        <div class="bg-info shadow-info border-radius-lg p-3">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div class="pe-3">
-                                    <h2 class="text-white">{{ strtoupper($sales[0]->customer_name) }}</h2>
-                                </div>
-                                <div>
-                                    <button class="btn btn-light text-info">
-                                        <i class="fas fa-print"></i> Print
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card-body px-0 pb-2">
+<div class="container-fluid py-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            @foreach($sales as $sale)
+            <h5 class="mb-0" style="text-transform:capitalize">{{ $sale->customer_name }}</h5>
+            @endforeach
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table id="customerDetailsTable" class="table table-bordered table-hover table-striped" style="width:100%">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Building Name</th>
+                            <th>Contact</th>
+                            <th>Email</th>
+                            <th>Room Model</th>
+                            <th>Details</th>
+                        </tr>
+                    </thead>
+                    <tbody>
                         @foreach($sales as $sale)
-                            <div class="col-12 mb-4">
-                                <div class="card border-0 shadow">
-                                    <div class="card-header bg-info text-white">
-                                        <h3 style="text-transform: capitalize">{{ $sale->room->room_number }}</h3>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="row mb-3">
-                                            <div class="col-md-4 fs-5"><strong>Building Name:</strong> {{ $sale->room->building->building_name }}</div>
-                                            <div class="col-md-4 fs-5"><strong>Contact:</strong> {{ $sale->customer_contact }}</div>
-                                            <div class="col-md-4 fs-5"><strong>Email:</strong> {{ $sale->customer_email }}</div>
-                                            <div class="col-md-4 fs-5"><strong>Room Model:</strong> {{ $sale->room->room_type }}</div>  
-                                        </div>
-                                        <div class="row mb-3">
-                                            @if ($sale->room->room_type === 'Flat')
-                                            <div class="row mb-3">
-                                            <div class="col-md-4 fs-5"><strong>Super Build Up Area in sq ft:</strong> {{ $sale->room->flat_build_up_area }}</div>
-                                            <div class="col-md-4 fs-5"><strong>Super Build Up Area Price per sq ft:</strong> {{ $sale->room->flat_super_build_up_price }}</div>
-                                            <div class="col-md-4 fs-5"><strong>Carpet Area in sq ft:</strong> {{ $sale->room->flat_carpet_area }}</div>
-                                        </div>
-                                        <div class="row mb-3">
+                        <tr>
+                            <td style="text-transform:capitalize;color:black;">{{ $sale->room->building->building_name }}</td>
+                            <td style="color:black;">{{ $sale->customer_contact }}</td>
+                            <td style="color:black;">{{ $sale->customer_email }}</td>
+                            <td style="color:black;">{{ $sale->room->room_type }}</td>
+                            <td>
+                                <table class="table table-sm table-borderless">
+                                    <tbody>
+                                        @if ($sale->room->room_type === 'Flat')
+                                        <tr><td><strong style="color:black;">Room Number:</strong></td><td style="color:black; text-transform: capitalize">{{ $sale->room->room_number }}</td></tr>
+                                        <tr><td><strong style="color:black;">Flat Model:</strong></td><td style="color:black;">{{ $sale->room->flat_model }}</td></tr>
 
-                                            <div class="col-md-4 fs-5"><strong>Carpet Area Price per sq ft:</strong> {{ $sale->room->flat_carpet_area_price }}</div>
-                                                @if ($sale->area_calculation_type === 'carpet_area_rate')
-                                                    <div class="col-md-4 fs-5"><strong>Flat Expected Rate :</strong> {{ $sale->room->flat_expected_carpet_area_price }}</div>
-                                                    @elseif ($sale->area_calculation_type === 'built_up_area_rate')
-                                                    <div class="col-md-4 fs-5"><strong>flat Expected Rate :</strong> {{ $sale->room->flat_expected_super_buildup_area_price }}</div>
-                                                @endif
-
-                                                @if ($sale->calculation_type == 'fixed_amount')
-                                                <div class="col-md-4 fs-5"><strong>Parking:</strong>  Unparked</div>
-                                                    @elseif ( $sale->calculation_type == 'rate_per_sq_ft')
-                                                    <div class="col-md-4 fs-5"><strong>Parking Sq Ft:</strong> {{ $sale->total_sq_ft_for_parking }}</div>
-                                                    <div class="col-md-4 fs-5"><strong>Parking Rate (per sq ft) :</strong> {{ $sale->parking_rate_per_sq_ft }}</div>
-                                                @endif
-                                            </div>
-                                            <div class="row mb-3">
-
-                                            @elseif ($sale->room->room_type === 'Shops')
-                                            <div class="col-md-4 fs-5"><strong>Shop Type:</strong> {{ $sale->room->shop_type }}</div>
-                                            <div class="col-md-4 fs-5"><strong>Super Build Up Area in sq ft:</strong> {{ $sale->room->build_up_area }}</div>
-                                            <div class="col-md-4 fs-5"><strong>Super Build Up Area Price per sq ft:</strong> {{ $sale->room->super_build_up_price }}</div>
-                                            <div class="col-md-4 fs-5"><strong>Carpet Area in sq ft:</strong> {{ $sale->room->carpet_area }}</div>
-                                            <div class="col-md-4 fs-5"><strong>Carpet Area Price per sq ft:</strong> {{ $sale->room->carpet_area_price }}</div>
-                                                @if ($sale->area_calculation_type === 'carpet_area_rate')
-                                                    <div class="col-md-4 fs-5"><strong> Expected Rate :</strong> {{ $sale->room->expected_carpet_area_price }}</div>
-                                                    @elseif ($sale->area_calculation_type === 'built_up_area_rate')
-                                                    <div class="col-md-4 fs-5"><strong> Expected Rate :</strong> {{ $sale->room->expected_super_buildup_area_price }}</div>
-                                                @endif
-
-                                                @if ($sale->calculation_type == 'fixed_amount')
-                                                <div class="col-md-4 fs-5"><strong>Parking:</strong>  Unparked</div>
-                                                    @elseif ( $sale->calculation_type == 'rate_per_sq_ft')
-                                                    <div class="col-md-4 fs-5"><strong>Parking Sq Ft:</strong> {{ $sale->total_sq_ft_for_parking }}</div>
-                                                    <div class="col-md-4 fs-5"><strong>Parking Rate (per sq ft) :</strong> {{ $sale->parking_rate_per_sq_ft }}</div>
-                                                @endif
-
-
-                                            @elseif ($sale->room->room_type === 'Table space')
-                                            <div class="col-md-4 fs-5"><strong>Type:</strong> {{ $sale->room->space_type }}</div>
-                                            <div class="col-md-4 fs-5"><strong>Space Area :</strong> {{ $sale->room->space_area }}</div>
-                                            <div class="col-md-4 fs-5"><strong>Space Rate:</strong> {{ $sale->room->space_rate }}</div>
-                                                @if ($sale->area_calculation_type === 'carpet_area_rate')
-                                                    <div class="col-md-4 fs-5"><strong> Expected Rate :</strong> {{ $sale->room->space_expected_price }}</div>
-                                                    @elseif ($sale->area_calculation_type === 'built_up_area_rate')
-                                                    <div class="col-md-4 fs-5"><strong> Expected Rate :</strong> {{ $sale->room->space_expected_price }}</div>
-                                                @endif
-
-                                                @if ($sale->calculation_type == 'fixed_amount')
-                                                <div class="col-md-4 fs-5"><strong>Parking:</strong>  Unparked</div>
-                                                    @elseif ( $sale->calculation_type == 'rate_per_sq_ft')
-                                                    <div class="col-md-4 fs-5"><strong>Parking Sq Ft:</strong> {{ $sale->total_sq_ft_for_parking }}</div>
-                                                    <div class="col-md-4 fs-5"><strong>Parking Rate (per sq ft) :</strong> {{ $sale->parking_rate_per_sq_ft }}</div>
-                                                @endif
-
-
-
-                                            @elseif ($sale->room->room_type === 'Chair space')
-                                            <div class="col-md-4 fs-5"><strong>Chair Name:</strong> {{ $sale->room->chair_name }}</div>
-                                            <div class="col-md-4 fs-5"><strong>Chair Type :</strong> {{ $sale->room->chair_type }}</div>
-                                            <div class="col-md-4 fs-5"><strong>Chair Material:</strong> {{ $sale->room->chair_material }}</div>
-                                            <div class="col-md-4 fs-5"><strong>Chair space in sq :</strong> {{ $sale->room->chair_space_in_sq }}</div>
-                                            <div class="col-md-4 fs-5"><strong>Chair space Rate in sq :</strong> {{ $sale->room->chair_space_in_sq }}</div>
-                                            <div class="col-md-4 fs-5"><strong>Chair space Expected Rate :</strong> {{ $sale->room->chair_space_expected_rate }}</div>
+                                            @if ($sale->area_calculation_type === 'carpet_area_rate')
+                                            <tr><td><strong style="color:black;">Carpet Area sq ft:</strong></td><td style="color:black;">{{ $sale->room->flat_carpet_area }} sq ft</td></tr>
+                                            <tr><td><strong style="color:black;">Carpet Area Price per sq ft:</strong></td><td style="color:black;">₹{{ $sale->room->flat_carpet_area_price }}</td></tr>
+                                            <tr><td><strong style="color:black;">Expected Amount:</strong></td><td style="color:black;">₹{{ $sale->room->flat_expected_carpet_area_price }}</td></tr>
+                                            @elseif ($sale->area_calculation_type === 'built_up_area_rate')
+                                            <tr><td><strong style="color:black;">Super Build Up sq ft:</strong></td><td style="color:black;">{{ $sale->room->flat_build_up_area }}</td></tr>
+                                            <tr><td><strong style="color:black;">Super Build Up Price per sq ft:</strong></td><td style="color:black;">₹{{ $sale->room->flat_super_build_up_price }}</td></tr>
+                                            <tr><td><strong style="color:black;">Expected Amount:</strong></td><td style="color:black;">₹{{ $sale->room->flat_expected_super_buildup_area_price }}</td></tr>
                                             @endif
-
-
-
-                                        </div>
-                                        <div class="row mb-3">
-                                           
-                                            <div class="col-md-4 fs-5"><strong>Sale Amount in Sq:</strong> {{ number_format($sale->sale_amount) }}</div>
-                                            
-                                        </div>
-                                     
-                                        <div class="row mb-3">
-                                            <div class="col-md-4 fs-5"><strong>Parking Amount:</strong> {{ number_format($sale->parking_amount) }}</div>
-                                            <div class="col-md-4 fs-5"><strong>Room Rate:</strong> {{ number_format($sale->room_rate) }}</div>
-                                            <div class="col-md-4 fs-5"><strong>GST Percentage:</strong> {{ $sale->gst_percent }}%</div>
-                                        </div>
-                                        <div class="row mb-3">
-                                            <div class="col-md-4 fs-5"><strong>Total With GST:</strong> {{ $sale->total_with_gst }}</div>
-                                            <div class="col-md-4 fs-5"><strong>Discount Percent:</strong> {{ $sale->discount_percent }}%</div>
-                                            <div class="col-md-4 fs-5"><strong>Total With Discount:</strong> {{ $sale->total_with_discount }}</div>
-                                        </div>
-                                        <div class="row mb-3">
-                                            <div class="col-md-4 fs-5"><strong>Advance Payment:</strong> {{ $sale->advance_amount }}</div>
-                                            <div class="col-md-4 fs-5"><strong>Remaining Balance:</strong> {{ $sale->remaining_balance }}</div>
-                                        </div>
-                                        @if ($sale->advance_payment === 'bank_transfer')
-                                            <div class="row mb-3">
-                                                <div class="col-md-4 fs-5"><strong>Transfer ID:</strong> {{ $sale->transfer_id }}</div>
-                                            </div>
-                                        @elseif ($sale->advance_payment === 'later')
-   
-    </div>
-@endif
-                                    </div>
-                                </div>
-                            </div>
+                                        <tr><td><strong style="color:black;">Sale Amount:</strong></td><td style="color:black;">₹{{ $sale->sale_amount }}</td></tr>
+                                        <tr><td><strong style="color:black;">Gst % :</strong></td><td style="color:black;">₹{{ $sale->gst_percent }}</td></tr>
+                                        <tr><td><strong style="color:black;">GST Amount:</strong></td>
+                                        <td style="color:black;">₹{{ number_format($sale->total_with_gst - $sale->room_rate, 2) }}</td></tr>
+                                        <tr><td><strong style="color:black;">Parking Amount :</strong></td><td style="color:black;">₹{{ $sale->parking_amount }}</td></tr>
+                                        <tr>
+                                            <td><strong style="color:black;">No of Installments :</strong></td>
+                                            <td id="remaining-installments-{{ $sale->id }}" style="color:black;">{{ $sale->installments }}</td>
+                                        </tr>
+                                        <tr><td><strong style="color:black;">Amount per Installment :</strong></td>
+                                        <td style="color:black;">₹{{ $sale->installments > 0 ? number_format($sale->remaining_balance / $sale->installments, 2) : 'N/A' }}</td></tr>
+                                        <tr style="display: none;">
+                                            <td><strong style="color:black;">Remaining Installments Total :</strong></td>
+                                            <td id="remaining-installments-total">{{ count($sales) }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="2">
+                                                <form id="markPaidForm-{{ $sale->id }}" action="{{ route('admin.installments.markPaid', $sale->id) }}" method="POST" class="mark-paid-form">
+                                                    @csrf
+                                                    <div class="form-group">
+                                                        <label for="amount_paid">Amount Paid:</label>
+                                                        <input type="number" name="amount_paid" class="form-control" placeholder="Amount paid" required>
+                                                        <input type="hidden" name="installment_number" id="installment_number-{{ $sale->id }}" value="1">
+                                                    </div>
+                                                    <button type="submit" class="btn btn-primary mt-2">Mark as Paid</button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                        @elseif ($sale->room->room_type === 'Shops')
+                                        <!-- Shop details -->
+                                        @elseif ($sale->room->room_type === 'Table space')
+                                        <!-- Table space details -->
+                                        @elseif ($sale->room->room_type === 'Chair space')
+                                        <!-- Chair space details -->
+                                        @endif
+                                    </tbody>
+                                </table>
+                            </td>
+                        </tr>
                         @endforeach
-                    </div>
-                </div>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
+</div>
 @endsection
+
+@push('styles')
+<style>
+    .table td table {
+        margin-bottom: 0;
+    }
+    .table td table td {
+        padding: 0.25rem;
+    }
+    .table td, .table th, .table td table td, .table td table th {
+        color: black !important;
+    }
+</style>
+@endpush
+
+@push('scripts')
+<script>
+$(document).ready(function() {
+    $('.mark-paid-form').on('submit', function(e) {
+        e.preventDefault();
+
+        var form = $(this);
+        var saleId = form.attr('id').split('-')[1]; // Get the sale ID from form ID
+        var url = form.attr('action');
+        var amountPaid = form.find('input[name="amount_paid"]').val();
+        var installmentNumber = parseInt(form.find('input[name="installment_number"]').val());
+
+        $.ajax({
+            url: url,
+            type: 'POST',
+            data: {
+                _token: '{{ csrf_token() }}',
+                amount_paid: amountPaid,
+                installment_number: installmentNumber
+            },
+            success: function(response) {
+                if (response.success) {
+                    alert('Installment marked as paid.');
+
+                    // Update remaining installments display
+                    var remainingInstallments = response.remaining_installments;
+                    $('#remaining-installments-' + saleId).text(remainingInstallments);
+
+                    // Update remaining balance display
+                    var remainingBalance = response.remaining_balance;
+                    // Update remaining balance display here if necessary
+
+                    // Decrease the total number of installments shown
+                    var totalInstallments = parseInt($('#remaining-installments-total').text());
+                    $('#remaining-installments-total').text(totalInstallments - 1);
+
+                    // Hide the form if no remaining installments
+                    if (remainingInstallments === 0) {
+                        form.closest('tr').hide(); // Hide form or handle completion UI
+                    }
+
+                    // Update form for next installment
+                    var nextInstallmentNumber = installmentNumber + 1;
+                    form.find('input[name="installment_number"]').val(nextInstallmentNumber);
+
+                    // Optionally refresh the page or update UI as needed
+                    // location.reload(); // Uncomment if needed to refresh the page
+                } else {
+                    alert('Error marking installment as paid.');
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error marking installment as paid:', error);
+                alert('Error marking installment as paid. Please try again.');
+            }
+        });
+    });
+});
+</script>
+@endpush

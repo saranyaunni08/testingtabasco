@@ -33,12 +33,14 @@ class BuildingController extends Controller
     }
     public function index()
     {
-        // Fetch the building ID from the database, assuming you have a Building model
-        $building = Building::first(); // Adjust this according to your logic
+        $buildings = Building::all(); // Fetch all buildings
+        
     
-        // Pass the building ID to the view
-        return view('customers.index', ['building' => $building]);
+        return view('pages.buildingdashboard', [
+            'buildings' => $buildings,
+        ]);
     }
+    
     public function create()
     {
         return view('pages.addbuilding');

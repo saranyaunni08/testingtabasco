@@ -20,7 +20,7 @@
                     <div class="col-md-6">
                       <div class="form-group mb-4">
                         <label class="form-label">Building Name</label>
-                        <input name="building_name" type="text" class="form-control" required>
+                        <input name="building_name" type="text" class="form-control" style="text-transform: capitalize" required>
                       </div>
                     </div>
 
@@ -34,7 +34,7 @@
                     <div class="col-md-12">
                       <div class="form-group mb-4">
                         <label class="form-label">Address</label>
-                        <input name="building_address" type="text" class="form-control" required>
+                        <input name="building_address" type="text" class="form-control" style="text-transform: capitalize" required>
                       </div>
                     </div>
 
@@ -91,7 +91,7 @@
                       <div class="form-group">
                         <label class="form-label">Amenities</label><br>
                         <div class="form-check form-check-inline">
-                          <input class="form-check-input" type="checkbox" id="amenity1" name="building_amenities[]" value="Swimming Pool">
+                          <input class="form-check-input" type="checkbox" id="amenity1" name="building_amenities[]" value="Swimming Pool" required>
                           <label class="form-check-label" for="amenity1">Swimming Pool</label>
                         </div>
                         <div class="form-check form-check-inline">

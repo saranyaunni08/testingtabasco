@@ -32,16 +32,7 @@
                                 <div class="avatar flex-shrink-0">
                                     <img src="{{ asset('img/image.png') }}" alt="Credit Card" class="rounded">
                                 </div>
-                                <div class="dropdown">
-                                    <button class="btn p-0" type="button" id="cardOpt1" data-bs-toggle="dropdown"
-                                        aria-haspopup="true" aria-expanded="false">
-                                        <i class="bx bx-dots-vertical-rounded"></i>
-                                    </button>
-                                    <div class="dropdown-menu" aria-labelledby="cardOpt1">
-                                        <a class="dropdown-item" href="javascript:void(0);">View More</a>
-                                        <a class="dropdown-item" href="javascript:void(0);">Delete</a>
-                                    </div>
-                                </div>
+                               
                             </div>
                             <span class="fw-medium d-block mb-1">{{ $type }}</span>
                             <h4 class="card-title mb-2">₹{{ number_format($stats['total'], 2) }}</h4>
@@ -58,6 +49,15 @@
                     <div class="row p-4">
 
                         @php
+                        $floors = $rooms->groupBy('room_floor');
+                    @endphp
+
+                    @foreach ($floors as $floor => $floorRooms)
+                    <div class="floor-section mb-5">
+                        <h3 class="text-center p-3" style="background-color: #f0f8ff; color: #007bff;">Floor {{ $floor }}</h3>
+                    
+
+                        @php
                             $roomTypes = [
                                 'Flat' => [],
                                 'Shops' => [],
@@ -67,7 +67,7 @@
                                 'Kiosk' => [],
                             ];
 
-                            foreach ($rooms as $room) {
+                            foreach ($floorRooms as $room) {
                                 $roomTypes[$room->room_type][] = $room;
                             }
                         @endphp
@@ -83,7 +83,6 @@
                                                     {{ $type }}</th>
                                             </tr>
                                             <tr>
-                                                <!-- Adjust headers based on $type -->
                                                 @if ($type === 'Flat')
                                                     <th>Sl. No</th>
                                                     <th>Room Number</th>
@@ -343,13 +342,11 @@
                                                                         </div>
                                                                         <div class="col-6">
                                                                             <div class="form-group">
-                                                                                <label for="gst_percent">GST
-                                                                                    Percent</label>
-                                                                                <input type="number" class="form-control"
-                                                                                    id="gst_percent" name="gst_percent"
-                                                                                    required>
+                                                                                <label for="gst_percent">GST Percent</label>
+                                                                                <input type="number" step="0.01" class="form-control" id="gst_percent" name="gst_percent" required>
                                                                             </div>
                                                                         </div>
+                                                                        
                                                                         <div class="col-6">
                                                                             <div class="form-group">
                                                                                 <label for="advance_payment">Total Advance
@@ -366,14 +363,10 @@
                                                                         </div>
                                                                         <div class="col-6">
                                                                             <div class="form-group">
-                                                                                <label for="discount_percent">Discount
-                                                                                    (%)
-                                                                                </label>
-                                                                                <input type="number" class="form-control"
-                                                                                    id="discount_percent"
-                                                                                    name="discount_percent">
+                                                                                <label for="discount_percent">Discount (%)</label>
+                                                                                <input type="number" step="0.01" class="form-control" id="discount_percent" name="discount_percent">
                                                                             </div>
-                                                                        </div>  
+                                                                        </div>
                                                                         <div class="col-6">
                                                                             <div class="form-group d-none"
                                                                                 id="advance_amount_group">
@@ -384,6 +377,14 @@
                                                                                     name="advance_amount">
                                                                             </div>
                                                                         </div>
+
+                                                                        <div class="col-6">
+                                                                            <div class="form-group">
+                                                                                <label for="installments">Number of Installments</label>
+                                                                                <input type="number" class="form-control" id="installments" name="installments" required>
+                                                                            </div>
+                                                                        </div>
+                                                                        
                                                                         <div class="col-6">
                                                                             <div class="form-group d-none"
                                                                                 id="payment_method_group">
@@ -455,6 +456,8 @@
                             @endif
                         @endforeach
                     </div>
+                    @endforeach
+
                 </div>
             </div>
         </div>

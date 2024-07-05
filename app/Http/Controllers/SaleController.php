@@ -30,6 +30,8 @@ class SaleController extends Controller
             'cheque_id' => 'nullable|string',
             'last_date' => 'nullable|date',
             'discount_percent' => 'nullable|numeric',
+            'installments' => 'required|numeric', 
+
         ]);
 
         $room = Room::find($validatedData['room_id']);
@@ -41,7 +43,6 @@ class SaleController extends Controller
         $totalWithDiscount = isset($validatedData['discount_percent']) ? $totalWithGst - ($totalWithGst * ($validatedData['discount_percent'] / 100)) : $totalWithGst;
         $remainingBalance = $totalWithDiscount - ($validatedData['advance_amount'] ?? 0);
 
-        // Log the calculated values to debug
         Log::info('Room Rate: ' . $roomRate);
         Log::info('Parking Amount: ' . $parkingAmount);
         Log::info('Total Amount: ' . $totalAmount);
@@ -67,6 +68,7 @@ class SaleController extends Controller
         $sale->cheque_id = $validatedData['cheque_id'];
         $sale->last_date = $validatedData['last_date'];
         $sale->discount_percent = $validatedData['discount_percent'];
+        $sale->installments = $validatedData['installments']; 
         $sale->room_rate = $roomRate;
         $sale->total_amount = $totalAmount;
         $sale->parking_amount = $parkingAmount;
@@ -160,17 +162,17 @@ class SaleController extends Controller
         return view('customers.index', compact('customerNames', 'sales', 'search'));
     }
 
-    public function showCustomer($customerName)
+    public function showCustomer($customerName, Request $request)
     {
         $sales = Sale::where('customer_name', $customerName)->get();
-
-        if ($sales->isEmpty()) {
-            abort(404, 'Customer not found.');
-        }
-
-        return view('customers.show', compact('sales'));
+        
+        $page = 'customer_details'; 
+        
+        $building_id = $request->query('building_id');
+    
+        return view('customers.show', compact('sales', 'page', 'building_id'));
     }
-
+  
     function getCalculationType(Request $request) {
         $roomId = $request->input('room_id');
         $type = $request->input('type');
@@ -207,4 +209,32 @@ class SaleController extends Controller
             return response()->json($data);
         }
     }
+
+    public function markInstallmentPaid(Request $request, Sale $sale)
+    {
+        $amountPaid = $request->input('amount_paid');
+        $installmentNumber = $request->input('installment_number');
+        
+        // Check if the amount paid is valid
+        if ($amountPaid > 0 && $amountPaid <= $sale->remaining_balance) {
+            $sale->remaining_balance -= $amountPaid;
+            
+            // Decrease the number of installments
+            if ($sale->installments > 0) {
+                $sale->installments -= 1;
+            }
+    
+            // Save the updated sale information
+            $sale->save();
+    
+            return response()->json([
+                'success' => true,
+                'remaining_installments' => $sale->installments,
+                'remaining_balance' => $sale->remaining_balance
+            ]);
+        }
+    
+        return response()->json(['success' => false], 400);
+    }
+    
 }

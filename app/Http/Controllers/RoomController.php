@@ -190,22 +190,7 @@ class RoomController extends Controller
 
         return redirect()->route('admin.rooms.index')->with('success', 'Room marked as sold.');
     }
-
-    public function dashboard(Request $request)
-    {
-        $building_id = $request->query('building_id');
-        $building = Building::find($building_id);
-        $rooms = Room::where('building_id', $building_id)->get();
-
-        return view('rooms.room-dashboard', [
-            'building_id' => $building_id,
-            'building' => $building,
-            'rooms' => $rooms,
-            'page' => 'rooms',
-            'title' => 'Rooms'
-        ]);
-    }
-
+  
     public function showBuildingRooms($building_id)
     {
         $building = Building::with('rooms')->findOrFail($building_id);
@@ -213,25 +198,22 @@ class RoomController extends Controller
         return view('rooms.show', compact('building', 'rooms'));
     }
 
-    public function showRooms(Request $request)
+    public function showRooms($building_id)
     {
-        $building_id = $request->query('building_id');
-        $building = Building::find($building_id);
         $rooms = Room::where('building_id', $building_id)->get();
 
-        return view('rooms.show', [
-            'building_id' => $building_id,
-            'building' => $building,
+        return view('rooms.index', [
             'rooms' => $rooms,
-            'page' => 'rooms',
-            'title' => 'Rooms'
+            'building_id' => $building_id, 
         ]);
     }
-    public function show($id) {
-        $room = Room::findOrFail($id);
+    public function show($buildingId) {
+        $rooms = Room::where('building_id', $buildingId)->paginate(10);
         $master_settings = MasterSetting::first(); 
-        return view('rooms.show', compact('room', 'master_settings'));
+        return view('rooms.show', compact('rooms', 'master_settings'));
     }
+    
+    
     public function showFlats($building_id)
     {
         $building = Building::findOrFail($building_id);
@@ -242,21 +224,21 @@ class RoomController extends Controller
     }
     public function showShops($building_id)
     {
-        $rooms = Room::where('building_id', $building_id)->where('room_type', 'Shops')->get();
         $building = Building::find($building_id);
+        $rooms = Room::where('building_id', $building_id)->where('room_type', 'Shops')->get();
         $page = 'Shops'; 
 
         Log::info('Fetched rooms:', $rooms->toArray());
     
-        return view('rooms.shops', compact('rooms', 'building', 'page'));
+        return view('rooms.shops', compact('rooms', 'building', 'page','building_id'));
     }
     public function showTableSpaces($building_id)
     {
-        $rooms = Room::where('building_id', $building_id)->where('room_type', 'table space')->get();
         $building = Building::find($building_id);
-        $page = 'table-spaces'; // Set the $page variable to 'table-spaces'
+        $rooms = Room::where('building_id', $building_id)->where('room_type', 'table space')->get();
+        $page = 'table-spaces'; 
     
-        return view('rooms.table-spaces', compact('rooms', 'building', 'page'));
+        return view('rooms.table-spaces', compact('rooms', 'building', 'page','building_id'));
     }
     public function kiosks($building_id)
     {
@@ -264,22 +246,19 @@ class RoomController extends Controller
         $rooms = Room::where('building_id', $building_id)
                      ->where('room_type', 'Kiosk')
                      ->get();
-        $page = 'Kiosks'; // Define the $page variable
-    
-        return view('rooms.kiosk', compact('building', 'rooms', 'page'));
+        $page = 'Kiosks'; 
+        return view('rooms.kiosk', compact('building', 'rooms', 'page','building_id'));
     }
     public function chairSpaces($building_id)
     {
-        $type = 'Chair Space'; // This should reflect your actual room type
+        $type = 'Chair Space'; 
     
-        // Retrieve chair spaces for the specified building_id
         $chairSpaces = Room::where('building_id', $building_id)
                            ->where('room_type', 'Chair Space')
                            ->get();
     
-        $page = 'chair-spaces'; // Set the $page variable to 'chair-spaces'
+        $page = 'chair-spaces'; 
     
-        return view('rooms.chair-space', compact('chairSpaces', 'type', 'page'));
+        return view('rooms.chair-space', compact('chairSpaces', 'type', 'page','building_id'));
     }
-       
 }

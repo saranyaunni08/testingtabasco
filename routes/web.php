@@ -56,7 +56,9 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
         Route::get('/rooms', [RoomController::class, 'showRooms'])->name('rooms.index');
 
 
-        Route::get('/buildings/{building_id}/rooms/create', [RoomController::class, 'create'])->name('rooms.create');
+        // Route::get('/buildings/{building_id}/rooms/create', [RoomController::class, 'create'])->name('rooms.create');
+        Route::get('/rooms/create/{building_id}', 'RoomController@create')->name('admin.rooms.create');
+
 
         Route::post('admin/rooms', [RoomController::class, 'store'])->name('admin.rooms.store');
 
@@ -107,6 +109,9 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
         Route::get('/table-spaces/{building_id}', [RoomController::class, 'showTableSpaces'])->name('table-spaces.index');
         Route::get('buildings/{building_id}/kiosks', [RoomController::class, 'kiosks'])->name('kiosks.index');
         Route::get('/buildings/{building_id}/chair-spaces', 'App\Http\Controllers\RoomController@chairSpaces')->name('chair-spaces');
+
+        Route::get('/buildingdashboard', 'App\Http\Controllers\BuildingController@index')->name('buildingdashboard');
+        Route::post('/installments/{sale}/mark-paid', [SaleController::class, 'markInstallmentPaid'])->name('installments.markPaid');
 
 
 
