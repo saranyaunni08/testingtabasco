@@ -3,9 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Room extends Model
 {
+    use HasFactory;
+    use SoftDeletes;
     protected $fillable = [
         'room_number', 'room_floor', 'room_type', 'build_up_area', 'carpet_area', 'flat_rate',
         'super_build_up_price', 'carpet_area_price', 'shop_number', 'shop_type', 'shop_area',

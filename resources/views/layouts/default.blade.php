@@ -7,7 +7,6 @@
     <link rel="icon" type="image/png" href="../assets/img/favicon.png">
     <link rel="stylesheet" type="text/css"
       href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,900|Roboto+Slab:400,700" />
-    <link href="{{ asset('css/nucleo-icons.css') }}" rel="stylesheet" />
     <link href="{{ asset('css/nucleo-svg.css') }}" rel="stylesheet" />
     <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
@@ -21,6 +20,11 @@
     <link href="https://cdn.jsdelivr.net/npm/boxicons@2.1.0/css/boxicons.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+
+
 
   
     <title>{{ $title }}</title>
@@ -57,7 +61,6 @@
             <span class="nav-link-text ms-1">Building Dashboard</span>
           </a>
         </li>
-        
 
         @if(isset($buildings))
         @foreach($buildings as $b)
@@ -73,81 +76,64 @@
         @endforeach
       @endif
         @if(isset($rooms))
-          <li class="nav-item" id="roomsMenu">
-            <a class="nav-link text-white {{ $page == 'rooms' ? 'active bg-gradient-info' : '' }}"
-               href="{{ route('admin.rooms.create', ['building_id' => $building->id ?? 0]) }}">
+          
+        <li class="nav-item">
+          <a class="nav-link text-white {{ $page == 'flats' ? 'active bg-gradient-info' : '' }}"
+             href="{{ route('admin.flats.index', ['building_id' => $building->id ?? 0]) }}">
               <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
-                <i class="material-icons opacity-10">add</i>
-              </div>
-              <span class="nav-link-text ms-1">Add Room</span>
-            </a>
-          </li>
-          <li class="nav-item" id="flatsMenu">
-            <a class="nav-link text-white {{ $page == 'flats' ? 'active bg-gradient-info' : '' }}"
-               href="{{ route('admin.flats.index', ['building_id' => $building->id ?? 0]) }}">
-              <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
-                <i class="material-icons opacity-10">home</i>
+                  <i class="material-icons opacity-10">home</i>
               </div>
               <span class="nav-link-text ms-1">Flats</span>
-            </a>
-          </li>
-          <li class="nav-item" id="shopsMenu">
-            <a class="nav-link text-white {{ $page == 'Shops' ? 'active bg-gradient-info' : '' }}"
-               href="{{ route('admin.shops.index', ['building_id' => $building->id ?? 0]) }}">
+          </a>
+      </li>
+      <li class="nav-item">
+          <a class="nav-link text-white {{ $page == 'Shops' ? 'active bg-gradient-info' : '' }}"
+             href="{{ route('admin.shops.index', ['building_id' => $building->id ?? 0]) }}">
               <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
-                <i class="material-icons opacity-10">store</i>
+                  <i class="material-icons opacity-10">store</i>
               </div>
               <span class="nav-link-text ms-1">Shops</span>
-            </a>
-          </li>
-          <li class="nav-item" id="tableSpacesMenu">
-            <a class="nav-link text-white {{ $page == 'table-spaces' ? 'active bg-gradient-info' : '' }}"
-               href="{{ route('admin.table-spaces.index', ['building_id' => $building->id ?? 0]) }}">
+          </a>
+      </li>
+      <li class="nav-item">
+          <a class="nav-link text-white {{ $page == 'table-spaces' ? 'active bg-gradient-info' : '' }}"
+             href="{{ route('admin.table-spaces.index', ['building_id' => $building->id ?? 0]) }}">
               <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
-                <i class="material-icons opacity-10">table_chart</i>
+                  <i class="material-icons opacity-10">table_chart</i>
               </div>
               <span class="nav-link-text ms-1">Table Spaces</span>
-            </a>
-          </li>
-          <li class="nav-item" id="kiosksMenu">
-            <a class="nav-link text-white {{ $page == 'Kiosks' ? 'active bg-gradient-info' : '' }}"
-               href="{{ route('admin.kiosks.index', ['building_id' => $building->id ?? 0]) }}">
+          </a>
+      </li>
+      <li class="nav-item">
+          <a class="nav-link text-white {{ $page == 'Kiosks' ? 'active bg-gradient-info' : '' }}"
+             href="{{ route('admin.kiosks.index', ['building_id' => $building->id ?? 0]) }}">
               <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
-                <i class="material-icons opacity-10">store</i>
+                  <i class="material-icons opacity-10">store</i>
               </div>
               <span class="nav-link-text ms-1">Kiosks</span>
-            </a>
-          </li>
-          <li class="nav-item" id="chairSpacesMenu">
-            <a class="nav-link text-white {{ $page == 'chair-spaces' ? 'active bg-gradient-info' : '' }}"
-               href="{{ route('admin.chair-spaces', ['building_id' => $building->id ?? 0]) }}">
+          </a>
+      </li>
+      <li class="nav-item">
+          <a class="nav-link text-white {{ $page == 'chair-spaces' ? 'active bg-gradient-info' : '' }}"
+             href="{{ route('admin.chair-spaces.index', ['building_id' => $building->id ?? 0]) }}">
               <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
-                <i class="material-icons opacity-10">event_seat</i>
+                  <i class="material-icons opacity-10">event_seat</i>
               </div>
               <span class="nav-link-text ms-1">Chair Spaces</span>
-            </a>
-          </li>
-        @endif
-
-
-        {{-- <li class="nav-item" id="customersMenu">
-          <a class="nav-link text-white {{ $page == 'customers' ? 'active bg-gradient-info' : '' }}"
-             href="{{ route('admin.customers.index') }}">
-            <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
-              <i class="material-icons opacity-10">person</i>
-            </div>
-            <span class="nav-link-text ms-1">Customers</span>
           </a>
-        </li>
-        <li class="nav-item" id="mastersMenu">
-          <a class="nav-link text-white {{ $page == 'masters' ? 'active bg-gradient-info' : '' }}"
-             href="{{ route('admin.masters.index') }}">
-            <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
-              <i class="material-icons opacity-10">build</i>
-            </div>
-            <span class="nav-link-text ms-1">Masters</span>
+      </li>
+      <li class="nav-item" id="totalCustomersMenu">
+          <a class="nav-link text-white {{ $page == 'total-customers' ? 'active bg-gradient-info' : '' }}"
+             href="{{ route('admin.customers.total_customers', ['building' => $building->id ?? 0]) }}">
+              <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+                  <i class="material-icons opacity-10">people</i>
+              </div>
+              <span class="nav-link-text ms-1">Total Customers</span>
           </a>
-        </li> --}}
+      </li>
+      
+
+        @endif 
       </ul>
     </div>
     <div class="sidenav-footer position-absolute w-100 bottom-0">

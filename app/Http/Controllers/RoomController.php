@@ -27,10 +27,12 @@ class RoomController extends Controller
     public function create(Request $request)
     {
         $building_id = $request->building_id; 
+        $room_type = $request->room_type;
         $building = Building::findOrFail($building_id);
-
-        return view('rooms.create', compact('building_id', 'building'));
+    
+        return view('rooms.create', compact('building_id', 'building', 'room_type'));
     }
+    
     public function store(Request $request)
     {
         $validatedData = $request->validate([
@@ -75,6 +77,7 @@ class RoomController extends Controller
             'chair_space_in_sq' => 'nullable|string',
             'chair_space_rate' => 'nullable|string',
             'chair_space_expected_rate' => 'nullable|string',
+            
         ]);
 
         if ($validatedData['carpet_area'] && $validatedData['carpet_area_price']) {

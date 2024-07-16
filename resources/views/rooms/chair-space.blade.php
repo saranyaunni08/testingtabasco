@@ -1,19 +1,35 @@
-@extends('layouts.default', ['title' => 'Chair Space'])
+@extends('layouts.default', ['title' => 'Chair Spaces'])
 
 @section('content')
 <div class="container-fluid py-4">
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card my-4">
+                <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
+                    <div class="bg-gradient-info shadow-info border-radius-lg pt-4 pb-3 d-flex justify-content-between align-items-center">
+                        <h6 class="text-white text-capitalize ps-3">Room Details</h6>
+                        <!-- Add this block for the link to create room page -->
+                        <a href="{{ route('admin.rooms.create', ['building_id' => $building_id, 'room_type' => 'Chair space']) }}" 
+                            class="btn btn-outline-light float-end" style="background-color: #ffffff; border-color: #007bff;
+                             color: #007bff; font-weight: bold;" onmouseover="this.style.backgroundColor='#007bff'; this.style.color='#ffffff'" 
+                             onmouseout="this.style.backgroundColor='#ffffff'; this.style.color='#007bff'">Add Chair space</a>
+                    </div>
+                </div>
+            </div>
     <div class="card">
         <h5 class="card-header">Chair Space</h5>
         <div class="card-body">
             <div class="table-responsive">
                 <table id="chairSpacesTable" class="table table-bordered" style="width:100%">
-                    <thead>
+                    <thead class="thead-dark">
                         <tr>
                             <th>Chair Name</th>
                             <th>Chair Type</th>
                             <th>Chair Space (sq.)</th>
                             <th>Chair Space Rate (sq.)</th>
                             <th>Chair Space Expected Rate</th>
+                            <th>Status</th>
                             <th>Action</th>
                         </tr>
                     </thead>
@@ -22,14 +38,22 @@
                         <tr>
                             <td>{{ $room->chair_name }}</td>
                             <td>{{ $room->chair_type }}</td>
-                            <td>{{ $room->chair_space }}</td>
+                            <td>{{ $room->chair_space_in_sq }}</td>
                             <td>{{ $room->chair_space_rate }}</td>
                             <td>{{ $room->chair_space_expected_rate }}</td>
                             <td>
+                                @if($room->status == 'available')
+                                    <span class="badge badge-info">Available</span>
+                                @elseif($room->status == 'sold')
+                                    <span class="badge badge-danger">Booking</span>
+                                @endif
+                            </td>
+                            <td>
                                 <a href="{{ route('admin.rooms.edit', $room->id) }}" class="btn btn-success btn-sm">
-                                    <i class="bx bx-edit bx-sm"></i>
+                                    <i class="bx bx-edit bx-sm"></i> 
                                 </a>
-                                <form action="{{ route('admin.rooms.destroy', ['building_id' => $room->building_id, 'room_id' => $room->id]) }}" method="POST" class="d-inline">
+                                <form action="{{ route('admin.rooms.destroy', ['building_id' => $room->building_id, 'room_id' => $room->id]) }}" 
+                                    method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this room?');">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-danger btn-sm">
@@ -37,20 +61,21 @@
                                     </button>
                                 </form>
                                 
+
                                 @if ($room->status === 'available')
+
                                 <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#sellModal{{ $room->id }}">
                                     Sell Room
                                 </button>
                                 @else
+
                                 <a href="{{ route('admin.customers.show', ['customerName' => $room->sale->customer_name]) }}"
                                     style="color: #28a745; font-weight: bold; font-size: 1.2em; border: 2px solid #28a745;
-                                    padding: 5px 10px; border-radius: 5px; background-color: #e9f7ef; text-decoration:none;">View
+                                     padding: 5px 10px; border-radius: 5px; background-color: #e9f7ef; text-decoration:none;">View
                                 </a>
-                                @endif
-
-                                <!-- Modal -->
+                                @endif  
                                 <div class="modal fade" id="sellModal{{ $room->id }}" tabindex="-1" aria-labelledby="sellModalLabel{{ $room->id }}" aria-hidden="true">
-                                    <div class="modal-dialog modal-lg"> <!-- Increased width -->
+                                    <div class="modal-dialog modal-lg"> 
                                         <div class="modal-content">
                                             <div class="modal-header">
                                                 <h5 class="modal-title" id="sellModalLabel{{ $room->id }}">Sell Room {{ $room->name }}</h5>
@@ -97,6 +122,22 @@
                                                                 </select>
                                                             </div>
                                                         </div>
+
+                                                        @if($room->room_type == 'Shops')
+                                                        <div class="col-6">
+                                                            <div class="form-group">
+                                                                <label class="font-weight-bold" for="build_up_area">Super Build-Up Area Rate</label>
+                                                                <input type="text" class="form-control" id="build_up_area" name="build_up_area" value="{{ $room->build_up_area }}" readonly>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-6">
+                                                            <div class="form-group">
+                                                                <label class="font-weight-bold" for="carpet_area">Carpet Area Rate</label>
+                                                                <input type="text" class="form-control" id="carpet_area" name="carpet_area" value="{{ $room->carpet_area }}" readonly>
+                                                            </div>
+                                                        </div>
+                                                        @endif  
+
                                                         <div class="col-6">
                                                             <div class="form-group">
                                                                 <label class="font-weight-bold" for="calculation_type">Calculation Type for Parking</label>
@@ -124,12 +165,7 @@
                                                                 <input type="number" step="0.01" class="form-control" id="discount_percent" name="discount_percent">
                                                             </div>
                                                         </div>
-                                                        <div class="col-6">
-                                                            <div class="form-group">
-                                                                <label class="font-weight-bold" for="gst_percent">GST Percent</label>
-                                                                <input type="number" step="0.01" class="form-control" id="gst_percent" name="gst_percent" required>
-                                                            </div>
-                                                        </div>
+                                                      
                                                         <div class="col-6">
                                                             <div class="form-group">
                                                                 <label class="font-weight-bold" for="cash_in_hand_percent">Cash in Hand %</label>
@@ -140,6 +176,12 @@
                                                             <div class="form-group">
                                                                 <label class="font-weight-bold" for="in_hand_amount">In Hand Amount</label>
                                                                 <input type="number" step="0.01" class="form-control" id="in_hand_amount{{ $room->id }}" name="in_hand_amount" readonly>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-6">
+                                                            <div class="form-group">
+                                                                <label class="font-weight-bold" for="gst_percent">GST Percent</label>
+                                                                <input type="number" step="0.01" class="form-control" id="gst_percent" name="gst_percent" required>
                                                             </div>
                                                         </div>
                                                         <div class="col-6">
@@ -170,6 +212,13 @@
                                                             </div>
                                                         </div>
                                                         <div class="col-6">
+                                                            <div class="form-group">
+                                                                <label class="font-weight-bold" for="installment_date">Installment Date</label>
+                                                                <input type="date" class="form-control" id="installment_date" name="installment_date">
+                                                            </div>
+                                                        </div>
+                                                    
+                                                        <div class="col-6">
                                                             <div class="form-group d-none" id="payment_method_group">
                                                                 <label class="font-weight-bold" for="payment_method">Payment Method</label>
                                                                 <select class="form-control" id="payment_method" name="payment_method">
@@ -191,6 +240,11 @@
                                                                 <input type="text" class="form-control" id="cheque_id" name="cheque_id">
                                                             </div>
                                                         </div>
+
+                                                        <div  id="gst_amount_group" class="col-12">
+                                                            <h4 for="gst_amount">GST Amount :₹<span id="gst_amount"></span> </h4>
+                                                        </div>
+                                                        
                                                         
                                                         <div class="col-12">
                                                             <h4>Total amount: ₹<span id="total"></span></h4>
@@ -210,12 +264,12 @@
                                         </div>
                                     </div>
                                 </div>
-                                <!-- End Modal -->
+                                
                             </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="6" class="text-center">No chair spaces available.</td>
+                            <td colspan="10" class="text-center">No records found.</td>
                         </tr>
                         @endforelse
                     </tbody>
@@ -226,216 +280,238 @@
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const modalElements = document.querySelectorAll('[id^="sellModal"]');
+document.addEventListener('DOMContentLoaded', () => {
+const modalElements = document.querySelectorAll('[id^="sellModal"]');
 
-        modalElements.forEach((modalElement) => {
-            const roomId = modalElement.id.replace('sellModal', '');
-            const calculationTypeSelect = modalElement.querySelector('#calculation_type');
-            const areaCalculationTypeSelect = modalElement.querySelector('#area_calculation_type');
-            const parkingRatePerSqFtGroup = modalElement.querySelector(`#parking_rate_per_sq_ft_group${roomId}`);
-            const totalSqFtGroup = modalElement.querySelector(`#total_sq_ft_group${roomId}`);
-            const advancePaymentSelect = modalElement.querySelector('#advance_payment');
-            const advanceAmountGroup = modalElement.querySelector('#advance_amount_group');
-            const paymentMethodGroup = modalElement.querySelector('#payment_method_group');
-            const paymentMethodSelect = modalElement.querySelector('#payment_method');
-            const transferIdGroup = modalElement.querySelector('#transfer_id_group');
-            const chequeIdGroup = modalElement.querySelector('#cheque_id_group');
-            const lastDateGroup = modalElement.querySelector('#last_date_group');
-            const saleInput = modalElement.querySelector('#sale_amount');
-            const totalElement = modalElement.querySelector('#total');
-            const parkingRateInput = modalElement.querySelector('#parking_rate_per_sq_ft');
-            const totalSqFtInput = modalElement.querySelector('#total_sq_ft_for_parking');
-            const gstInput = modalElement.querySelector('#gst_percent');
-            const discountInput = modalElement.querySelector('#discount_percent');
-            const advanceAmountInput = modalElement.querySelector('#advance_amount');
-            const remainingBalanceElement = modalElement.querySelector('#remaining_balance');
-            const cashInHandPercentInput = modalElement.querySelector(`#cash_in_hand_percent${roomId}`);
-            const inHandAmountInput = modalElement.querySelector(`#in_hand_amount${roomId}`);
+modalElements.forEach((modalElement) => {
+    const roomId = modalElement.id.replace('sellModal', '');
+    const calculationTypeSelect = modalElement.querySelector('#calculation_type');
+    const areaCalculationTypeSelect = modalElement.querySelector('#area_calculation_type');
+    const parkingRatePerSqFtGroup = modalElement.querySelector(`#parking_rate_per_sq_ft_group${roomId}`);
+    const totalSqFtGroup = modalElement.querySelector(`#total_sq_ft_group${roomId}`);
+    const advancePaymentSelect = modalElement.querySelector('#advance_payment');
+    const advanceAmountGroup = modalElement.querySelector('#advance_amount_group');
+    const paymentMethodGroup = modalElement.querySelector('#payment_method_group');
+    const paymentMethodSelect = modalElement.querySelector('#payment_method');
+    const transferIdGroup = modalElement.querySelector('#transfer_id_group');
+    const chequeIdGroup = modalElement.querySelector('#cheque_id_group');
+    const lastDateGroup = modalElement.querySelector('#last_date_group');
+    const saleInput = modalElement.querySelector('#sale_amount');
+    const totalElement = modalElement.querySelector('#total');
+    const parkingRateInput = modalElement.querySelector('#parking_rate_per_sq_ft');
+    const totalSqFtInput = modalElement.querySelector('#total_sq_ft_for_parking');
+    const gstInput = modalElement.querySelector('#gst_percent');
+    const discountInput = modalElement.querySelector('#discount_percent');
+    const advanceAmountInput = modalElement.querySelector('#advance_amount');
+    const remainingBalanceElement = modalElement.querySelector('#remaining_balance');
+    const cashInHandPercentInput = modalElement.querySelector(`#cash_in_hand_percent${roomId}`);
+    const inHandAmountInput = modalElement.querySelector(`#in_hand_amount${roomId}`);
+    const gstAmountElement = modalElement.querySelector('#gst_amount'); // Added for GST amount
 
-            const flatFields = modalElement.querySelector('#flat_fields');
-            const shopFields = modalElement.querySelector('#shop_fields');
-            const tableSpaceFields = modalElement.querySelector('#table_space_fields');
-            const kioskFields = modalElement.querySelector('#kiosk_fields');
-            const chairSpaceFields = modalElement.querySelector('#chair_space_fields');
+    const flatFields = modalElement.querySelector('#flat_fields');
+    const shopFields = modalElement.querySelector('#shop_fields');
+    const tableSpaceFields = modalElement.querySelector('#table_space_fields');
+    const kioskFields = modalElement.querySelector('#kiosk_fields');
+    const chairSpaceFields = modalElement.querySelector('#chair_space_fields');
 
-            function showRelevantAreaFields(roomType) {
-                hideAllFields();
-                if (roomType === 'Flat' && flatFields) {
-                    flatFields.classList.remove('d-none');
-                } else if (roomType === 'Shop' && shopFields) {
-                    shopFields.classList.remove('d-none');
-                } else if (roomType === 'Table Space' && tableSpaceFields) {
-                    tableSpaceFields.classList.remove('d-none');
-                } else if (roomType === 'Kiosk' && kioskFields) {
-                    kioskFields.classList.remove('d-none');
-                } else if (roomType === 'Chair Space' && chairSpaceFields) {
-                    chairSpaceFields.classList.remove('d-none');
-                }
-            }
-
-            function hideAllFields() {
-                if (flatFields) flatFields.classList.add('d-none');
-                if (shopFields) shopFields.classList.add('d-none');
-                if (tableSpaceFields) tableSpaceFields.classList.add('d-none');
-                if (kioskFields) kioskFields.classList.add('d-none');
-                if (chairSpaceFields) chairSpaceFields.classList.add('d-none');
-            }
-
-            function toggleAdvancePaymentFields() {
-    if (advancePaymentSelect && advancePaymentSelect.value === 'now') {
-        if (advanceAmountGroup) advanceAmountGroup.classList.remove('d-none');
-        if (paymentMethodGroup) paymentMethodGroup.classList.remove('d-none');
-        if (lastDateGroup) lastDateGroup.classList.add('d-none'); // Ensure lastDateGroup is hidden when paying now
-    } else if (advancePaymentSelect && advancePaymentSelect.value === 'later') {
-        if (advanceAmountGroup) advanceAmountGroup.classList.add('d-none');
-        if (paymentMethodGroup) paymentMethodGroup.classList.add('d-none');
-        if (transferIdGroup) transferIdGroup.classList.add('d-none');
-        if (chequeIdGroup) chequeIdGroup.classList.add('d-none');
-        if (lastDateGroup) lastDateGroup.classList.remove('d-none'); // Show lastDateGroup when paying later
+    function showRelevantAreaFields(roomType) {
+        hideAllFields();
+        if (roomType === 'Flat' && flatFields) {
+            flatFields.classList.remove('d-none');
+        } else if (roomType === 'Shop' && shopFields) {
+            shopFields.classList.remove('d-none');
+        } else if (roomType === 'Table Space' && tableSpaceFields) {
+            tableSpaceFields.classList.remove('d-none');
+        } else if (roomType === 'Kiosk' && kioskFields) {
+            kioskFields.classList.remove('d-none');
+        } else if (roomType === 'Chair Space' && chairSpaceFields) {
+            chairSpaceFields.classList.remove('d-none');
+        }
     }
-}
 
+    function hideAllFields() {
+        if (flatFields) flatFields.classList.add('d-none');
+        if (shopFields) shopFields.classList.add('d-none');
+        if (tableSpaceFields) tableSpaceFields.classList.add('d-none');
+        if (kioskFields) kioskFields.classList.add('d-none');
+        if (chairSpaceFields) chairSpaceFields.classList.add('d-none');
+    }
 
+    function toggleAdvancePaymentFields() {
+        if (advancePaymentSelect && advancePaymentSelect.value === 'now') {
+            if (advanceAmountGroup) advanceAmountGroup.classList.remove('d-none');
+            if (paymentMethodGroup) paymentMethodGroup.classList.remove('d-none');
+            if (lastDateGroup) lastDateGroup.classList.add('d-none');
+        } else if (advancePaymentSelect && advancePaymentSelect.value === 'later') {
+            if (advanceAmountGroup) advanceAmountGroup.classList.add('d-none');
+            if (paymentMethodGroup) paymentMethodGroup.classList.add('d-none');
+            if (transferIdGroup) transferIdGroup.classList.add('d-none');
+            if (chequeIdGroup) chequeIdGroup.classList.add('d-none');
+            if (lastDateGroup) lastDateGroup.classList.remove('d-none');
+        }
+    }
 
-            function togglePaymentMethodFields() {
-                if (paymentMethodSelect && paymentMethodSelect.value === 'bank_transfer') {
-                    if (transferIdGroup) transferIdGroup.classList.remove('d-none');
-                    if (chequeIdGroup) chequeIdGroup.classList.add('d-none');
-                } else if (paymentMethodSelect && paymentMethodSelect.value === 'cheque') {
-                    if (transferIdGroup) transferIdGroup.classList.add('d-none');
-                    if (chequeIdGroup) chequeIdGroup.classList.remove('d-none');
-                } else {
-                    if (transferIdGroup) transferIdGroup.classList.add('d-none');
-                    if (chequeIdGroup) chequeIdGroup.classList.add('d-none');
+    function togglePaymentMethodFields() {
+        if (paymentMethodSelect && paymentMethodSelect.value === 'bank_transfer') {
+            if (transferIdGroup) transferIdGroup.classList.remove('d-none');
+            if (chequeIdGroup) chequeIdGroup.classList.add('d-none');
+        } else if (paymentMethodSelect && paymentMethodSelect.value === 'cheque') {
+            if (transferIdGroup) transferIdGroup.classList.add('d-none');
+            if (chequeIdGroup) chequeIdGroup.classList.remove('d-none');
+        } else {
+            if (transferIdGroup) transferIdGroup.classList.add('d-none');
+            if (chequeIdGroup) chequeIdGroup.classList.add('d-none');
+        }
+    }
+
+    function toggleCalculationFields() {
+        if (calculationTypeSelect && calculationTypeSelect.value === 'rate_per_sq_ft') {
+            if (parkingRatePerSqFtGroup) parkingRatePerSqFtGroup.classList.remove('d-none');
+            if (totalSqFtGroup) totalSqFtGroup.classList.remove('d-none');
+        } else {
+            if (parkingRatePerSqFtGroup) parkingRatePerSqFtGroup.classList.add('d-none');
+            if (totalSqFtGroup) totalSqFtGroup.classList.add('d-none');
+        }
+    }
+
+    function toggleAreaCalculationFields() {
+        const buildUpAreaField = modalElement.querySelector('#build_up_area');
+        const carpetAreaField = modalElement.querySelector('#carpet_area');
+
+        if (areaCalculationTypeSelect && areaCalculationTypeSelect.value === 'build_up_area') {
+            if (buildUpAreaField) buildUpAreaField.classList.remove('d-none');
+            if (carpetAreaField) carpetAreaField.classList.add('d-none');
+        } else {
+            if (buildUpAreaField) buildUpAreaField.classList.add('d-none');
+            if (carpetAreaField) carpetAreaField.classList.remove('d-none');
+        }
+    }
+
+    function updateTotalAmount() {
+        const saleAmount = saleInput ? parseFloat(saleInput.value) || 0 : 0;
+        const areaCalculationType = areaCalculationTypeSelect ? areaCalculationTypeSelect.value : '';
+
+        if (!roomId) {
+            console.error('Room ID is not defined.');
+            return;
+        }
+
+        $.ajax({
+            type: 'POST',
+            url: "{{ route('admin.sales.caltype') }}",
+            data: {
+                room_id: roomId,
+                type: areaCalculationType,
+                _token: '{{ csrf_token() }}'
+            },
+            dataType: "json",
+            success: function(resultData) {
+                console.log('Result Data:', resultData);
+                let totalRate = parseInt(resultData.sqft) * parseFloat(saleAmount);
+                console.log('Initial Total Rate:', totalRate);
+
+                let parkingAmount = 0;
+                if (calculationTypeSelect.value === 'rate_per_sq_ft') {
+                    const parkingRate = parseFloat(parkingRateInput.value) || 0;
+                    const totalSqFt = parseFloat(totalSqFtInput.value) || 0;
+                    parkingAmount = parkingRate * totalSqFt;
+                    totalRate += parkingAmount;
+                    console.log('Parking Amount (rate_per_sq_ft):', parkingAmount);
+                } else if (calculationTypeSelect.value === 'fixed_amount') {
+                    parkingAmount = 0;  
+                    totalRate += parkingAmount;
+                    console.log('Parking Amount (fixed_amount):', parkingAmount);
                 }
-            }
 
-            function toggleCalculationFields() {
-                if (calculationTypeSelect && calculationTypeSelect.value === 'rate_per_sq_ft') {
-                    if (parkingRatePerSqFtGroup) parkingRatePerSqFtGroup.classList.remove('d-none');
-                    if (totalSqFtGroup) totalSqFtGroup.classList.remove('d-none');
-                } else {
-                    if (parkingRatePerSqFtGroup) parkingRatePerSqFtGroup.classList.add('d-none');
-                    if (totalSqFtGroup) totalSqFtGroup.classList.add('d-none');
-                }
-            }
+                console.log('Total Rate after Parking:', totalRate);
 
-            function toggleAreaCalculationFields() {
-                const buildUpAreaField = modalElement.querySelector('#build_up_area');
-                const carpetAreaField = modalElement.querySelector('#carpet_area');
+                const discountPercent = parseFloat(discountInput.value) || 0;
+                const discountAmount = totalRate * (discountPercent / 100);
+                totalRate -= discountAmount;
+                console.log('Discount Amount:', discountAmount);
+                console.log('Total Rate after Discount:', totalRate);
 
-                if (areaCalculationTypeSelect && areaCalculationTypeSelect.value === 'build_up_area') {
-                    if (buildUpAreaField) buildUpAreaField.classList.remove('d-none');
-                    if (carpetAreaField) carpetAreaField.classList.add('d-none');
-                } else {
-                    if (buildUpAreaField) buildUpAreaField.classList.add('d-none');
-                    if (carpetAreaField) carpetAreaField.classList.remove('d-none');
-                }
-            }
+                const advanceAmount = parseFloat(advanceAmountInput.value) || 0;
+                const remainingBalance = totalRate - advanceAmount;
+                if (remainingBalanceElement) remainingBalanceElement.textContent = remainingBalance.toFixed(2);
 
-            function updateTotalAmount() {
-                const saleAmount = saleInput ? parseFloat(saleInput.value) || 0 : 0;
-                const areaCalculationType = areaCalculationTypeSelect ? areaCalculationTypeSelect.value : '';
-
-                if (!roomId) {
-                    console.error('Room ID is not defined.');
-                    return;
-                }
-
-                $.ajax({
-                    type: 'POST',
-                    url: "{{ route('admin.sales.caltype') }}",
-                    data: {
-                        room_id: roomId,
-                        type: areaCalculationType,
-                        _token: '{{ csrf_token() }}'
-                    },
-                    dataType: "json",
-                    success: function(resultData) {
-                        console.log('Result Data:', resultData);
-                        let totalRate = parseInt(resultData.sqft) * parseFloat(saleAmount);
-                        console.log('Total Rate:', totalRate);
-
-                        if (calculationTypeSelect.value === 'rate_per_sq_ft') {
-                            const parkingRate = parseFloat(parkingRateInput.value) || 0;
-                            const totalSqFt = parseFloat(totalSqFtInput.value) || 0;
-                            const parkingAmount = parkingRate * totalSqFt;
-                            totalRate += parkingAmount;
-                        }
-
-                        const discountPercent = parseFloat(discountInput.value) || 0;
-                        const discountAmount = totalRate * (discountPercent / 100);
-                        totalRate -= discountAmount;
-
-                        const gstPercent = parseFloat(gstInput.value) || 0;
-                        const gstAmount = totalRate * (gstPercent / 100);
-                        totalRate += gstAmount;
-
-                        if (totalElement) totalElement.textContent = totalRate.toFixed(2);
-
-                        const advanceAmount = parseFloat(advanceAmountInput.value) || 0;
-                        const remainingBalance = totalRate - advanceAmount;
-                        if (remainingBalanceElement) remainingBalanceElement.textContent = remainingBalance.toFixed(2);
-
-                        calculateInHandAmount(roomId, totalRate);
-                    },
-                    error: function(xhr, status, error) {
-                        console.error('Error:', error);
-                    }
-                });
-            }
-
-            function calculateInHandAmount(roomId, totalRate) {
-                const cashInHandPercent = parseFloat(document.getElementById(`cash_in_hand_percent${roomId}`).value) || 0;
+                const cashInHandPercent = parseFloat(cashInHandPercentInput.value) || 0;
                 const cashInHandAmount = (cashInHandPercent / 100) * totalRate;
-                document.getElementById(`in_hand_amount${roomId}`).value = cashInHandAmount.toFixed(2);
-            }
+                if (inHandAmountInput) inHandAmountInput.value = cashInHandAmount.toFixed(2);
 
-            if (advancePaymentSelect) {
-                advancePaymentSelect.addEventListener('change', toggleAdvancePaymentFields);
-            }
-            if (paymentMethodSelect) {
-                paymentMethodSelect.addEventListener('change', togglePaymentMethodFields);
-            }
-            if (calculationTypeSelect) {
-                calculationTypeSelect.addEventListener('change', toggleCalculationFields);
-            }
-            if (areaCalculationTypeSelect) {
-                areaCalculationTypeSelect.addEventListener('change', updateTotalAmount);
-            }
-            if (saleInput) {
-                saleInput.addEventListener('input', updateTotalAmount);
-            }
-            if (parkingRateInput) {
-                parkingRateInput.addEventListener('input', updateTotalAmount);
-            }
-            if (totalSqFtInput) {
-                totalSqFtInput.addEventListener('input', updateTotalAmount);
-            }
-            if (gstInput) {
-                gstInput.addEventListener('input', updateTotalAmount);
-            }
-            if (discountInput) {
-                discountInput.addEventListener('input', updateTotalAmount);
-            }
-            if (advanceAmountInput) {
-                advanceAmountInput.addEventListener('input', updateTotalAmount);
-            }
-            if (cashInHandPercentInput) {
-                cashInHandPercentInput.addEventListener('input', () => calculateInHandAmount(roomId, parseFloat(totalElement.textContent)));
-            }
+                const amountForGST = totalRate - cashInHandAmount;
+                console.log('Amount for GST:', amountForGST);
 
-            toggleAdvancePaymentFields();
-            togglePaymentMethodFields();
-            toggleCalculationFields();
-            toggleAreaCalculationFields();
-            updateTotalAmount();
+                const gstPercent = parseFloat(gstInput.value) || 0;
+                const gstAmount = amountForGST * (gstPercent / 100);
+                console.log('GST Amount:', gstAmount);
 
-            const roomType = modalElement.getAttribute('data-room-type');
-            showRelevantAreaFields(roomType);
+                const finalTotal = totalRate + gstAmount;
+                console.log('Final Total after GST:', finalTotal);
+
+                if (totalElement) totalElement.textContent = finalTotal.toFixed(2);
+                if (gstAmountElement) gstAmountElement.textContent = gstAmount.toFixed(2); 
+            },
+            error: function(error) {
+                console.error('Error:', error);
+            }
         });
-    });
+    }
+
+    function calculateInHandAmount(roomId, totalRate) {
+        const cashInHandPercent = parseFloat(document.getElementById(`cash_in_hand_percent${roomId}`).value) || 0;
+        const cashInHandAmount = (cashInHandPercent / 100) * totalRate;
+        document.getElementById(`in_hand_amount${roomId}`).value = cashInHandAmount.toFixed(2);
+    }
+
+    if (advancePaymentSelect) {
+        advancePaymentSelect.addEventListener('change', toggleAdvancePaymentFields);
+    }
+    if (paymentMethodSelect) {
+        paymentMethodSelect.addEventListener('change', togglePaymentMethodFields);
+    }
+    if (calculationTypeSelect) {
+        calculationTypeSelect.addEventListener('change', toggleCalculationFields);
+    }
+    if (areaCalculationTypeSelect) {
+        areaCalculationTypeSelect.addEventListener('change', updateTotalAmount);
+    }
+    if (saleInput) {
+        saleInput.addEventListener('input', updateTotalAmount);
+    }
+    if (parkingRateInput) {
+        parkingRateInput.addEventListener('input', updateTotalAmount);
+    }
+    if (totalSqFtInput) {
+        totalSqFtInput.addEventListener('input', updateTotalAmount);
+    }
+    if (gstInput) {
+        gstInput.addEventListener('input', updateTotalAmount);
+    }
+    if (discountInput) {
+        discountInput.addEventListener('input', updateTotalAmount);
+    }
+    if (advanceAmountInput) {
+        advanceAmountInput.addEventListener('input', updateTotalAmount);
+    }
+    if (cashInHandPercentInput) {
+        cashInHandPercentInput.addEventListener('input', () => calculateInHandAmount(roomId, parseFloat(totalElement.textContent)));
+    }
+
+    toggleAdvancePaymentFields();
+    togglePaymentMethodFields();
+    toggleCalculationFields();
+    toggleAreaCalculationFields();
+    updateTotalAmount();
+
+    const roomType = modalElement.getAttribute('data-room-type');
+    showRelevantAreaFields(roomType);
+});
+});
+
+
 </script>
+
+
 @endsection
 

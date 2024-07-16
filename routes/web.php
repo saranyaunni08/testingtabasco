@@ -56,14 +56,16 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
         Route::get('/rooms', [RoomController::class, 'showRooms'])->name('rooms.index');
 
 
-        // Route::get('/buildings/{building_id}/rooms/create', [RoomController::class, 'create'])->name('rooms.create');
-        Route::get('/rooms/create/{building_id}', 'RoomController@create')->name('admin.rooms.create');
+        Route::get('rooms/create/{building_id}', [RoomController::class, 'create'])->name('rooms.create');
 
 
-        Route::post('admin/rooms', [RoomController::class, 'store'])->name('admin.rooms.store');
+
+        Route::post('admin/rooms', [RoomController::class, 'store'])->name('rooms.store');
 
         Route::get('rooms', [RoomController::class, 'index'])->name('rooms.index');
-        Route::delete('/buildings/{building_id}/rooms/{room_id}', 'RoomController@destroy')->name('rooms.destroy');
+        Route::delete('/building/{building_id}/room/{room_id}', [RoomController::class, 'destroy'])
+    ->name('rooms.destroy');
+
 
 
 
@@ -108,10 +110,15 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
         Route::get('/shops/{building_id}', [RoomController::class, 'showShops'])->name('shops.index');
         Route::get('/table-spaces/{building_id}', [RoomController::class, 'showTableSpaces'])->name('table-spaces.index');
         Route::get('buildings/{building_id}/kiosks', [RoomController::class, 'kiosks'])->name('kiosks.index');
-        Route::get('/buildings/{building_id}/chair-spaces', 'App\Http\Controllers\RoomController@chairSpaces')->name('chair-spaces');
+        Route::get('/buildings/{building_id}/chair-spaces', [RoomController::class, 'chairSpaces'])->name('chair-spaces.index');
 
         Route::get('/buildingdashboard', 'App\Http\Controllers\BuildingController@index')->name('buildingdashboard');
         Route::post('/installments/{sale}/mark-paid', [SaleController::class, 'markInstallmentPaid'])->name('installments.markPaid');
+
+        Route::get('/buildings/{building}/total-customers', [SaleController::class, 'totalCustomers'])->name('customers.total_customers');
+
+        Route::post('/installments/{sale}/mark-paid', [SaleController::class, 'markPaid'])->name('installments.markPaid');
+
 
 
 

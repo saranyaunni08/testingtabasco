@@ -224,8 +224,14 @@
                                                                 style="color: #28a745; font-weight: bold; font-size: 1.2em; border: 2px solid #28a745; padding: 5px 10px; border-radius: 5px; background-color: #e9f7ef;">
                                                                 Sold
                                                             </span>&nbsp;
+                                                            @if ($room->sale)
                                                             <a href="{{ route('admin.customers.show', ['customerName' => $room->sale->customer_name]) }}"
-                                                                style="color: #28a745; font-weight: bold; font-size: 1.2em; border: 2px solid #28a745; padding: 5px 10px; border-radius: 5px; background-color: #e9f7ef; text-decoration:none;">View</a>
+                                                                style="color: #28a745; font-weight: bold; font-size: 1.2em; border: 2px solid #28a745;
+                                                                       padding: 5px 10px; border-radius: 5px; background-color: #e9f7ef; text-decoration:none;">View
+                                                            </a>
+                                                        @else
+                                                            <span style="color: red;">No sale information available</span>
+                                                        @endif
                                                         @endif
                                                     </td>
 
@@ -663,10 +669,5 @@
                 showRelevantAreaFields(roomType);
             });
         });
-    </script>
-
-    
-    
-    
-    
+    </script>   
 @endsection

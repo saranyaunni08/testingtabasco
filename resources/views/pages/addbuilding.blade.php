@@ -55,9 +55,10 @@
                     <div class="col-md-6">
                       <div class="form-group mb-4">
                         <label class="form-label">Pin Code</label>
-                        <input name="pin_code" type="text" class="form-control" required>
+                        <input name="pin_code" type="text" class="form-control" pattern="[0-9]*" required>
                       </div>
                     </div>
+                    
 
                     <div class="col-md-6">
                       <div class="form-group mb-4">
