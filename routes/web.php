@@ -91,7 +91,7 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
         Route::post('/sales/store', [SaleController::class, 'store'])->name('sales.store');
         Route::post('/sales/cac-type', [SaleController::class, 'getCalculationType'])->name('sales.caltype');
 
-        Route::get('/customers', [SaleController::class, 'index'])->name('customers.index');
+        // Route::get('/customers', [SaleController::class, 'index'])->name('customers.index');
 
         Route::get('/customers/{customerName}', [SaleController::class, 'showCustomer'])->name('customers.show');
 
@@ -115,10 +115,16 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
         Route::get('/buildingdashboard', 'App\Http\Controllers\BuildingController@index')->name('buildingdashboard');
         Route::post('/installments/{sale}/mark-paid', [SaleController::class, 'markInstallmentPaid'])->name('installments.markPaid');
 
-        Route::get('/buildings/{building}/total-customers', [SaleController::class, 'totalCustomers'])->name('customers.total_customers');
-
+        
         Route::post('/installments/{sale}/mark-paid', [SaleController::class, 'markPaid'])->name('installments.markPaid');
-
+        
+        Route::get('/rooms/difference/{building_id}', [RoomController::class, 'difference'])
+        ->name('flats.difference');
+        
+        Route::get('/rooms/difference/shops/{building_id}', [RoomController::class, 'shopsDifference'])->name('shops.difference');
+        
+        
+        Route::get('/buildings/{building}/total-customers', [SaleController::class, 'totalCustomers'])->name('customers.total_customers');
 
 
 

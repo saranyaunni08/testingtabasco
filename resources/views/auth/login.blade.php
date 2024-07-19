@@ -40,8 +40,15 @@
                                     Forgot your password?
                                     <a href="{{ route('password.request') }}" class="text-info text-gradient font-weight-bold">Reset Password</a>
                                 </p>
-                                
-                                
+                                @if ($errors->any())
+                                    <div class="alert alert-danger">
+                                        <ul>
+                                            @foreach ($errors->all() as $error)
+                                                <li>{{ $error }}</li>
+                                            @endforeach
+                                        </ul>
+                                    </div>
+                                @endif
                             </form>
                         </div>
                     </div>

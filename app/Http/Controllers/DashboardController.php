@@ -19,8 +19,9 @@ class DashboardController extends Controller
 
         // Count total rooms
         $totalRooms = Room::count();
-        $soldRooms = Room::whereHas('sale')->count();
 
+        // Count sold rooms
+        $soldRooms = Room::has('sales')->count();
 
         // Count specific room types
         $totalShops = Room::where('room_type', 'Shops')->count();
@@ -32,56 +33,30 @@ class DashboardController extends Controller
         // Fetch latest sales
         $sales = Sale::orderBy('created_at', 'desc')->take(5)->get();
 
-        // Pluck customer names from sales
-        $customerNames = Sale::pluck('customer_name');
+        // Example: Calculate or retrieve expected price
+        $ExpectedPrice = 5000; // Replace with your calculation or retrieval logic
 
-        // Calculate total with discount, total sale amount, total GST
-        $totalWithDiscount = Sale::sum('total_with_discount');
-        $totalSale = Sale::sum('total_amount');
-        $totalGst = Sale::sum('total_with_gst');
+        // Example: Calculate or retrieve expected amount data for chart
+        $expectedAmountData = [ /* Your expected amount data calculation or retrieval logic here */ ];
 
-        // Calculate expected price based on room types
-        $ExpectedPrice = Room::sum('expected_carpet_area_price')
-            + Room::sum('flat_expected_carpet_area_price')
-            + Room::sum('kiosk_expected_price')
-            + Room::sum('chair_space_expected_rate')
-            + Room::sum('space_expected_price');
+        // Example: Retrieve sold amount data for chart (assuming you already have this)
+        $soldAmountData = [ /* Your sold amount data retrieval logic here */ ];
 
-        // Initialize arrays to hold expected and sold amount data for each building
-        $expectedAmountData = [];
-        $soldAmountData = [];
-
-        // Calculate expected amount and sold amount for each building
-        foreach ($buildings as $building) {
-            // Calculate expected amount (sum of relevant fields from rooms)
-            $expectedAmount = Room::where('building_id', $building->id)
-                ->sum('expected_carpet_area_price')
-                + Room::where('building_id', $building->id)
-                ->sum('flat_expected_carpet_area_price')
-                + Room::where('building_id', $building->id)
-                ->sum('kiosk_expected_price')
-                + Room::where('building_id', $building->id)
-                ->sum('chair_space_expected_rate')
-                + Room::where('building_id', $building->id)
-                ->sum('space_expected_price');
-
-            // Calculate sold amount for this building
-            $soldAmount = Sale::whereHas('room', function ($query) use ($building) {
-                    $query->where('building_id', $building->id);
-                })
-                ->sum('total_with_discount');
-
-            $expectedAmountData[] = $expectedAmount;
-            $soldAmountData[] = $soldAmount;
-        }
-
-        // Pass data to the view
+        // Return view with data
         return view('pages.dashboard', compact(
-            'buildings', 'sales', 'customerNames',
-            'totalCustomers', 'totalShops', 'totalFlats',
-            'totalKiosks', 'totalChairSpaces', 'totalTableSpaces',
-            'totalRooms', 'ExpectedPrice', 'totalWithDiscount', 'totalSale', 'totalGst',
-            'expectedAmountData', 'soldAmountData','soldRooms'
+            'buildings',
+            'totalCustomers',
+            'totalRooms',
+            'soldRooms',
+            'totalShops',
+            'totalFlats',
+            'totalKiosks',
+            'totalChairSpaces',
+            'totalTableSpaces',
+            'sales',
+            'ExpectedPrice',
+            'expectedAmountData',
+            'soldAmountData'
         ));
     }
 }

@@ -299,4 +299,5 @@ class SaleController extends Controller
         // Redirect back with success message
         return redirect()->back()->with('success', 'Installment marked as paid successfully.');
     }
+   
 }

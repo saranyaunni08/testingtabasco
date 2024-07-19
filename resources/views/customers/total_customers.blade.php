@@ -73,12 +73,47 @@
                                             <p><strong>Parking Amount:</strong> ₹{{ $sale->parking_amount }}</p>
                                             <p><strong>No of Installments:</strong> {{ $sale->installments }}</p>
                                             <p><strong>Amount per Installment:</strong> ₹{{ $sale->installments > 0 ? number_format($sale->remaining_balance / $sale->installments, 2) : 'N/A' }}</p>
-                                        @elseif ($sale->room->room_type === 'Shops')
-                                            <!-- Shop details -->
-                                        @elseif ($sale->room->room_type === 'Table space')
-                                            <!-- Table space details -->
+                                        
+                                        
+                                            @elseif ($sale->room->room_type === 'Shops')
+                                                <p><strong>Room Number:</strong> {{ $sale->room->room_number }}</p>
+                                                <p><strong>Flat Model:</strong> {{ $sale->room->flat_model }}</p>
+                                                @if ($sale->area_calculation_type === 'carpet_area_rate')
+                                                    <p><strong>Carpet Area sq ft:</strong> {{ $sale->room->carpet_area }} sq ft</p>
+                                                    <p><strong>Carpet Area Price per sq ft:</strong> ₹{{ $sale->room->carpet_area_price }}</p>
+                                                    <p><strong>Expected Amount:</strong> ₹{{ $sale->room->expected_carpet_area_price }}</p>
+                                                @elseif ($sale->area_calculation_type === 'built_up_area_rate')
+                                                    <p><strong>Super Build Up sq ft:</strong> {{ $sale->room->build_up_area }}</p>
+                                                    <p><strong>Super Build Up Price per sq ft:</strong> ₹{{ $sale->room->super_build_up_price }}</p>
+                                                    <p><strong>Expected Amount:</strong> ₹{{ $sale->room->expected_super_buildup_area_price }}</p>
+                                                @endif
+                                                <p><strong>Sale Amount:</strong> ₹{{ $sale->sale_amount }}</p>
+                                                <p><strong>GST Amount:</strong> ₹{{ number_format($sale->total_with_gst - $sale->total_amount, 2) }}</p>
+                                                <p><strong>Parking Amount:</strong> ₹{{ $sale->parking_amount }}</p>
+                                                <p><strong>No of Installments:</strong> {{ $sale->installments }}</p>
+                                                <p><strong>Amount per Installment:</strong> ₹{{ $sale->installments > 0 ? number_format($sale->remaining_balance / $sale->installments, 2) : 'N/A' }}</p>                                        @elseif ($sale->room->room_type === 'Table space')
+
+                                                
+
                                         @elseif ($sale->room->room_type === 'Chair space')
-                                            <!-- Chair space details -->
+                                                
+                                                <p><strong>Room Number:</strong> {{ $sale->room->room_number }}</p>
+                                                <p><strong>Flat Model:</strong> {{ $sale->room->flat_model }}</p>
+                                                @if ($sale->area_calculation_type === 'carpet_area_rate')
+                                                    <p><strong>Carpet Area sq ft:</strong> {{ $sale->room->flat_carpet_area }} sq ft</p>
+                                                    <p><strong>Carpet Area Price per sq ft:</strong> ₹{{ $sale->room->flat_carpet_area_price }}</p>
+                                                    <p><strong>Expected Amount:</strong> ₹{{ $sale->room->flat_expected_carpet_area_price }}</p>
+                                                @elseif ($sale->area_calculation_type === 'built_up_area_rate')
+                                                    <p><strong>Super Build Up sq ft:</strong> {{ $sale->room->flat_build_up_area }}</p>
+                                                    <p><strong>Super Build Up Price per sq ft:</strong> ₹{{ $sale->room->flat_super_build_up_price }}</p>
+                                                    <p><strong>Expected Amount:</strong> ₹{{ $sale->room->flat_expected_super_buildup_area_price }}</p>
+                                                @endif
+                                                <p><strong>Sale Amount:</strong> ₹{{ $sale->sale_amount }}</p>
+                                                <p><strong>GST Amount:</strong> ₹{{ number_format($sale->total_with_gst - $sale->total_amount, 2) }}</p>
+                                                <p><strong>Parking Amount:</strong> ₹{{ $sale->parking_amount }}</p>
+                                                <p><strong>No of Installments:</strong> {{ $sale->installments }}</p>
+                                                <p><strong>Amount per Installment:</strong> ₹{{ $sale->installments > 0 ? number_format($sale->remaining_balance / $sale->installments, 2) : 'N/A' }}</p> 
+                                                
                                         @endif
                                     </div>
                                     <div class="modal-footer">

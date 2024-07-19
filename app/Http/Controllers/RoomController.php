@@ -215,16 +215,23 @@ class RoomController extends Controller
         $master_settings = MasterSetting::first(); 
         return view('rooms.show', compact('rooms', 'master_settings'));
     }
-    
-    
     public function showFlats($building_id)
     {
+        // Fetch the building
         $building = Building::findOrFail($building_id);
-        $rooms = Room::where('building_id', $building_id)->where('room_type', 'flat')->get();
-        $page = 'rooms';
-
+    
+        // Fetch rooms (flats) for the specific building and eager load the sale relationship
+        $rooms = Room::where('building_id', $building_id)
+                     ->where('room_type', 'flat')
+                     ->with('sale')  // Eager load the sale relationship
+                     ->get();
+    
+        // Passing the necessary data to the view
+        $page = 'flats';
+    
         return view('rooms.flats', compact('rooms', 'page', 'building_id', 'building'));
     }
+    
     public function showShops($building_id)
     {
         $building = Building::find($building_id);
@@ -264,4 +271,53 @@ class RoomController extends Controller
     
         return view('rooms.chair-space', compact('chairSpaces', 'type', 'page','building_id'));
     }
-}
+    public function difference($buildingId)
+    {
+        $building = Building::findOrFail($buildingId);
+        $rooms = Room::where('building_id', $buildingId)
+                      ->where('room_type', 'flat')
+                      ->whereNull('deleted_at')
+                      ->get()
+                      ->groupBy('room_floor'); 
+    
+        $title = 'Flat Differences'; 
+    
+        return view('flats.difference', [
+            'rooms' => $rooms,
+            'page' => 'difference',
+            'building' => $building,
+            'title' => $title
+        ]);
+    }
+    public function shopsDifference($building_id)
+    {
+        $building = Building::findOrFail($building_id);
+        $rooms = Room::where('building_id', $building_id)
+                     ->where('room_type', 'Shops')
+                     ->get()
+                     ->groupBy('room_floor');  
+    
+        return view('shops.difference', [
+            'title' => 'Shops Difference',
+            'page' => 'shops_difference',
+            'building' => $building,
+            'rooms' => $rooms
+        ]);
+    }
+    public function totalCustomers()
+    {
+        $customers = Sale::select(
+            'sales.customer_name',
+            'sales.sale_amount',
+            'sales.in_hand_amount',
+            'sales.gst_amount',
+            'sales.total_amount',
+            'rooms.room_type',
+            'sales.remaining_balance'
+        )
+        ->join('rooms', 'sales.room_id', '=', 'rooms.id')
+        ->get();
+    
+        return view('customers.total_customers', compact('customers'));
+    }
+}    

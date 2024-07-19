@@ -41,18 +41,17 @@
     <hr class="horizontal light mt-0 mb-2">
     <div class="collapse navbar-collapse w-auto" id="sidenav-collapse-main">
       <ul class="navbar-nav">
+
         <li class="nav-item" id="dashboardMenu">
           <a class="nav-link text-white {{ $page == 'dashboard' ? 'active bg-gradient-info' : '' }}"
              href="{{ route('admin.dashboard') }}">
-            <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
-              <i class="material-icons opacity-10">dashboard</i>
-            </div>
-            <span class="nav-link-text ms-1">Dashboard</span>
+              <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+                  <i class="material-icons opacity-10">dashboard</i>
+              </div>
+              <span class="nav-link-text ms-1">Dashboard</span>
           </a>
-        </li>
-
-        
-        
+      </li>
+     
         <li class="nav-item" id="dashboardMenu">
           <a class="nav-link text-white" href="{{ route('admin.buildingdashboard') }}">
             <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
@@ -64,6 +63,7 @@
 
         @if(isset($buildings))
         @foreach($buildings as $b)
+        
           <li class="nav-item">
             <a class="nav-link text-white {{ $page == 'building-'.$b->id ? 'active bg-gradient-info' : '' }}"
                href="{{ route('admin.rooms.index', ['building_id' => $b->id]) }}">
@@ -73,18 +73,21 @@
               <span class="nav-link-text ms-1" style="text-transform: capitalize">{{ $b->building_name }}</span>
             </a>
           </li>
+          
+        
         @endforeach
       @endif
         @if(isset($rooms))
-          
         <li class="nav-item">
           <a class="nav-link text-white {{ $page == 'flats' ? 'active bg-gradient-info' : '' }}"
-             href="{{ route('admin.flats.index', ['building_id' => $building->id ?? 0]) }}">
-              <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
-                  <i class="material-icons opacity-10">home</i>
-              </div>
-              <span class="nav-link-text ms-1">Flats</span>
-          </a>
+          href="{{ route('admin.flats.index', ['building_id' => $building->id]) }}">
+           <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+               <i class="material-icons opacity-10">home</i>
+           </div>
+           <span class="nav-link-text ms-1">Flats</span>
+       </a>
+       
+
       </li>
       <li class="nav-item">
           <a class="nav-link text-white {{ $page == 'Shops' ? 'active bg-gradient-info' : '' }}"
@@ -131,9 +134,33 @@
               <span class="nav-link-text ms-1">Total Customers</span>
           </a>
       </li>
+
+      <li class="nav-item" id="flatDifferencesMenu">
+        <a class="nav-link text-white {{ $page == 'building-'.$building->id ? 'active bg-gradient-info' : '' }}"
+           href="{{ route('admin.flats.difference', ['building_id' =>  $building->id]) }}">
+            <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+                <i class="material-icons opacity-10">apartment</i>
+            </div>
+            <span class="nav-link-text ms-1">Flat Differences</span>
+        </a>
+      </li>
       
 
+      <li class="nav-item" id="shopsDifferencesMenu">
+        <a class="nav-link text-white {{ $page == 'shops-difference' ? 'active bg-gradient-info' : '' }}"
+           href="{{ route('admin.shops.difference', ['building_id' => $building->id ?? 0]) }}">
+            <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+                <i class="material-icons opacity-10">store</i>
+            </div>
+            <span class="nav-link-text ms-1">Shops Differences</span>
+        </a>
+    </li>
+    
+
         @endif 
+
+        
+    
       </ul>
     </div>
     <div class="sidenav-footer position-absolute w-100 bottom-0">
