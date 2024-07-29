@@ -251,35 +251,32 @@ class SaleController extends Controller
         return redirect()->route('customers.index')->with('success', 'Customer updated successfully.');
     }
     public function markMultipleAsPaid(Request $request)
-{
-    // Retrieve installments array from request
-    $installments = $request->input('installments');
-
-    // Validate that installments is an array
-    if (is_array($installments)) {
-        foreach ($installments as $installmentData) {
-            // Check if 'id' is present in the current installment data
-            if (isset($installmentData['id'])) {
-                $id = $installmentData['id'];
-                $installment = Installment::find($id);
-
+    {
+        $installments = $request->input('installments');
+        $transactionDetails = $request->input('transaction_details');
+        $bankDetails = $request->input('bank_details');
+    
+        // Validate that installments is an array
+        if (is_array($installments)) {
+            foreach ($installments as $index => $installmentId) {
+                $installment = Installment::find($installmentId);
+    
                 if ($installment) {
                     // Update installment details
                     $installment->status = 'paid';
-                    $installment->transaction_details = $installmentData['transaction_details'] ?? $installment->transaction_details;
-                    $installment->bank_details = $installmentData['bank_details'] ?? $installment->bank_details;
+                    $installment->transaction_details = $transactionDetails[$index] ?? $installment->transaction_details;
+                    $installment->bank_details = $bankDetails[$index] ?? $installment->bank_details;
                     $installment->save();
+                } else {
+                    // Log or handle the case where 'id' is missing
+                    Log::warning('Installment data missing or invalid', ['id' => $installmentId]);
                 }
-            } else {
-                // Log or handle the case where 'id' is missing
-                Log::warning('Installment data missing id', $installmentData);
             }
+    
+            return redirect()->back()->with('success', 'Selected installments marked as paid.');
         }
-
-        return redirect()->back()->with('success', 'Selected installments marked as paid.');
+    
+        return redirect()->back()->with('error', 'No installments selected.');
     }
-
-    return redirect()->back()->with('error', 'No installments selected.');
-}
-
+    
 }
