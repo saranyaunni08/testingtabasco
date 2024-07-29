@@ -126,19 +126,19 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
         Route::put('/installments/markAsPaid', [SaleController::class, 'markAsPaid'])->name('installments.markAsPaid');
         // Route::post('/installments/{installment}/mark-paid', [SaleController::class, 'markAsPaid'])->name('installments.markPaid');
         Route::put('/installments/{id}/markAsPaid', [SaleController::class, 'markAsPaid'])
-    ->name('installments.markAsPaid');
+        ->name('installments.markAsPaid');
+        Route::put('/customers/{customer}/installments/{installment}/markAsPaid', [SaleController::class, 'markAsPaid'])->name('installments.markAsPaid');
+        Route::put('/installments/markMultipleAsPaid', [SaleController::class, 'markMultipleAsPaid'])->name('installments.markMultipleAsPaid');
 
 
         
         // Route::put('admin/customers/{id}', [SaleController::class, 'update'])->name('customers.update');
         // Route::get('admin/customers/{id}', [SaleController::class, 'update'])->name('customers.update');
         // Route::post('admin/customers/{customer}', [SaleController::class, 'update'])->name('customers.update');
+        Route::put('/customers/{id}', [SaleController::class, 'update'])->name('customers.update');
 
         Route::get('customers/total-customers', [RoomController::class, 'totalCustomers'])->name('customers.total_customers');
 
 
     });
 });
-
-
-

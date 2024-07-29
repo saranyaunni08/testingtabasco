@@ -421,7 +421,7 @@
         const remainingBalanceElement = modalElement.querySelector('#remaining_balance');
         const cashInHandPercentInput = modalElement.querySelector(`#cash_in_hand_percent${roomId}`);
         const inHandAmountInput = modalElement.querySelector(`#in_hand_amount${roomId}`);
-        const gstAmountElement = modalElement.querySelector('#gst_amount'); // Added for GST amount
+        const gstAmountElement = modalElement.querySelector('#gst_amount'); 
     
         const flatFields = modalElement.querySelector('#flat_fields');
         const shopFields = modalElement.querySelector('#shop_fields');

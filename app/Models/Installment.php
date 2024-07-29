@@ -22,4 +22,7 @@ class Installment extends Model
     {
         return $this->belongsTo(Sale::class);
     }
+    protected $casts = [
+        'installment_date' => 'date',
+    ];
 }

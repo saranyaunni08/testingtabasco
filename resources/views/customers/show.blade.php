@@ -242,70 +242,95 @@
                                                                 </tr>                 
 
 
-                                                        @endif
-                                                    </tbody>
-                                                </table>
-                                                <tbody>
-                                                    @foreach($sales as $sale)
-                                                        <tr>
-                                                            <td style="text-transform:capitalize;color:black;">{{ $sale->room->building->building_name }}</td>
-                                                            <td style="color:black;">{{ $sale->customer_contact }}</td>
-                                                            <td style="color:black;">{{ $sale->customer_email }}</td>
-                                                            <td style="color:black;">{{ $sale->room->room_type }}</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td colspan="4">
-                                                                <div class="card mt-3">
-                                                                    <div class="card-header">
-                                                                        <strong style="text-transform: capitalize">{{ $sale->room->room_type }} Details</strong>
+                                                                        @endif
+                                                                    </tbody>
+                                                                </table>
+                                                                <tbody>
+                                                                    @foreach($sales as $sale)
+                                                                        <tr>
+                                                                            <td style="text-transform:capitalize;color:black;">{{ $sale->room->building->building_name }}</td>
+                                                                            <td style="color:black;">{{ $sale->customer_contact }}</td>
+                                                                            <td style="color:black;">{{ $sale->customer_email }}</td>
+                                                                            <td style="color:black;">{{ $sale->room->room_type }}</td>
+                                                                        </tr>
+                                                                        <tr>
+                                                                            <td colspan="4">
+                                                                                <div class="card mt-3">
+                                                                                    <div class="card-header">
+                                                                                        <strong style="text-transform: capitalize">{{ $sale->room->room_type }} Details</strong>
+                                                                                    </div>
+                                                                                    <div class="card-body">
+                                                                                        <h5 class="mt-4">Installment Details</h5>
+                                                                                        <form id="markAsPaidForm" method="POST" action="{{ route('admin.installments.markMultipleAsPaid') }}">
+                                                                                            @csrf
+                                                                                            @method('PUT')
+                                                                                            <table class="table table-sm table-bordered">
+                                                                                                <thead>
+                                                                                                    <tr>
+                                                                                                        <th>Select</th>
+                                                                                                        <th>ID</th>
+                                                                                                        <th>Installment Date</th>
+                                                                                                        <th>Amount</th>
+                                                                                                        <th>Transaction Details</th>
+                                                                                                        <th>Bank Details</th>
+                                                                                                        <th>Status</th>
+                                                                                                    </tr>
+                                                                                                </thead>
+                                                                                                <tbody>
+                                                                                                    @foreach($installments as $installment)
+                                                                                                        <tr>
+                                                                                                            <td>
+                                                                                                                <input type="checkbox" name="installments[]" value="{{ $installment->id }}"
+                                                                                                                    @if($installment->status === 'paid') style="display: none;" @endif>
+                                                                                                            </td>
+                                                                                                            
+                                                                                                            <td>{{ $installment->id }}</td>
+                                                                                                            <td>{{ $installment->installment_date->format('d/m/Y') }}</td>
+                                                                                                            <td>{{ $installment->installment_amount }}</td>
+                                                                                                            <td>
+                                                                                                                @if($installment->status === 'paid')
+                                                                                                                    <span style="color: green; font-weight: bold;">{{ $installment->transaction_details }}</span>
+                                                                                                                @else
+                                                                                                                    <input type="text" name="transaction_details[]" value="{{ $installment->transaction_details }}">
+                                                                                                                @endif
+                                                                                                            </td>
+                                                                                                            <td>
+                                                                                                                @if($installment->status === 'paid')
+                                                                                                                    <span style="color: green; font-weight: bold;">{{ $installment->bank_details }}</span>
+                                                                                                                @else
+                                                                                                                    <input type="text" name="bank_details[]" value="{{ $installment->bank_details }}">
+                                                                                                                @endif
+                                                                                                            </td>
+                                                                                                            <td>
+                                                                                                                @if($installment->status === 'paid')
+                                                                                                                    <span class="badge bg-success">Paid</span>
+                                                                                                                @else
+                                                                                                                    <span class="badge bg-danger">Pending</span>
+                                                                                                                @endif
+                                                                                                            </td>                                                                                                        </tr>
+                                                                                                    @endforeach
+                                                                                                </tbody>
+                                                                                            </table>
+                                                                                            <button type="submit" class="btn btn-primary">Mark Selected as Paid</button>
+                                                                                        </form>
+                                                                                        
+                                                                                    </div>
+                                                                                </div>
+                                                                            </td>
+                                                                        </tr>
+                                                                    @endforeach
+                                                                </tbody>
+                                                                
+                                                                                        </table>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </td>
+                                                                        </tr>
+                                                            </tbody>
+                                                            </table>
                                                                     </div>
-                                                                    <div class="card-body">
-                                                                        <h5 class="mt-4">Installment Details</h5>
-                                                                        <table class="table table-sm table-bordered">
-                                                                            <thead>
-                                                                                <tr>
-                                                                                    <th>Installment Date</th>
-                                                                                    <th>Installment Amount</th>
-                                                                                    <th>Transaction Details</th>
-                                                                                    <th>Bank Details</th>
-                                                                                    <th>Status</th>
-                                                                                </tr>
-                                                                            </thead>
-                                                                            <tbody>
-                                                                                @forelse($installments as $installment)
-                                                                                <tr>
-                                                                                    <td>{{ $installment->installment_date }}</td>
-                                                                                    <td>{{ $installment->installment_amount }}</td>
-                                                                                    <td>{{ $installment->transaction_details }}</td>
-                                                                                    <td>{{ $installment->bank_details }}</td>
-                                                                                    <td>{{ $installment->status }}</td>
-                                                                                    <td>
-                                                                                        @if($installment->status == 'pending')
-                                                                                            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#markPaidModal"
-                                                                                                data-installment-id="{{ $installment->id }}"
-                                                                                                data-installment-date="{{ $installment->installment_date }}"
-                                                                                                data-installment-amount="{{ $installment->installment_amount }}">
-                                                                                                Mark as Paid
-                                                                                            </button>
-                                                                                        @endif
-                                                                                    </td>
-                                                                                </tr>
-                                                                            @empty
-                                                                                <tr>
-                                                                                    <td colspan="6">No installments available</td>
-                                                                                </tr>
-                                                                            @endforelse
-                                                                            </tbody>
-                                                                        </table>
-                                                                    </div>
-                                                                </div>
-                                                            </td>
-                                                        </tr>
-                                               </tbody>
-                                            </table>
-                                                    </div>
-                                                @endforeach
-                                           <!-- Mark Paid Modal -->
+                                                                @endforeach
+<!-- Mark Paid Modal -->
 <div class="modal fade" id="markPaidModal" tabindex="-1" role="dialog" aria-labelledby="markPaidModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -315,11 +340,11 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <form id="markAsPaidForm" method="POST" action="{{ route('admin.installments.markAsPaid', $installment->id) }}">
+            <form id="markPaidForm" method="POST">
                 @csrf
                 @method('PUT')
+                <input type="hidden" name="installment_id" id="modalInstallmentId">
                 <div class="modal-body">
-                    <input type="hidden" name="installment_id" id="modalInstallmentId">
                     <div class="form-group">
                         <label for="modalInstallmentDate">Installment Date</label>
                         <input type="text" class="form-control" id="modalInstallmentDate" name="installment_date" readonly>
@@ -330,30 +355,26 @@
                     </div>
                     <div class="form-group">
                         <label for="transaction_details">Transaction Details</label>
-                        <input type="text" class="form-control" id="transaction_details" name="transaction_details">
+                        <input type="text" class="form-control" id="modalTransactionDetails" name="transaction_details">
                     </div>
                     <div class="form-group">
                         <label for="bank_details">Bank Details</label>
-                        <input type="text" class="form-control" id="bank_details" name="bank_details">
+                        <input type="text" class="form-control" id="modalBankDetails" name="bank_details">
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary">Save changes</button>
+                    <button type="submit" class="btn btn-primary">Mark as Paid</button>
                 </div>
             </form>
-            
-            
         </div>
     </div>
 </div>
-
 
                                                                                         </div>
                                                                                     </div>
                                                                                 </td>
                                                                             </tr>
-                                                                        @endforeach
                                                                     </tbody>
                                                                 </table>
                                                             </div>
@@ -363,20 +384,38 @@
                                             </div>
 
 
+                                        <!-- Script to handle modal population and form action update -->
 <script>
-$('#markPaidModal').on('show.bs.modal', function (event) {
-    var button = $(event.relatedTarget); // Button that triggered the modal
-    var installmentId = button.data('installment-id');
-    var installmentDate = button.data('installment-date');
-    var installmentAmount = button.data('installment-amount');
+ document.addEventListener('DOMContentLoaded', function () {
+    var markPaidModal = document.getElementById('markPaidModal');
+    var markPaidForm = document.getElementById('markPaidForm');
+    var modalInstallmentId = document.getElementById('modalInstallmentId');
+    var modalInstallmentDate = document.getElementById('modalInstallmentDate');
+    var modalInstallmentAmount = document.getElementById('modalInstallmentAmount');
+    var modalTransactionDetails = document.getElementById('modalTransactionDetails');
+    var modalBankDetails = document.getElementById('modalBankDetails');
 
-    var modal = $(this);
-    modal.find('#modalInstallmentId').val(installmentId);
-    modal.find('#modalInstallmentDate').val(installmentDate);
-    modal.find('#modalInstallmentAmount').val(installmentAmount);
+    markPaidModal.addEventListener('show.bs.modal', function (event) {
+        var button = event.relatedTarget;
+        var customerId = button.getAttribute('data-customer-id');
+        var installmentId = button.getAttribute('data-installment-id');
+        var installmentDate = button.getAttribute('data-installment-date');
+        var installmentAmount = button.getAttribute('data-installment-amount');
+        var transactionDetails = button.getAttribute('data-transaction-details');
+        var bankDetails = button.getAttribute('data-bank-details');
+
+        // Set form action URL
+        markPaidForm.action = '/admin/customers/' + customerId + '/installments/' + installmentId + '/markAsPaid';
+
+        // Set hidden input values
+        modalInstallmentId.value = installmentId;
+        modalInstallmentDate.value = installmentDate;
+        modalInstallmentAmount.value = installmentAmount;
+        modalTransactionDetails.value = transactionDetails;
+        modalBankDetails.value = bankDetails;
+    });
 });
 
 
 </script>
-
 @endsection

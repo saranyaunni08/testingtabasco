@@ -230,27 +230,56 @@ class SaleController extends Controller
 
         return response()->json($data);
     }
-   
-    public function markAsPaid(Request $request, $id)
+    public function markAsPaid(Request $request, $installmentId)
     {
-        // Validate request
-        $validatedData = $request->validate([
-            'transaction_details' => 'required|string',
-            'bank_details' => 'required|string',
-        ]);
+        $installment = Installment::findOrFail($installmentId);
     
-        // Find the installment
-        $installment = Installment::findOrFail($id);
-    
-        // Update the installment
+        $installment->status = 'paid';
         $installment->transaction_details = $request->input('transaction_details');
         $installment->bank_details = $request->input('bank_details');
-        $installment->status = 'paid'; // Change status to paid
         $installment->save();
     
-        // Redirect back with a success message
-        return redirect()->back()->with('success', 'Installment marked as paid successfully.');
+        return redirect()->back()->with('success', 'Installment marked as paid.');
     }
     
-    
+    public function update(Request $request, $id)
+    {
+        // Handle the update logic here
+        $customer = sale::findOrFail($id);
+        $customer->update($request->all());
+
+        return redirect()->route('customers.index')->with('success', 'Customer updated successfully.');
+    }
+    public function markMultipleAsPaid(Request $request)
+{
+    // Retrieve installments array from request
+    $installments = $request->input('installments');
+
+    // Validate that installments is an array
+    if (is_array($installments)) {
+        foreach ($installments as $installmentData) {
+            // Check if 'id' is present in the current installment data
+            if (isset($installmentData['id'])) {
+                $id = $installmentData['id'];
+                $installment = Installment::find($id);
+
+                if ($installment) {
+                    // Update installment details
+                    $installment->status = 'paid';
+                    $installment->transaction_details = $installmentData['transaction_details'] ?? $installment->transaction_details;
+                    $installment->bank_details = $installmentData['bank_details'] ?? $installment->bank_details;
+                    $installment->save();
+                }
+            } else {
+                // Log or handle the case where 'id' is missing
+                Log::warning('Installment data missing id', $installmentData);
+            }
+        }
+
+        return redirect()->back()->with('success', 'Selected installments marked as paid.');
+    }
+
+    return redirect()->back()->with('error', 'No installments selected.');
+}
+
 }
