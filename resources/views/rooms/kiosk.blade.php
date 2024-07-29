@@ -42,7 +42,7 @@
                             <td>{{ $room->kiosk_type }}</td>
                             <td>{{ $room->kiosk_area }} sq ft</td>
                             <td>₹{{ number_format($room->kiosk_rate, 2) }}</td>
-                            <td>₹{{ number_format($room->kiosk_expected_rate, 2) }}</td>
+                            <td>₹{{ number_format($room->kiosk_expected_price, 2) }}</td>
                             <td>
                                 @if($room->status == 'available')
                                     <span class="badge badge-info">Available</span>
@@ -71,10 +71,12 @@
                                 </button>
                                 @else
 
+                                @if ($room->sale)
                                 <a href="{{ route('admin.customers.show', ['customerName' => $room->sale->customer_name]) }}"
                                     style="color: #28a745; font-weight: bold; font-size: 1.2em; border: 2px solid #28a745;
                                      padding: 5px 10px; border-radius: 5px; background-color: #e9f7ef; text-decoration:none;">View
                                 </a>
+                                @endif
                                 @endif  
                                 <div class="modal fade" id="sellModal{{ $room->id }}" tabindex="-1" aria-labelledby="sellModalLabel{{ $room->id }}" aria-hidden="true">
                                     <div class="modal-dialog modal-lg"> 

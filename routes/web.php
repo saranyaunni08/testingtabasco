@@ -116,16 +116,25 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
         Route::post('/installments/{sale}/mark-paid', [SaleController::class, 'markInstallmentPaid'])->name('installments.markPaid');
 
         
-        Route::post('/installments/{sale}/mark-paid', [SaleController::class, 'markPaid'])->name('installments.markPaid');
         
         Route::get('/rooms/difference/{building_id}', [RoomController::class, 'difference'])
         ->name('flats.difference');
         
         Route::get('/rooms/difference/shops/{building_id}', [RoomController::class, 'shopsDifference'])->name('shops.difference');
-        
-        
-        Route::get('/buildings/{building}/total-customers', [SaleController::class, 'totalCustomers'])->name('customers.total_customers');
 
+
+        Route::put('/installments/markAsPaid', [SaleController::class, 'markAsPaid'])->name('installments.markAsPaid');
+        // Route::post('/installments/{installment}/mark-paid', [SaleController::class, 'markAsPaid'])->name('installments.markPaid');
+        Route::put('/installments/{id}/markAsPaid', [SaleController::class, 'markAsPaid'])
+    ->name('installments.markAsPaid');
+
+
+        
+        // Route::put('admin/customers/{id}', [SaleController::class, 'update'])->name('customers.update');
+        // Route::get('admin/customers/{id}', [SaleController::class, 'update'])->name('customers.update');
+        // Route::post('admin/customers/{customer}', [SaleController::class, 'update'])->name('customers.update');
+
+        Route::get('customers/total-customers', [RoomController::class, 'totalCustomers'])->name('customers.total_customers');
 
 
     });

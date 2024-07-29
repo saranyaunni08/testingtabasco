@@ -20,16 +20,17 @@ class Sale extends Model
         'total_with_discount', 'remaining_balance', 'cash_in_hand_percent', 'in_hand_amount', 
     ];
 
-    // Define the relationship with Installment model
     public function installments()
     {
         return $this->hasMany(Installment::class);
     }
 
+
+    
     // Define other relationships or methods as needed
     public function room()
     {
-        return $this->belongsTo(Room::class, 'room_id');
+        return $this->belongsTo(Room::class);
     }
 }
     

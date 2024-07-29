@@ -245,153 +245,138 @@
                                                         @endif
                                                     </tbody>
                                                 </table>
-
-                                                <!-- Installment Calendar -->
-                                                <div class="table-responsive mt-4">
-                                                    <h5 class="text-center">Installment Calendar</h5>
-                                                    <table class="table table-bordered">
-                                                        <thead class="table-dark">
-                                                            <tr>
-                                                                <th>Sl No</th>
-                                                                <th>Installment Date</th>
-                                                                <th>Installment Amount</th>
-                                                                <th>Status</th>
-                                                                <th>Action</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            @php
-                                                                $installmentDate = \Carbon\Carbon::createFromFormat('Y-m-d', $sale->installment_date);
-                                                                $installmentAmount = number_format($sale->remaining_balance / $sale->installments, 2);
-                                                            @endphp
-                                                            @for ($i = 0; $i < $sale->installments; $i++)
-                                                                <tr>
-                                                                    <td>{{ $i + 1 }}</td>
-                                                                    <td>{{ $installmentDate->format('d-m-Y') }}</td>
-                                                                    <td>₹{{ $installmentAmount }}</td>
-                                                                    <td>
-                                                                        @if (isset($sale->installments_paid) && count($sale->installments_paid) > $i && $sale->installments_paid[$i])
-                                                                            <span class="badge badge-success">Paid</span>
-                                                                        @else
-                                                                            <span class="badge badge-danger">Due</span>
-                                                                        @endif
-                                                                    </td>
-                                                                    <td>
-                                                                        @if (!isset($sale->installments_paid) || count($sale->installments_paid) <= $i || !$sale->installments_paid[$i])
-                                                                            <button type="button" class="btn btn-primary btn-sm mark-paid-btn" data-toggle="modal" data-target="#markPaidModal" 
-                                                                            data-installment-date="{{ $installmentDate->format('d-m-Y') }}" data-installment-amount="₹{{ $installmentAmount }}"
-                                                                             data-sale-id="{{ $sale->id }}" data-index="{{ $i }}">Mark as Paid</button>
-                                                                        @endif
-                                                                    </td>
-                                                                </tr>
-                                                                @php
-                                                                    $installmentDate->addMonth();
-                                                                @endphp
-                                                            @endfor
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            @endif
-        </div>
-    </div>
-</div>
-
-<!-- Mark Paid Modal -->
+                                                <tbody>
+                                                    @foreach($sales as $sale)
+                                                        <tr>
+                                                            <td style="text-transform:capitalize;color:black;">{{ $sale->room->building->building_name }}</td>
+                                                            <td style="color:black;">{{ $sale->customer_contact }}</td>
+                                                            <td style="color:black;">{{ $sale->customer_email }}</td>
+                                                            <td style="color:black;">{{ $sale->room->room_type }}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td colspan="4">
+                                                                <div class="card mt-3">
+                                                                    <div class="card-header">
+                                                                        <strong style="text-transform: capitalize">{{ $sale->room->room_type }} Details</strong>
+                                                                    </div>
+                                                                    <div class="card-body">
+                                                                        <h5 class="mt-4">Installment Details</h5>
+                                                                        <table class="table table-sm table-bordered">
+                                                                            <thead>
+                                                                                <tr>
+                                                                                    <th>Installment Date</th>
+                                                                                    <th>Installment Amount</th>
+                                                                                    <th>Transaction Details</th>
+                                                                                    <th>Bank Details</th>
+                                                                                    <th>Status</th>
+                                                                                </tr>
+                                                                            </thead>
+                                                                            <tbody>
+                                                                                @forelse($installments as $installment)
+                                                                                <tr>
+                                                                                    <td>{{ $installment->installment_date }}</td>
+                                                                                    <td>{{ $installment->installment_amount }}</td>
+                                                                                    <td>{{ $installment->transaction_details }}</td>
+                                                                                    <td>{{ $installment->bank_details }}</td>
+                                                                                    <td>{{ $installment->status }}</td>
+                                                                                    <td>
+                                                                                        @if($installment->status == 'pending')
+                                                                                            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#markPaidModal"
+                                                                                                data-installment-id="{{ $installment->id }}"
+                                                                                                data-installment-date="{{ $installment->installment_date }}"
+                                                                                                data-installment-amount="{{ $installment->installment_amount }}">
+                                                                                                Mark as Paid
+                                                                                            </button>
+                                                                                        @endif
+                                                                                    </td>
+                                                                                </tr>
+                                                                            @empty
+                                                                                <tr>
+                                                                                    <td colspan="6">No installments available</td>
+                                                                                </tr>
+                                                                            @endforelse
+                                                                            </tbody>
+                                                                        </table>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                               </tbody>
+                                            </table>
+                                                    </div>
+                                                @endforeach
+                                           <!-- Mark Paid Modal -->
 <div class="modal fade" id="markPaidModal" tabindex="-1" role="dialog" aria-labelledby="markPaidModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="markPaidModalLabel">Mark Installment as Paid</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">×</span>
+                    <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <div class="modal-body">
-                <form id="markPaidForm" action="{{ route('admin.installments.markPaid', ['sale' => $sale->id]) }}" method="POST">
-                    @csrf
-                    <input type="hidden" name="sale_id" value="{{ $sale->id }}">
-                    
+            <form id="markAsPaidForm" method="POST" action="{{ route('admin.installments.markAsPaid', $installment->id) }}">
+                @csrf
+                @method('PUT')
+                <div class="modal-body">
+                    <input type="hidden" name="installment_id" id="modalInstallmentId">
                     <div class="form-group">
                         <label for="modalInstallmentDate">Installment Date</label>
-                        <input type="date" class="form-control" id="modalInstallmentDate" name="installment_date" value="{{ $sale->installment_date }}" required>
+                        <input type="text" class="form-control" id="modalInstallmentDate" name="installment_date" readonly>
                     </div>
-                    
                     <div class="form-group">
                         <label for="modalInstallmentAmount">Installment Amount</label>
                         <input type="text" class="form-control" id="modalInstallmentAmount" name="installment_amount" readonly>
                     </div>
-                    
                     <div class="form-group">
-                        <label for="modalTransactionDetails">Transaction Details</label>
-                        <textarea class="form-control" id="modalTransactionDetails" name="transaction_details" rows="3"></textarea>
+                        <label for="transaction_details">Transaction Details</label>
+                        <input type="text" class="form-control" id="transaction_details" name="transaction_details">
                     </div>
-                    
                     <div class="form-group">
-                        <label for="modalBankDetails">Bank Details</label>
-                        <textarea class="form-control" id="modalBankDetails" name="bank_details" rows="3"></textarea>
+                        <label for="bank_details">Bank Details</label>
+                        <input type="text" class="form-control" id="bank_details" name="bank_details">
                     </div>
-                    
-                    <button type="submit" class="btn btn-success">Mark as Paid</button>
-                </form>
-            </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save changes</button>
+                </div>
+            </form>
+            
+            
         </div>
     </div>
 </div>
 
+
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </td>
+                                                                            </tr>
+                                                                        @endforeach
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                            </div>
+
+
 <script>
-    $(document).ready(function() {
-        // When the Mark as Paid button in modal is clicked
-        $('.mark-paid-btn').on('click', function() {
-            var saleId = $(this).data('sale-id');
-            var installmentDate = $(this).data('installment-date');
-            var installmentAmount = parseFloat($(this).data('installment-amount').replace(/[^\d.-]/g, ''));
-            $('#modalInstallmentAmount').val(installmentAmount.toFixed(2)); // Set as a string to avoid NaN
-            var index = $(this).data('index');
-            
-            // Set values in the modal form fields
-            $('#modalSaleId').val(saleId);
-            $('#modalInstallmentDate').val(moment(installmentDate, 'DD-MM-YYYY').format('YYYY-MM-DD'));
-            $('#modalInstallmentAmount').val(installmentAmount);
-            $('#modalIndex').val(index);
-        });
+$('#markPaidModal').on('show.bs.modal', function (event) {
+    var button = $(event.relatedTarget); // Button that triggered the modal
+    var installmentId = button.data('installment-id');
+    var installmentDate = button.data('installment-date');
+    var installmentAmount = button.data('installment-amount');
 
-        // When the markPaidForm is submitted
-        $('#markPaidForm').on('submit', function(e) {
-            e.preventDefault(); // Prevent normal form submission
+    var modal = $(this);
+    modal.find('#modalInstallmentId').val(installmentId);
+    modal.find('#modalInstallmentDate').val(installmentDate);
+    modal.find('#modalInstallmentAmount').val(installmentAmount);
+});
 
-            var form = $(this); // Get the form element
-            var actionUrl = form.attr('action'); // Get the form action URL
-            var formData = form.serialize(); // Serialize form data
 
-            // Make an AJAX POST request
-            $.ajax({
-                type: 'POST',
-                url: actionUrl,
-                data: formData,
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') // Add CSRF token
-                },
-                success: function(response) {
-                    // Handle success response
-                    $('#markPaidModal').modal('hide'); // Close the modal
-                    alert('Installment marked as paid successfully.'); // Display success message
-                    location.reload(); // Reload the page to update UI
-                },
-                error: function(xhr, status, error) {
-                    // Handle error response
-                    console.error(xhr.responseText); // Log error message
-                    alert('An error occurred. Please try again.'); // Display error message
-                }
-            });
-        });
-    });
 </script>
+
 @endsection

@@ -17,4 +17,9 @@ class Installment extends Model
         'bank_details',
         'status',
     ];
+
+    public function sale()
+    {
+        return $this->belongsTo(Sale::class);
+    }
 }

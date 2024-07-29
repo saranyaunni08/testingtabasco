@@ -4,9 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Sale;
 use App\Models\Room;
+use App\Models\Installment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use App\Models\Installment;
+use Carbon\Carbon;
 
 class SaleController extends Controller
 {
@@ -37,9 +38,7 @@ class SaleController extends Controller
             'in_hand_amount' => 'nullable|numeric',
         ]);
 
-
         $room = Room::find($validatedData['room_id']);
-
 
         $roomRate = $this->calculateRoomRate($validatedData, $room);
         $parkingAmount = $this->calculateParkingAmount($validatedData);
@@ -49,7 +48,6 @@ class SaleController extends Controller
         $totalWithGst = $totalAmount + $gstAmount;
         $totalWithDiscount = isset($validatedData['discount_percent']) ? $totalWithGst - ($totalWithGst * ($validatedData['discount_percent'] / 100)) : $totalWithGst;
         $remainingBalance = $totalWithDiscount - ($validatedData['advance_amount'] ?? 0);
-
 
         $sale = new Sale();
         $sale->room_id = $validatedData['room_id'];
@@ -73,7 +71,6 @@ class SaleController extends Controller
         $sale->installment_date = $validatedData['installment_date'];
         $sale->cash_in_hand_percent = $validatedData['cash_in_hand_percent'];
         $sale->in_hand_amount = $validatedData['in_hand_amount'];
-
         $sale->room_rate = $roomRate;
         $sale->total_amount = $totalAmount;
         $sale->parking_amount = $parkingAmount;
@@ -82,18 +79,29 @@ class SaleController extends Controller
         $sale->total_with_discount = $totalWithDiscount;
         $sale->remaining_balance = $remainingBalance;
 
-
         $sale->save();
-
 
         $room->status = 'sold';
         $room->save();
 
+        // Create installments
+        $installmentAmount = $remainingBalance / $validatedData['installments'];
+        $installmentDate = Carbon::parse($validatedData['installment_date']);
+
+        for ($i = 0; $i < $validatedData['installments']; $i++) {
+            Installment::create([
+                'sale_id' => $sale->id,
+                'installment_date' => $installmentDate->copy()->addMonths($i),
+                'installment_amount' => $installmentAmount,
+                'transaction_details' => '',
+                'bank_details' => '',
+                'status' => 'pending',
+            ]);
+        }
 
         return back()->with('success', 'Room sold successfully!');
     }
 
-        
     protected function calculateRoomRate($validatedData, $room)
     {
         $areaProperties = [
@@ -102,27 +110,27 @@ class SaleController extends Controller
             'Table space' => ['space_area', 'space_area'],
             'Chair space' => ['chair_space', 'chair_space']
         ];
-    
+
         $areaCalculationType = $validatedData['area_calculation_type'];
         $saleAmount = $validatedData['sale_amount'];
-    
+
         if (array_key_exists($room->room_type, $areaProperties)) {
             $propertyIndex = ($areaCalculationType == 'carpet_area_rate') ? 0 : 1;
             $areaProperty = $areaProperties[$room->room_type][$propertyIndex];
-    
+
             if (isset($room->$areaProperty)) {
                 return $saleAmount * $room->$areaProperty;
             }
         }
-    
-        return 0; 
+
+        return 0;
     }
-    
+
     protected function calculateParkingAmount($validatedData)
     {
         $parkingAmount = 0;
         if ($validatedData['calculation_type'] == 'fixed_amount') {
-            $parkingAmount = 0;  
+            $parkingAmount = 0;
         } elseif ($validatedData['calculation_type'] == 'rate_per_sq_ft' && 
                   !is_null($validatedData['total_sq_ft_for_parking']) && 
                   !is_null($validatedData['parking_rate_per_sq_ft'])) {
@@ -130,7 +138,7 @@ class SaleController extends Controller
         }
         return $parkingAmount;
     }
-    
+
     public function create()
     {
         $rooms = Room::all();
@@ -172,132 +180,77 @@ class SaleController extends Controller
     }
     public function showCustomer($customerName)
     {
-        $sales = Sale::where('customer_name', $customerName)
-            ->with(['room.building'])
-            ->get();
-        $page = 'customer';
-        $sale = $sales->first();
-
-        foreach ($sales as $sale) {
-            $installment = $sale->installments()->first();
-
-            if ($installment) {
-                $installmentDate = $installment->installment_date;
-                $installmentAmount = $sale->remaining_balance / $sale->installments;
-            } else {
-                $installmentDate = null;
-                $installmentAmount = null;
-            }
-
-            $sale->installmentDate = $installmentDate;
-            $sale->installmentAmount = $installmentAmount;
-        }
-
-        return view('customers.show', compact('sales', 'sale', 'page'));
-    }
+        // Fetch customer by name
+        $customer = sale::where('customer_name', $customerName)->first();
     
-    function getCalculationType(Request $request) {
+        if (!$customer) {
+            abort(404);
+        }
+    
+        // Fetch related installments
+    // Fetch related sales records for the customer
+    $sales = Sale::where('customer_name', $customerName)->get();
+
+    $page = 'customer';
+    // Fetch related installments
+    $installments = Installment::where('sale_id', $customer->id)->get();
+
+    return view('customers.show', compact('customer', 'sales', 'installments','page'));
+}       
+
+
+    public function getCalculationType(Request $request) 
+    {
         $roomId = $request->input('room_id');
         $type = $request->input('type');
 
         $roomData = Room::find($roomId);
 
-        if($type === 'carpet_area_rate') {
-            if($roomData->room_type == 'Shops'){
+        if ($type === 'carpet_area_rate') {
+            if ($roomData->room_type == 'Shops') {
                 $data = ['sqft' => $roomData->carpet_area];
-            }elseif($roomData->room_type ==  'Flat') {
+            } elseif ($roomData->room_type == 'Flat') {
                 $data = ['sqft' => $roomData->flat_carpet_area];
-            }elseif($roomData->room_type ==  'Table space') {
+            } elseif ($roomData->room_type == 'Table space') {
                 $data = ['sqft' => $roomData->space_area];
-            }elseif($roomData->room_type ==  'Kiosk') {
-                $data = ['sqft' => $roomData->kiosk_area];
-            }else {
-                $data = ['sqft' => $roomData->chair_space_in_sq];
+            } elseif ($roomData->room_type == 'Chair space') {
+                $data = ['sqft' => $roomData->chair_space];
             }
-
-            return response()->json($data);
-        }else {
-            if($roomData->room_type ==  'Shops'){
+        } else if ($type === 'build_up_area_rate') {
+            if ($roomData->room_type == 'Shops') {
                 $data = ['sqft' => $roomData->build_up_area];
-            }elseif($roomData->room_type ==  'Flat') {
+            } elseif ($roomData->room_type == 'Flat') {
                 $data = ['sqft' => $roomData->flat_build_up_area];
-            }elseif($roomData->room_type ==  'Table space') {
+            } elseif ($roomData->room_type == 'Table space') {
                 $data = ['sqft' => $roomData->space_area];
-            }elseif($roomData->room_type ==  'Kiosk') {
-                $data = ['sqft' => $roomData->kiosk_area];
-            }else {
-                $data = ['sqft' => $roomData->chair_space_in_sq];
+            } elseif ($roomData->room_type == 'Chair space') {
+                $data = ['sqft' => $roomData->chair_space];
             }
-
-            return response()->json($data);
         }
-    }
 
-  
-    
-    public function totalCustomers($buildingId)
-    {
-        $sales = Sale::with('room')
-            ->whereHas('room', function ($query) use ($buildingId) {
-                $query->where('building_id', $buildingId);
-            })
-            ->get();
-    
-        $title = "Total Customers";
-        $page = "total-customers";
-    
-        return view('customers.total_customers', compact('sales', 'title', 'page'));
+        return response()->json($data);
     }
-    public function update(Request $request, Sale $sale)
+   
+    public function markAsPaid(Request $request, $id)
     {
-
+        // Validate request
         $validatedData = $request->validate([
-            'calculation_type' => 'required|string', 
-            'parking_rate_per_sq_ft' => 'required|numeric',
-            'total_sq_ft_for_parking' => 'required|numeric',
-
-        ]);
-    
-
-        $sale->calculation_type = $request->input('calculation_type');
-        $sale->parking_rate_per_sq_ft = $request->input('parking_rate_per_sq_ft');
-        $sale->total_sq_ft_for_parking = $request->input('total_sq_ft_for_parking');
-    
-
-        $sale->save();
-    
-
-        return redirect()->back()->with('success', 'Sale updated successfully.');
-    }
-    
-    public function markPaid(Request $request, Sale $sale)
-    {
-        Log::info('Attempting to mark installment as paid.');
-
-        $validatedData = $request->validate([
-            'installment_date' => 'required|date_format:Y-m-d',
-            'installment_amount' => 'required|numeric',
             'transaction_details' => 'required|string',
             'bank_details' => 'required|string',
         ]);
-        
-        
     
-        // Create a new installment record
-        $installment = new Installment();
-        $installment->sale_id = $sale->id;
-        $installment->installment_date = $validatedData['installment_date'];
-        $installment->installment_amount = $validatedData['installment_amount'];
-        $installment->transaction_details = $validatedData['transaction_details'];
-        $installment->bank_details = $validatedData['bank_details'];
-        $installment->status = 'Paid'; // Assuming this updates the sale status
+        // Find the installment
+        $installment = Installment::findOrFail($id);
+    
+        // Update the installment
+        $installment->transaction_details = $request->input('transaction_details');
+        $installment->bank_details = $request->input('bank_details');
+        $installment->status = 'paid'; // Change status to paid
         $installment->save();
     
-        // Optionally, you can update the sale status here as well
-        $sale->update(['status' => 'Paid']);
-    
-        // Redirect back with success message
+        // Redirect back with a success message
         return redirect()->back()->with('success', 'Installment marked as paid successfully.');
     }
-   
+    
+    
 }

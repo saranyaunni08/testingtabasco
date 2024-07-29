@@ -1,9 +1,8 @@
 @extends('layouts.default', ['title' => $title, 'page' => $page])
 
 @section('content')
-
 <div class="container-fluid py-4">
-    @foreach($rooms as $floor => $floorRooms)
+    @foreach($floorRooms as $floor => $rooms)
     <div class="card my-4">
         <div class="card-header bg-primary text-white">
             <h2 class="mb-0">Floor: {{ $floor }}</h2>
@@ -30,7 +29,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($floorRooms as $index => $room)
+                        @foreach($rooms as $index => $room)
                         <tr>
                             <td class="text-center">{{ (int)$index + 1 }}</td>
                             <td>{{ $room->room_number }}</td>
@@ -51,13 +50,21 @@
                                 {{ $room->sales->first()->parking_amount }}
                                 @endif
                             </td>
-                            <td>
+                            <td class="text-right">
                                 @if($room->sales->isNotEmpty())
                                 {{ $room->sales->first()->customer_name }}
                                 @endif
                             </td>
-                            <td class="text-right">{{ $room->sale_amount }}</td>
-                            <td class="text-right">{{ $room->total_amount }}</td>
+                            <td class="text-right">
+                                @if($room->sales->isNotEmpty())
+                                {{ $room->sales->first()->sale_amount }}
+                                @endif
+                            </td>
+                            <td class="text-right">
+                                @if($room->sales->isNotEmpty())
+                                {{ $room->sales->first()->total_amount }}
+                                @endif
+                            </td>
                         </tr>
                         @endforeach
                     </tbody>

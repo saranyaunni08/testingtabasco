@@ -26,6 +26,10 @@ class Room extends Model
     {
         return $this->belongsTo(Building::class);
     }
+    public function sales()
+    {
+        return $this->hasMany(Sale::class, 'room_id', 'id');
+    }
     public function sale()
     {
         return $this->hasOne(Sale::class);

@@ -2,7 +2,6 @@
 
 @section('content')
 <div class="content">
-   
     <main class="main">
         <div class="container-fluid pt-4 px-4">
             <div class="row g-4">
@@ -14,24 +13,21 @@
                             <h5 class="font-weight-bolder">₹{{ number_format($ExpectedPrice) }}</h5>
                         </div>
                     </div>
-                   
                 </div>
-              
             </div>
         </div>
-        
-        <!-- Sale & Revenue End -->
 
-        <!-- Sales Chart Start -->
+        <!-- Rest of your code -->
+
         <div class="container-fluid pt-4 px-3">
             <div class="row g-4">
                 <div class="col-sm-12 col-xl-5">
                     <div class="bg-light rounded h-100 p-4">
                         <h6 class="mb-4">TOTAL ROOMS</h6>
-                        <canvas id="doughnut-chart" height="400"></canvas> 
+                        <canvas id="doughnut-chart" height="400"></canvas>
                     </div>
                 </div>
-                
+
                 <div class="col-sm-12 col-xl-6">
                     <div class="bg-light rounded h-100 p-4">
                         <h6 class="mb-4"></h6><br><br>
@@ -40,9 +36,7 @@
                 </div>
             </div>
         </div>
-        <!-- Sales Chart End -->
 
-        <!-- DataTable content start -->
         <div class="container-fluid pt-4 px-4">
             <table class="table table-bordered dataTable no-footer" id="DataTables_Table_0" aria-describedby="DataTables_Table_0_info" style="width: 100%; background-color: #f0f0f0;">
                 <thead>
@@ -69,9 +63,7 @@
                 </tbody>
             </table>
         </div>
-        <!-- DataTable content end -->
 
-        <!-- Widgets Start -->
         <div class="container-fluid pt-4 px-4">
             <div class="row g-4">
                 <div class="col-sm-6 col-xl-3">
@@ -81,8 +73,8 @@
                             <h6 class="mb-0">Total Customers</h6>
                             <h5 class="font-weight-bolder">
                                 {{ $totalCustomers }}
-                              </h5>
-                           </div>
+                            </h5>
+                        </div>
                     </div>
                 </div>
                 <div class="col-sm-6 col-xl-3">
@@ -92,7 +84,7 @@
                             <h6 class="mb-0">Total Shops</h6>
                             <h5 class="font-weight-bolder">
                                 {{ $totalShops }}
-                              </h5>
+                            </h5>
                         </div>
                     </div>
                 </div>
@@ -103,24 +95,19 @@
                             <h6 class="mb-0">Total Flats</h6>
                             <h5 class="font-weight-bolder">
                                 {{ $totalFlats }}
-                              </h5>                        </div>
+                            </h5>
+                        </div>
                     </div>
                 </div>
-               
             </div>
         </div>
-        <!-- Widgets End -->
 
-        <!-- Calendar Start -->
         <div class="container-fluid pt-4 px-4">
             <div class="bg-light text-center rounded p-4">
                 <div id="calendar"></div>
             </div>
         </div>
-        <!-- Calendar End -->
-
     </main>
-    <!-- Main Content End -->
 </div>
 @endsection
 
@@ -128,24 +115,24 @@
     document.addEventListener('DOMContentLoaded', function() {
         // Pie chart
         var ctxPie = document.getElementById('doughnut-chart').getContext('2d');
-var myPieChart = new Chart(ctxPie, {
-    type: 'pie',
-    data: {
-        labels: ['Flats', 'Shops', 'Kiosks', 'Chair Spaces', 'Table Spaces'],
-        datasets: [{
-            label: 'Room Types',
-            data: [
-                {{ $totalFlats }},
-                {{ $totalShops }},
-                {{ $totalKiosks }},
-                {{ $totalChairSpaces }},
-                {{ $totalTableSpaces }},
-            ],
-            backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4CAF50', '#FF5733']
-        }]
-    },
+        var myPieChart = new Chart(ctxPie, {
+            type: 'pie',
+            data: {
+                labels: ['Flats', 'Shops', 'Kiosks', 'Chair Spaces', 'Table Spaces'],
+                datasets: [{
+                    label: 'Room Types',
+                    data: [
+                        {{ $totalFlats }},
+                        {{ $totalShops }},
+                        {{ $totalKiosks }},
+                        {{ $totalChairSpaces }},
+                        {{ $totalTableSpaces }},
+                    ],
+                    backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4CAF50', '#FF5733']
+                }]
+            },
+        });
 
-});
         // Bar chart
         var ctxBar = document.getElementById('bar-chart').getContext('2d');
         var myBarChart = new Chart(ctxBar, {
@@ -153,26 +140,34 @@ var myPieChart = new Chart(ctxPie, {
             data: {
                 labels: [
                     @foreach ($buildings as $building)
-                        '{{ strtoupper ($building->building_name) }}',
+                        '{{ strtoupper($building->building_name) }}',
                     @endforeach
                 ],
                 datasets: [
-                    {
-                        label: 'Expected Amount',
-                        data: @json($expectedAmountData),
-                        backgroundColor: '#4CAF50',
-                        borderWidth: 1
-                    },
+                    
                     {
                         label: 'Sold Amount',
                         data: @json($soldAmountData),
-                        backgroundColor: '#FF6384',
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Total Expected Price',
+                        data: Array({{ count($buildings) }}).fill({{ $ExpectedPrice }}),
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
                         borderWidth: 1
                     }
                 ]
             },
-          
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
         });
     });
-</script>
 </script>

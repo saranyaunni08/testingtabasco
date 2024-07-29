@@ -395,9 +395,9 @@
 
 
 <script>
-document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', () => {
     const modalElements = document.querySelectorAll('[id^="sellModal"]');
-
+    
     modalElements.forEach((modalElement) => {
         const roomId = modalElement.id.replace('sellModal', '');
         const calculationTypeSelect = modalElement.querySelector('#calculation_type');
@@ -422,13 +422,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const cashInHandPercentInput = modalElement.querySelector(`#cash_in_hand_percent${roomId}`);
         const inHandAmountInput = modalElement.querySelector(`#in_hand_amount${roomId}`);
         const gstAmountElement = modalElement.querySelector('#gst_amount'); // Added for GST amount
-
+    
         const flatFields = modalElement.querySelector('#flat_fields');
         const shopFields = modalElement.querySelector('#shop_fields');
         const tableSpaceFields = modalElement.querySelector('#table_space_fields');
         const kioskFields = modalElement.querySelector('#kiosk_fields');
         const chairSpaceFields = modalElement.querySelector('#chair_space_fields');
-
+    
         function showRelevantAreaFields(roomType) {
             hideAllFields();
             if (roomType === 'Flat' && flatFields) {
@@ -443,7 +443,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 chairSpaceFields.classList.remove('d-none');
             }
         }
-
+    
         function hideAllFields() {
             if (flatFields) flatFields.classList.add('d-none');
             if (shopFields) shopFields.classList.add('d-none');
@@ -451,7 +451,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (kioskFields) kioskFields.classList.add('d-none');
             if (chairSpaceFields) chairSpaceFields.classList.add('d-none');
         }
-
+    
         function toggleAdvancePaymentFields() {
             if (advancePaymentSelect && advancePaymentSelect.value === 'now') {
                 if (advanceAmountGroup) advanceAmountGroup.classList.remove('d-none');
@@ -465,7 +465,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (lastDateGroup) lastDateGroup.classList.remove('d-none');
             }
         }
-
+    
         function togglePaymentMethodFields() {
             if (paymentMethodSelect && paymentMethodSelect.value === 'bank_transfer') {
                 if (transferIdGroup) transferIdGroup.classList.remove('d-none');
@@ -478,7 +478,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (chequeIdGroup) chequeIdGroup.classList.add('d-none');
             }
         }
-
+    
         function toggleCalculationFields() {
             if (calculationTypeSelect && calculationTypeSelect.value === 'rate_per_sq_ft') {
                 if (parkingRatePerSqFtGroup) parkingRatePerSqFtGroup.classList.remove('d-none');
@@ -488,11 +488,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (totalSqFtGroup) totalSqFtGroup.classList.add('d-none');
             }
         }
-
+    
         function toggleAreaCalculationFields() {
             const buildUpAreaField = modalElement.querySelector('#build_up_area');
             const carpetAreaField = modalElement.querySelector('#carpet_area');
-
+    
             if (areaCalculationTypeSelect && areaCalculationTypeSelect.value === 'build_up_area') {
                 if (buildUpAreaField) buildUpAreaField.classList.remove('d-none');
                 if (carpetAreaField) carpetAreaField.classList.add('d-none');
@@ -501,16 +501,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (carpetAreaField) carpetAreaField.classList.remove('d-none');
             }
         }
-
+    
         function updateTotalAmount() {
             const saleAmount = saleInput ? parseFloat(saleInput.value) || 0 : 0;
             const areaCalculationType = areaCalculationTypeSelect ? areaCalculationTypeSelect.value : '';
-
+    
             if (!roomId) {
                 console.error('Room ID is not defined.');
                 return;
             }
-
+    
             $.ajax({
                 type: 'POST',
                 url: "{{ route('admin.sales.caltype') }}",
@@ -524,7 +524,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     console.log('Result Data:', resultData);
                     let totalRate = parseInt(resultData.sqft) * parseFloat(saleAmount);
                     console.log('Initial Total Rate:', totalRate);
-
+    
                     let parkingAmount = 0;
                     if (calculationTypeSelect.value === 'rate_per_sq_ft') {
                         const parkingRate = parseFloat(parkingRateInput.value) || 0;
@@ -537,48 +537,48 @@ document.addEventListener('DOMContentLoaded', () => {
                         totalRate += parkingAmount;
                         console.log('Parking Amount (fixed_amount):', parkingAmount);
                     }
-
+    
                     console.log('Total Rate after Parking:', totalRate);
-
+    
                     const discountPercent = parseFloat(discountInput.value) || 0;
                     const discountAmount = totalRate * (discountPercent / 100);
                     totalRate -= discountAmount;
                     console.log('Discount Amount:', discountAmount);
                     console.log('Total Rate after Discount:', totalRate);
-
+    
                     const advanceAmount = parseFloat(advanceAmountInput.value) || 0;
                     const remainingBalance = totalRate - advanceAmount;
                     if (remainingBalanceElement) remainingBalanceElement.textContent = remainingBalance.toFixed(2);
-
+    
                     const cashInHandPercent = parseFloat(cashInHandPercentInput.value) || 0;
                     const cashInHandAmount = (cashInHandPercent / 100) * totalRate;
                     if (inHandAmountInput) inHandAmountInput.value = cashInHandAmount.toFixed(2);
-
+    
                     const amountForGST = totalRate - cashInHandAmount;
                     console.log('Amount for GST:', amountForGST);
-
+    
                     const gstPercent = parseFloat(gstInput.value) || 0;
                     const gstAmount = amountForGST * (gstPercent / 100);
                     console.log('GST Amount:', gstAmount);
-
+    
                     const finalTotal = totalRate + gstAmount;
                     console.log('Final Total after GST:', finalTotal);
-
+    
                     if (totalElement) totalElement.textContent = finalTotal.toFixed(2);
-                    if (gstAmountElement) gstAmountElement.textContent = gstAmount.toFixed(2); // Display GST amount
+                    if (gstAmountElement) gstAmountElement.textContent = gstAmount.toFixed(2); 
                 },
                 error: function(error) {
                     console.error('Error:', error);
                 }
             });
         }
-
+    
         function calculateInHandAmount(roomId, totalRate) {
             const cashInHandPercent = parseFloat(document.getElementById(`cash_in_hand_percent${roomId}`).value) || 0;
             const cashInHandAmount = (cashInHandPercent / 100) * totalRate;
             document.getElementById(`in_hand_amount${roomId}`).value = cashInHandAmount.toFixed(2);
         }
-
+    
         if (advancePaymentSelect) {
             advancePaymentSelect.addEventListener('change', toggleAdvancePaymentFields);
         }
@@ -612,20 +612,20 @@ document.addEventListener('DOMContentLoaded', () => {
         if (cashInHandPercentInput) {
             cashInHandPercentInput.addEventListener('input', () => calculateInHandAmount(roomId, parseFloat(totalElement.textContent)));
         }
-
+    
         toggleAdvancePaymentFields();
         togglePaymentMethodFields();
         toggleCalculationFields();
         toggleAreaCalculationFields();
         updateTotalAmount();
-
+    
         const roomType = modalElement.getAttribute('data-room-type');
         showRelevantAreaFields(roomType);
     });
-});
-
-
-</script>
-
+    });
+    
+    
+    </script>
+    
 
 @endsection
