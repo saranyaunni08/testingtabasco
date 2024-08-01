@@ -48,9 +48,16 @@
                                         <td>{{ $room->flat_carpet_area_price }} sq ft</td>
                                         <td>₹{{ number_format($room->flat_expected_carpet_area_price, 2, '.', ',') }}</td>
                                         <td>
+                                            @php
+                                                $sale = $room->sales->first();
+                                                $isPaid = $sale && $installments->where('sale_id', $sale->id)->where('status', 'sold')->isNotEmpty();
+                                            @endphp
+                                            
                                             @if($room->status == 'available')
                                                 <span class="badge badge-info">Available</span>
-                                            @elseif($room->status == 'sold')
+                                            @elseif($isPaid)
+                                                <span class="badge badge-success">Paid</span>
+                                            @else
                                                 <span class="badge badge-danger">Booking</span>
                                             @endif
                                         </td>
@@ -214,6 +221,12 @@
                                                                         </div>
                                                                     </div>
                                                                     <div class="col-6">
+                                                                        <div class="form-group">
+                                                                            <label class="font-weight-bold" for="partner_name">Partner Name</label>
+                                                                            <input type="text" class="form-control" id="partner_name" name="partner_name" required>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-6">
                                                                         <div class="form-group d-none" id="last_date_group">
                                                                             <label class="font-weight-bold" for="last_date">Last Date for Advance Payment</label>
                                                                             <input type="date" class="form-control" id="last_date" name="last_date">
@@ -263,9 +276,9 @@
                                                                     <div class="col-12">
                                                                         <h4>Total amount: ₹<span id="total"></span></h4>
                                                                     </div>
-                                                                    <div class="col-12">
+                                                                    {{-- <div class="col-12">
                                                                         <h4>Remaining Balance: ₹<span id="remaining_balance"></span></h4>
-                                                                    </div>
+                                                                    </div> --}}
                                                                     <div class="col-12">
                                                                         <div class="modal-footer">
                                                                             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>

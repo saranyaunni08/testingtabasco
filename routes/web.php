@@ -139,6 +139,8 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
 
         Route::get('customers/total-customers', [RoomController::class, 'totalCustomers'])->name('customers.total_customers');
 
+        // Route::get('/admin/installments/download', [SaleController::class, 'downloadInstallmentDetails'])->name('admin.installments.download');
+
 
     });
 });

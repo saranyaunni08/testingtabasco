@@ -24,10 +24,6 @@ class Sale extends Model
     {
         return $this->hasMany(Installment::class);
     }
-
-
-    
-    // Define other relationships or methods as needed
     public function room()
     {
         return $this->belongsTo(Room::class);

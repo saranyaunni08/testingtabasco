@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
 use App\Models\Building;
 use App\Models\Sale;
-use App\Models\MasterSetting; 
+use App\Models\Installment;
 use Illuminate\Support\Facades\Log;
 
 
@@ -210,11 +210,6 @@ class RoomController extends Controller
             'building_id' => $building_id, 
         ]);
     }
-    public function show($buildingId) {
-        $rooms = Room::where('building_id', $buildingId)->paginate(10);
-        $master_settings = MasterSetting::first(); 
-        return view('rooms.show', compact('rooms', 'master_settings'));
-    }
     public function showFlats($building_id)
     {
         // Fetch the building
@@ -226,10 +221,12 @@ class RoomController extends Controller
                      ->with('sale')  // Eager load the sale relationship
                      ->get();
     
+        $installments = Installment::whereIn('sale_id', $rooms->pluck('id'))->get();
+
         // Passing the necessary data to the view
         $page = 'flats';
     
-        return view('rooms.flats', compact('rooms', 'page', 'building_id', 'building'));
+        return view('rooms.flats', compact('rooms', 'page', 'building_id', 'building','installments'));
     }
         public function showShops($building_id)
     {

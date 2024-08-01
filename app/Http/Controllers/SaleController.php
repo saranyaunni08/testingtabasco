@@ -195,7 +195,12 @@ class SaleController extends Controller
     // Fetch related installments
     $installments = Installment::where('sale_id', $customer->id)->get();
 
-    return view('customers.show', compact('customer', 'sales', 'installments','page'));
+    $totalPaidInstallments = $installments->where('status', 'paid')->sum('installment_amount');
+
+    $remainingBalanceAfterInstallments = $customer->remaining_balance - $totalPaidInstallments;
+
+
+    return view('customers.show', compact('customer', 'sales', 'installments','page','remainingBalanceAfterInstallments'));
 }       
 
 
@@ -252,28 +257,34 @@ class SaleController extends Controller
     }
     public function markMultipleAsPaid(Request $request)
     {
-        $installments = $request->input('installments');
-        $transactionDetails = $request->input('transaction_details');
-        $bankDetails = $request->input('bank_details');
+        try {
+            $installments = $request->input('installments');
+            $installmentDates = $request->input('installment_dates');
+            $transactionDetails = $request->input('transaction_details');
+            $bankDetails = $request->input('bank_details');
     
-        // Validate that installments is an array
-        if (is_array($installments)) {
-            foreach ($installments as $index => $installmentId) {
-                $installment = Installment::find($installmentId);
+            // Validate that installments is an array
+            if (is_array($installments)) {
+                foreach ($installments as $installmentId) {
+                    $installment = Installment::find($installmentId);
     
-                if ($installment) {
-                    // Update installment details
-                    $installment->status = 'paid';
-                    $installment->transaction_details = $transactionDetails[$index] ?? $installment->transaction_details;
-                    $installment->bank_details = $bankDetails[$index] ?? $installment->bank_details;
-                    $installment->save();
-                } else {
-                    // Log or handle the case where 'id' is missing
-                    Log::warning('Installment data missing or invalid', ['id' => $installmentId]);
+                    if ($installment) {
+                        // Update installment details
+                        $installment->status = 'paid';
+                        $installment->installment_date = $installmentDates[$installmentId] ?? $installment->installment_date;
+                        $installment->transaction_details = $transactionDetails[$installmentId] ?? $installment->transaction_details;
+                        $installment->bank_details = $bankDetails[$installmentId] ?? $installment->bank_details;
+                        $installment->save();
+                    } else {
+                        // Log or handle the case where 'id' is missing
+                        Log::warning('Installment data missing or invalid', ['id' => $installmentId]);
+                    }
                 }
-            }
     
-            return redirect()->back()->with('success', 'Selected installments marked as paid.');
+                return redirect()->back()->with('success', 'Selected installments marked as paid.');
+            }
+        } catch (\Exception $e) {
+            Log::error('Error marking installments as paid: ' . $e->getMessage());
         }
     
         return redirect()->back()->with('error', 'No installments selected.');

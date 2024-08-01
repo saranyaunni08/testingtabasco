@@ -127,14 +127,20 @@
                                                             </div>
                                                         </div>
 
-                                                          @if($room->room_type == 'Kiosk')
+                                                        @if($room->room_type == 'Flat')
                                                         <div class="col-6">
                                                             <div class="form-group">
-                                                                <label class="font-weight-bold" for="kiosk_area">Kiosk Area</label>
-                                                                <input type="text" class="form-control" id="kiosk_area" name="kiosk_area" value="{{ $room->kiosk_area }}" readonly>
+                                                                <label class="font-weight-bold" for="flat_build_up_area">Super Build-Up Area Rate</label>
+                                                                <input type="text" class="form-control" id="flat_build_up_area" name="flat_build_up_area" value="{{ $room->flat_build_up_area }}" readonly>
                                                             </div>
                                                         </div>
-                                                    @endif  
+                                                        <div class="col-6">
+                                                            <div class="form-group">
+                                                                <label class="font-weight-bold" for="flat_carpet_area">Carpet Area Rate</label>
+                                                                <input type="text" class="form-control" id="flat_carpet_area" name="flat_carpet_area" value="{{ $room->flat_carpet_area }}" readonly>
+                                                            </div>
+                                                        </div>
+                                                        @endif  
 
                                                         <div class="col-6">
                                                             <div class="form-group">
@@ -198,6 +204,12 @@
                                                             </div>
                                                         </div>
                                                         <div class="col-6">
+                                                            <div class="form-group">
+                                                                <label class="font-weight-bold" for="partner_name">Partner Name</label>
+                                                                <input type="text" class="form-control" id="partner_name" name="partner_name" required>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-6">
                                                             <div class="form-group d-none" id="last_date_group">
                                                                 <label class="font-weight-bold" for="last_date">Last Date for Advance Payment</label>
                                                                 <input type="date" class="form-control" id="last_date" name="last_date">
@@ -247,9 +259,9 @@
                                                         <div class="col-12">
                                                             <h4>Total amount: ₹<span id="total"></span></h4>
                                                         </div>
-                                                        <div class="col-12">
+                                                        {{-- <div class="col-12">
                                                             <h4>Remaining Balance: ₹<span id="remaining_balance"></span></h4>
-                                                        </div>
+                                                        </div> --}}
                                                         <div class="col-12">
                                                             <div class="modal-footer">
                                                                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>

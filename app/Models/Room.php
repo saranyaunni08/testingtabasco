@@ -28,7 +28,7 @@ class Room extends Model
     }
     public function sales()
     {
-        return $this->hasMany(Sale::class, 'room_id', 'id');
+        return $this->hasMany(Sale::class);
     }
     public function sale()
     {
