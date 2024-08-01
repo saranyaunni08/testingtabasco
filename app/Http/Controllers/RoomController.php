@@ -246,7 +246,7 @@ class RoomController extends Controller
     
         return view('rooms.table-spaces', compact('rooms', 'building', 'page','building_id'));
     }
-    public function kiosks($building_id)
+    public function showKiosks($building_id)
     {
         $building = Building::find($building_id);
         $rooms = Room::where('building_id', $building_id)
@@ -255,7 +255,7 @@ class RoomController extends Controller
         $page = 'Kiosks'; 
         return view('rooms.kiosk', compact('building', 'rooms', 'page','building_id'));
     }
-    public function chairSpaces($building_id)
+    public function showChairSpaces($building_id)
     {
         $type = 'Chair Space'; 
     

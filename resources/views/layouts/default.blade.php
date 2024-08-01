@@ -22,6 +22,9 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <link rel="stylesheet" href="{{ asset('path/to/now-ui-icons.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
 
 
 
@@ -82,8 +85,8 @@
           <a class="nav-link text-white {{ $page == 'flats' ? 'active bg-gradient-info' : '' }}"
           href="{{ route('admin.flats.index', ['building_id' => $building->id]) }}">
            <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
-               <i class="material-icons opacity-10">home</i>
-           </div>
+            <i class="material-icons opacity-10">apartment</i>
+          </div>
            <span class="nav-link-text ms-1">Flats</span>
        </a>
        
@@ -111,7 +114,7 @@
           <a class="nav-link text-white {{ $page == 'Kiosks' ? 'active bg-gradient-info' : '' }}"
              href="{{ route('admin.kiosks.index', ['building_id' => $building->id ?? 0]) }}">
               <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
-                  <i class="material-icons opacity-10">store</i>
+                <i class="material-icons opacity-10">storefront</i> <!-- Kiosk-like icon -->
               </div>
               <span class="nav-link-text ms-1">Kiosks</span>
           </a>
@@ -155,7 +158,24 @@
             <span class="nav-link-text ms-1">Shops Differences</span>
         </a>
     </li>
-    
+    <li class="nav-item {{ $page == 'kiosks' ? 'active bg-gradient-info' : '' }}">
+      <a class="nav-link" href="{{ route('admin.kiosks.index', ['building_id' =>  $building->id ?? 0]) }}">
+        <i class="material-icons opacity-10">storefront</i> <!-- Kiosk-like icon -->
+          <span class="nav-link-text">Kiosks Differences</span>
+      </a>
+  </li>
+  <li class="nav-item {{ $page == 'chair-spaces' ? 'active bg-gradient-info' : '' }}">
+      <a class="nav-link" href="{{ route('admin.chair-spaces.index', ['building_id' => $building->id ?? 0]) }}">
+        <i class="material-icons opacity-10">event_seat</i>
+        <span class="nav-link-text">Chair Spaces Differences</span>
+      </a>
+  </li>
+  <li class="nav-item {{ $page == 'table-spaces' ? 'active bg-gradient-info' : '' }}">
+      <a class="nav-link" href="{{ route('admin.table-spaces.index', ['building_id' => $building->id ?? 0]) }}">
+        <i class="material-icons opacity-10">table_chart</i> <!-- Updated icon -->
+          <span class="nav-link-text">Table Spaces Differences</span>
+      </a>
+  </li>
 
         @endif 
 

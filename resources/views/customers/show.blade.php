@@ -123,8 +123,12 @@
                                                             <tr style="display: none;">
                                                                 <td><strong style="color:black;">Remaining Installments Total:</strong></td>
                                                                 <td id="remaining-installments-total">{{ count($sales) }}</td>
-                                                            </tr>                                           
-                                                            
+                                                            </tr>
+                                                            <tr><td><strong style="color:black;">Remaining Balance:</strong></td><td style="color:black;">₹{{ $sale->remaining_balance}}</td></tr>
+                                                            <tr>
+                                                                <td><strong style="color:black;">Remaining Balance after paid Installments:</strong></td>
+                                                                <td style="color:black;">₹{{ $remainingBalanceAfterInstallments }}</td>
+                                                            </tr>
                                                             
                                                         @elseif ($sale->room->room_type === 'Table space')
 
@@ -160,11 +164,17 @@
                                                                     <td id="remaining-installments-{{ $sale->id }}" style="color:black;">{{ $sale->installment_date }}</td>
                                                                 </tr>
                                                                 <tr><td><strong style="color:black;">Amount per Installment:</strong></td>
-                                                                <td style="color:black;">₹{{ $sale->installments > 0 ? number_format($sale->remaining_balance / $sale->installments, 2) : 'N/A' }}</td></tr>
-                                                                <tr style="display: none;">
-                                                                    <td><strong style="color:black;">Remaining Installments Total:</strong></td>
-                                                                    <td id="remaining-installments-total">{{ count($sales) }}</td>
-                                                                </tr>                                           
+                                                                    <td style="color:black;">₹{{ $sale->installments > 0 ? number_format($sale->remaining_balance / $sale->installments, 2) : 'N/A' }}</td></tr>
+                                                                    <tr style="display: none;">
+                                                                        <td><strong style="color:black;">Remaining Installments Total:</strong></td>
+                                                                        <td id="remaining-installments-total">{{ count($sales) }}</td>
+                                                                    </tr>
+                                                                    <tr><td><strong style="color:black;">Remaining Balance:</strong></td><td style="color:black;">₹{{ $sale->remaining_balance}}</td></tr>
+                                                                    <tr>
+                                                                        <td><strong style="color:black;">Remaining Balance after paid Installments:</strong></td>
+                                                                        <td style="color:black;">₹{{ $remainingBalanceAfterInstallments }}</td>
+                                                                    </tr>                                          
+                                                                                                            
                                                                     
                                                         @elseif ($sale->room->room_type === 'Chair space')
 
@@ -205,7 +215,12 @@
                                                         <tr style="display: none;">
                                                             <td><strong style="color:black;">Remaining Installments Total:</strong></td>
                                                             <td id="remaining-installments-total">{{ count($sales) }}</td>
-                                                        </tr>      
+                                                        </tr>
+                                                        <tr><td><strong style="color:black;">Remaining Balance:</strong></td><td style="color:black;">₹{{ $sale->remaining_balance}}</td></tr>
+                                                        <tr>
+                                                            <td><strong style="color:black;">Remaining Balance after paid Installments:</strong></td>
+                                                            <td style="color:black;">₹{{ $remainingBalanceAfterInstallments }}</td>
+                                                        </tr>     
                                                         
                                                         @elseif ($sale->room->room_type === 'Kiosk')
 
@@ -246,6 +261,11 @@
                                                                 <tr style="display: none;">
                                                                     <td><strong style="color:black;">Remaining Installments Total:</strong></td>
                                                                     <td id="remaining-installments-total">{{ count($sales) }}</td>
+                                                                </tr>
+                                                                <tr><td><strong style="color:black;">Remaining Balance:</strong></td><td style="color:black;">₹{{ $sale->remaining_balance}}</td></tr>
+                                                                <tr>
+                                                                    <td><strong style="color:black;">Remaining Balance after paid Installments:</strong></td>
+                                                                    <td style="color:black;">₹{{ $remainingBalanceAfterInstallments }}</td>
                                                                 </tr>                 
 
 

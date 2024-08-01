@@ -108,7 +108,6 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
 
         Route::get('/flats/{building_id}', [RoomController::class, 'showFlats'])->name('flats.index');
         Route::get('/shops/{building_id}', [RoomController::class, 'showShops'])->name('shops.index');
-        Route::get('/table-spaces/{building_id}', [RoomController::class, 'showTableSpaces'])->name('table-spaces.index');
         Route::get('buildings/{building_id}/kiosks', [RoomController::class, 'kiosks'])->name('kiosks.index');
         Route::get('/buildings/{building_id}/chair-spaces', [RoomController::class, 'chairSpaces'])->name('chair-spaces.index');
 
@@ -121,6 +120,15 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
         ->name('flats.difference');
         
         Route::get('/rooms/difference/shops/{building_id}', [RoomController::class, 'shopsDifference'])->name('shops.difference');
+
+                // Route for Kiosks
+        Route::get('/buildings/{building_id}/kiosks', [RoomController::class, 'showKiosks'])->name('kiosks.index');
+
+        // Route for Chair Spaces
+        Route::get('/buildings/{building_id}/chair-spaces', [RoomController::class, 'showChairSpaces'])->name('chair-spaces.index');
+
+        // Route for Table Spaces
+        Route::get('/buildings/{building_id}/table-spaces', [RoomController::class, 'showTableSpaces'])->name('table-spaces.index');
 
 
         Route::put('/installments/markAsPaid', [SaleController::class, 'markAsPaid'])->name('installments.markAsPaid');
