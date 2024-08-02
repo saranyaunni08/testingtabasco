@@ -282,6 +282,56 @@
                                                                                         <strong style="text-transform: capitalize">{{ $sale->room->room_type }} Details</strong>
                                                                                     </div>
                                                                                     <div class="card-body">
+                                                                                        <div class="row mb-4">
+                                                                                            <div class="col-12">
+                                                                                                <h4>Loan Details</h4>
+                                                                                                <table class="table table-sm table-bordered">
+                                                                                                    <tbody>
+                                                                                                        <tr>
+                                                                                                            <th>Loan No</th>
+                                                                                                            <td>{{ $customer->id }}</td>
+                                                                                                        </tr>
+                                                                                                        <tr>
+                                                                                                            <th>Disb Date</th>
+                                                                                                            <td>{{ $customer->created_at->format('d/m/Y') }}</td>
+                                                                                                        </tr>
+                                                                                                        <tr>
+                                                                                                            <th>Cost of Asset</th>
+                                                                                                            <td>{{ $customer->total_with_discount }}</td>
+                                                                                                        </tr>
+                                                                                                        <tr>
+                                                                                                            <th>EMI Start Date</th>
+                                                                                                            <td>{{ $emi_start_date->format('d/m/Y') }}</td>
+                                                                                                        </tr>
+                                                                                                        <tr>
+                                                                                                            <th>EMI End Date</th>
+                                                                                                            <td>{{ $emi_end_date->format('d/m/Y') }}</td>
+                                                                                                        </tr>
+                                                                                                        <tr>
+                                                                                                            <th>EMI Amount</th>
+                                                                                                            <td>{{ $emi_amount }}</td>
+                                                                                                        </tr>
+                                                                                                        <tr>
+                                                                                                            <th>Tenure (Months)</th>
+                                                                                                            <td>{{ $tenure_months }}</td>
+                                                                                                        </tr>
+                                                                                                        <tr>
+                                                                                                            <th>Asset</th>
+                                                                                                            <td>{{ $room->room_type }}</td>
+                                                                                                        </tr>
+                                                                                                        <tr>
+                                                                                                            <th>Loan Amount</th>
+                                                                                                            <td>{{ $customer->remaining_balance }}</td>
+                                                                                                        </tr>
+                                                                                                        <tr>
+                                                                                                            <th>Current EMI OS</th>
+                                                                                                            <td>{{ $remainingBalanceAfterInstallments }}</td>
+                                                                                                        </tr>
+                                                                                                    </tbody>
+                                                                                                </table>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    
                                                                                         <h5 class="mt-4">Installment Details</h5>
                                                                                         <form id="markAsPaidForm" method="POST" action="{{ route('admin.installments.markMultipleAsPaid') }}">
                                                                                             @csrf
@@ -344,7 +394,8 @@
                                                                                             <button type="submit" class="btn btn-primary">Mark Selected as Paid</button>
                                                                                         </form>
                                                                                         
-                                                                                        {{-- <a href="{{ route('admin.installments.download') }}" class="btn btn-secondary mt-3">Download Installment Details</a> --}}
+                                                                                        
+                                                                                        <a href="{{ route('admin.customers.download', ['customerName' => $customer->customer_name]) }}" class="btn btn-secondary mt-3">Download Details as CSV</a>
                                                                                     </div>
                                                                                     
                                                                                 </div>
@@ -416,7 +467,6 @@
                                             </div>
 
 
-                                        <!-- Script to handle modal population and form action update -->
 <script>
  document.addEventListener('DOMContentLoaded', function () {
     var markPaidModal = document.getElementById('markPaidModal');

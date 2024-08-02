@@ -8,6 +8,8 @@ use App\Http\Controllers\SaleController;
 use Illuminate\Support\Facades\Mail;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MasterSettingsController;
+use Symfony\Component\HttpFoundation\StreamedResponse;
+
 
 Route::get('/', function () {
     return redirect('login');
@@ -147,8 +149,9 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
 
         Route::get('customers/total-customers', [RoomController::class, 'totalCustomers'])->name('customers.total_customers');
 
-        // Route::get('/admin/installments/download', [SaleController::class, 'downloadInstallmentDetails'])->name('admin.installments.download');
+        Route::get('/customers/{customerName}/download', [SaleController::class, 'downloadCustomerDetails'])->name('customers.download');
 
+        
 
     });
 });

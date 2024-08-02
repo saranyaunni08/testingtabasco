@@ -8,6 +8,10 @@ use App\Models\Installment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
+use Illuminate\Support\Facades\Storage;
+use League\Csv\Writer;
 
 class SaleController extends Controller
 {
@@ -181,28 +185,57 @@ class SaleController extends Controller
     public function showCustomer($customerName)
     {
         // Fetch customer by name
-        $customer = sale::where('customer_name', $customerName)->first();
+        $customer = Sale::where('customer_name', $customerName)->first();
     
         if (!$customer) {
             abort(404);
         }
     
+        // Fetch related sales records for the customer
+        $sales = Sale::where('customer_name', $customerName)->get();
+    
+        if ($sales->isEmpty()) {
+            abort(404);
+        }
+    
+        $room = $sales->first()->room;
+    
         // Fetch related installments
-    // Fetch related sales records for the customer
-    $sales = Sale::where('customer_name', $customerName)->get();
-
-    $page = 'customer';
-    // Fetch related installments
-    $installments = Installment::where('sale_id', $customer->id)->get();
-
-    $totalPaidInstallments = $installments->where('status', 'paid')->sum('installment_amount');
-
-    $remainingBalanceAfterInstallments = $customer->remaining_balance - $totalPaidInstallments;
-
-
-    return view('customers.show', compact('customer', 'sales', 'installments','page','remainingBalanceAfterInstallments'));
-}       
-
+        $installments = Installment::whereIn('sale_id', $sales->pluck('id'))->get();
+    
+        // Calculate total paid installments
+        $totalPaidInstallments = $installments->where('status', 'paid')->sum('installment_amount');
+    
+        // Calculate remaining balance after installments
+        $remainingBalanceAfterInstallments = $customer->remaining_balance - $totalPaidInstallments;
+    
+        // Calculate EMI Amount
+        $emi_amount = $installments->sum('installment_amount');
+    
+        // Calculate tenure (months)
+        $tenure_months = $installments->count();
+    
+        // Get first and last installment dates
+        $emi_start_date = $installments->first()->installment_date;
+        $emi_end_date = $installments->last()->installment_date;
+    
+        // Set page variable
+        $page = 'customer';
+    
+        return view('customers.show', compact(
+            'customer', 
+            'sales', 
+            'installments', 
+            'page', 
+            'remainingBalanceAfterInstallments', 
+            'room', 
+            'emi_amount', 
+            'tenure_months', 
+            'emi_start_date', 
+            'emi_end_date'
+        ));
+    }
+    
 
     public function getCalculationType(Request $request) 
     {
@@ -289,5 +322,90 @@ class SaleController extends Controller
     
         return redirect()->back()->with('error', 'No installments selected.');
     }
+    public function downloadCustomerDetails($customerName)
+    {
+        // Fetch customer by name
+        $customer = Sale::where('customer_name', $customerName)->first();
     
+        if (!$customer) {
+            abort(404);
+        }
+    
+        // Fetch related sales records for the customer
+        $sales = Sale::where('customer_name', $customerName)->get();
+    
+        if ($sales->isEmpty()) {
+            abort(404);
+        }
+    
+        $room = $sales->first()->room;
+    
+        // Fetch related installments
+        $installments = Installment::whereIn('sale_id', $sales->pluck('id'))->get();
+    
+        // Calculate total paid installments
+        $totalPaidInstallments = $installments->where('status', 'paid')->sum('installment_amount');
+    
+        // Calculate remaining balance after installments
+        $remainingBalanceAfterInstallments = $customer->remaining_balance - $totalPaidInstallments;
+    
+        // Calculate EMI Amount
+        $emi_amount = $installments->sum('installment_amount');
+    
+        // Calculate tenure (months)
+        $tenure_months = $installments->count();
+    
+        // Get first and last installment dates
+        $emi_start_date = $installments->first()->installment_date;
+        $emi_end_date = $installments->last()->installment_date;
+    
+        // Prepare CSV data
+        $csvData = [
+            ['Loan Details'],
+            ['Loan No', $customer->id],
+            ['Disb Date', $customer->created_at->format('d-m-Y')],
+            ['Cost of Asset', $customer->total_with_discount],
+            ['EMI Start Date', $emi_start_date->format('d-m-Y')],
+            ['EMI End Date', $emi_end_date->format('d-m-Y')],
+            ['EMI Amount', $emi_amount],
+            ['Tenure (Months)', $tenure_months],
+            ['Asset', $room->room_type],
+            ['Loan Amount', $customer->remaining_balance],
+            ['Current EMI OS', $remainingBalanceAfterInstallments],
+            [],
+            ['Installment Details'],
+            ['SL No', 'ID', 'Installment Date', 'Amount', 'Transaction Details', 'Bank Details', 'Status'],
+        ];
+    
+        foreach ($installments as $index => $installment) {
+            $csvData[] = [
+                $index + 1,
+                $installment->id,
+                $installment->installment_date->format('d-m-Y'),
+                $installment->installment_amount,
+                $installment->transaction_details,
+                $installment->bank_details,
+                $installment->status === 'paid' ? 'Paid' : 'Pending'
+            ];
+        }
+    
+        // Generate CSV
+        $csv = Writer::createFromString('');
+        $csv->insertAll($csvData);
+    
+        // Create a filename for the CSV
+        $filename = 'customer_details_' . $customer->id . '.csv';
+    
+        // Save CSV to storage
+        Storage::put('public/' . $filename, $csv->getContent());
+    
+        // Return CSV download response
+        return response()->download(storage_path('app/public/' . $filename))->deleteFileAfterSend(true);
+    }
+
+    
+
+
+
+
 }
