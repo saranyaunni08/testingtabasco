@@ -150,6 +150,7 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
         Route::get('customers/total-customers', [RoomController::class, 'totalCustomers'])->name('customers.total_customers');
 
         Route::get('/customers/{customerName}/download', [SaleController::class, 'downloadCustomerDetails'])->name('customers.download');
+        Route::get('/customers/download-pdf/{customerName}', [SaleController::class, 'downloadPdf'])->name('customers.downloadPdf');
 
         
 

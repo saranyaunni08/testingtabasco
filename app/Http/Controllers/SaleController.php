@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Illuminate\Support\Facades\Storage;
 use League\Csv\Writer;
+use Barryvdh\DomPDF\Facade\Pdf as PDF;
 
 class SaleController extends Controller
 {
@@ -403,9 +404,46 @@ class SaleController extends Controller
         return response()->download(storage_path('app/public/' . $filename))->deleteFileAfterSend(true);
     }
 
+    public function downloadPdf($customerName)
+    {
+        // Fetch customer by name
+        $customer = Sale::where('customer_name', $customerName)->firstOrFail();
+        
+        // Fetch related sales records for the customer
+        $sales = Sale::where('customer_name', $customerName)->get();
+        
+        if ($sales->isEmpty()) {
+            abort(404);
+        }
     
-
-
+        $room = $sales->first()->room;
+    
+        // Fetch related installments
+        $installments = Installment::whereIn('sale_id', $sales->pluck('id'))->get();
+    
+        // Calculate required details
+        $totalPaidInstallments = $installments->where('status', 'paid')->sum('installment_amount');
+        $remainingBalanceAfterInstallments = $customer->remaining_balance - $totalPaidInstallments;
+        $emi_amount = $installments->sum('installment_amount');
+        $tenure_months = $installments->count();
+        $emi_start_date = $installments->first()->installment_date;
+        $emi_end_date = $installments->last()->installment_date;
+    
+        // Generate PDF from the new Blade view
+        $pdf = PDF::loadView('pdf.customer-details', [
+            'customer' => $customer,
+            'installments' => $installments,
+            'emi_start_date' => $emi_start_date,
+            'emi_end_date' => $emi_end_date,
+            'emi_amount' => $emi_amount,
+            'tenure_months' => $tenure_months,
+            'remainingBalanceAfterInstallments' => $remainingBalanceAfterInstallments,
+            'room' => $room
+        ]);
+    
+        // Download PDF
+        return $pdf->download('customer-details.pdf');
+    }
 
 
 }

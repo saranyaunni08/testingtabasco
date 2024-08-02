@@ -396,6 +396,9 @@
                                                                                         
                                                                                         
                                                                                         <a href="{{ route('admin.customers.download', ['customerName' => $customer->customer_name]) }}" class="btn btn-secondary mt-3">Download Details as CSV</a>
+                                                                                   
+                                                                                        <a href="{{ route('admin.customers.downloadPdf', ['customerName' => $customer->customer_name]) }}" class="btn btn-secondary mt-3">Download Details as PDF</a>
+
                                                                                     </div>
                                                                                     
                                                                                 </div>
