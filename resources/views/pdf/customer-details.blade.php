@@ -1,76 +1,75 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Customer Details</title>
+    <title>Customer Details Invoice</title>
     <style>
-        /* Add any styling you need for the PDF */
-        table {
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .invoice-box {
+            max-width: 800px;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #eee;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+            font-size: 16px;
+            line-height: 24px;
+            color: #555;
+        }
+        .details {
+            margin-bottom: 20px;
+        }
+        .details span {
+            display: inline-block;
+            width: 45%;
+            margin-bottom: 10px;
+        }
+        .badge {
+            padding: 5px 10px;
+            color: #fff;
+            border-radius: 5px;
+        }
+        .badge.bg-success {
+            background-color: #28a745;
+        }
+        .badge.bg-danger {
+            background-color: #dc3545;
+        }
+        .installments-table {
             width: 100%;
             border-collapse: collapse;
         }
-        table, th, td {
-            border: 1px solid black;
-        }
-        th, td {
+        .installments-table th, .installments-table td {
+            border: 1px solid #ddd;
             padding: 8px;
-            text-align: left;
+        }
+        .installments-table th {
+            background-color: #f2f2f2;
         }
     </style>
 </head>
 <body>
-    <div class="card-body">
-        <div class="row mb-4">
-            <div class="col-12">
-                <h4>Loan Details</h4>
-                <table class="table table-sm table-bordered">
-                    <tbody>
-                        <tr>
-                            <th>Loan No</th>
-                            <td>{{ $customer->id }}</td>
-                        </tr>
-                        <tr>
-                            <th>Disb Date</th>
-                            <td>{{ $customer->created_at->format('d/m/Y') }}</td>
-                        </tr>
-                        <tr>
-                            <th>Cost of Asset</th>
-                            <td>{{ $customer->total_with_discount }}</td>
-                        </tr>
-                        <tr>
-                            <th>EMI Start Date</th>
-                            <td>{{ $emi_start_date->format('d/m/Y') }}</td>
-                        </tr>
-                        <tr>
-                            <th>EMI End Date</th>
-                            <td>{{ $emi_end_date->format('d/m/Y') }}</td>
-                        </tr>
-                        <tr>
-                            <th>EMI Amount</th>
-                            <td>{{ $emi_amount }}</td>
-                        </tr>
-                        <tr>
-                            <th>Tenure (Months)</th>
-                            <td>{{ $tenure_months }}</td>
-                        </tr>
-                        <tr>
-                            <th>Asset</th>
-                            <td>{{ $room->room_type }}</td>
-                        </tr>
-                        <tr>
-                            <th>Loan Amount</th>
-                            <td>{{ $customer->remaining_balance }}</td>
-                        </tr>
-                        <tr>
-                            <th>Current EMI OS</th>
-                            <td>{{ $remainingBalanceAfterInstallments }}</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+    <div class="invoice-box">
+        <h2>Customer Loan Details</h2>
+        <div class="details">
+            <span>Customer Name: {{ $customer->customer_name }}</span>
+            <span>Customer Email: {{ $customer->customer_email }}</span><br>
+            <span>Customer Contact: {{ $customer->customer_contact }}</span><br>
+            <span>Loan No: {{ $customer->id }}</span>
+            <span>EMI Start Date: {{ $emi_start_date->format('d/m/Y') }}</span><br>
+            <span>Disb Date: {{ $customer->created_at->format('d/m/Y') }}</span>
+            <span>EMI End Date: {{ $emi_end_date->format('d/m/Y') }}</span><br>
+            <span>Cost of Asset: {{ $customer->total_with_discount }}</span>
+            <span>EMI Amount: {{ $emi_amount }}</span><br>
+            <span>Tenure (Months): {{ $tenure_months }}</span>
+            <span>Asset: {{ $room->room_type }}</span><br>
+            <span>Loan Amount: {{ $customer->remaining_balance }}</span>
+            <span>Current EMI OS: {{ $remainingBalanceAfterInstallments }}</span>
         </div>
-        
-        <h5 class="mt-4">Installment Details</h5>
-        <table class="table table-sm table-bordered">
+
+        <h4 class="mt-4">Installment Details</h4>
+        <table class="installments-table">
             <thead>
                 <tr>
                     <th>SL No</th>
@@ -83,6 +82,9 @@
                 </tr>
             </thead>
             <tbody>
+                @php
+                    $remaining_tenure = $tenure_months;
+                @endphp
                 @foreach($installments as $installment)
                     <tr>
                         <td>{{ $loop->iteration }}</td>
@@ -94,6 +96,9 @@
                         <td>
                             @if($installment->status === 'paid')
                                 <span class="badge bg-success">Paid</span>
+                                @php
+                                    $remaining_tenure--;
+                                @endphp
                             @else
                                 <span class="badge bg-danger">Pending</span>
                             @endif
@@ -101,6 +106,14 @@
                     </tr>
                 @endforeach
             </tbody>
+        </table>
+
+        <h4 class="mt-4">Updated Tenure</h4>
+        <table class="installments-table">
+            <tr>
+                <th>Remaining Tenure (Months)</th>
+                <td>{{ $remaining_tenure }}</td>
+            </tr>
         </table>
     </div>
 </body>

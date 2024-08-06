@@ -274,12 +274,12 @@
                                                                 </table>
                                                                 <tbody>
                                                                     @foreach($sales as $sale)
-                                                                       
                                                                         <tr>
                                                                             <td colspan="4">
                                                                                 <div class="card mt-3">
-                                                                                    <div class="card-header">
+                                                                                    <div class="card-header d-flex justify-content-between align-items-center">
                                                                                         <strong style="text-transform: capitalize">{{ $sale->room->room_type }} Details</strong>
+                                                                                        <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#cancelCustomerModal" data-customer-id="{{ $customer->id }}">Cancel Customer</button>
                                                                                     </div>
                                                                                     <div class="card-body">
                                                                                         <div class="row mb-4">
@@ -331,8 +331,17 @@
                                                                                                 </table>
                                                                                             </div>
                                                                                         </div>
-                                                                                    
+                                                                                        
                                                                                         <h5 class="mt-4">Installment Details</h5>
+                                                                                        <div class="d-flex justify-content-end mt-3">
+                                                                                            <a href="{{ route('admin.customers.download', ['customerName' => $customer->customer_name]) }}" class="btn btn-outline-primary me-2">
+                                                                                                <i class="fas fa-download"></i> CSV
+                                                                                            </a>
+                                                                                            <a href="{{ route('admin.customers.downloadPdf', ['customerName' => $customer->customer_name]) }}" class="btn btn-outline-danger">
+                                                                                                <i class="fas fa-download"></i> PDF
+                                                                                            </a>
+                                                                                        </div>
+                                                                                        
                                                                                         <form id="markAsPaidForm" method="POST" action="{{ route('admin.installments.markMultipleAsPaid') }}">
                                                                                             @csrf
                                                                                             @method('PUT')
@@ -347,6 +356,7 @@
                                                                                                         <th>Transaction Details</th>
                                                                                                         <th>Bank Details</th>
                                                                                                         <th>Status</th>
+                                                                                                        <th>Download PDF</th> 
                                                                                                     </tr>
                                                                                                 </thead>
                                                                                                 <tbody>
@@ -387,25 +397,31 @@
                                                                                                                     <span class="badge bg-danger">Pending</span>
                                                                                                                 @endif
                                                                                                             </td>
+                                                                                                            <td>
+                                                                                                                @if($installment->status === 'paid')
+                                                                                                                    <a href="{{ route('admin.installments.downloadPdf', $installment->id) }}" class="btn btn-primary">
+                                                                                                                        <i class="fas fa-download"></i> PDF
+                                                                                                                    </a>
+                                                                                                                                                                                                                                    </td>
+                                                                                                        
+                                                                                                                
+                                                                                                                @else
+                                                                                                                    <span>N/A</span>
+                                                                                                                @endif
+                                                                                                            </td>
                                                                                                         </tr>
                                                                                                     @endforeach
                                                                                                 </tbody>
                                                                                             </table>
                                                                                             <button type="submit" class="btn btn-primary">Mark Selected as Paid</button>
                                                                                         </form>
-                                                                                        
-                                                                                        
-                                                                                        <a href="{{ route('admin.customers.download', ['customerName' => $customer->customer_name]) }}" class="btn btn-secondary mt-3">Download Details as CSV</a>
-                                                                                   
-                                                                                        <a href="{{ route('admin.customers.downloadPdf', ['customerName' => $customer->customer_name]) }}" class="btn btn-secondary mt-3">Download Details as PDF</a>
-
                                                                                     </div>
-                                                                                    
                                                                                 </div>
                                                                             </td>
                                                                         </tr>
                                                                     @endforeach
-                                                                </tbody>
+                                                                    </tbody>
+                                                                    
                                                             </table>
                                                         </div>
                                                     </div>

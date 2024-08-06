@@ -9,6 +9,10 @@ use Illuminate\Support\Facades\Mail;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MasterSettingsController;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Illuminate\Support\Facades\Log;
+use Barryvdh\DomPDF\Facade\Pdf;
+
+
 
 
 Route::get('/', function () {
@@ -50,7 +54,6 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
         Route::get('/buildings/{building_id}/rooms', [RoomController::class, 'showRooms'])->name('buildings.rooms');
         Route::resource('rooms', RoomController::class)->except(['show']);
 
-        // Route::get('/buildings/{buildingId}/rooms', [RoomController::class, 'show'])->name('rooms.show');
         Route::get('/rooms/{id}', [RoomController::class, 'show'])->name('rooms.show')->middleware('auth:admin');
 
         Route::get('/buildings/{id}', [RoomController::class, 'show'])->name('buildings.show');
@@ -66,14 +69,9 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
 
         Route::get('rooms', [RoomController::class, 'index'])->name('rooms.index');
         Route::delete('/building/{building_id}/room/{room_id}', [RoomController::class, 'destroy'])
-    ->name('rooms.destroy');
+        ->name('rooms.destroy');
 
-
-
-
-        // Route::delete('/rooms/{id}', [RoomController::class, 'destroy'])->name('rooms.destroy');
         Route::delete('buildings/{building_id}/rooms/{room_id}', [RoomController::class, 'destroy'])->name('rooms.destroy');
-
 
         Route::get('rooms/{room}/edit', [RoomController::class, 'edit'])->name('rooms.edit');
         Route::put('rooms/{room}', [RoomController::class, 'update'])->name('rooms.update');
@@ -93,8 +91,8 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
         Route::post('/sales/store', [SaleController::class, 'store'])->name('sales.store');
         Route::post('/sales/cac-type', [SaleController::class, 'getCalculationType'])->name('sales.caltype');
 
-        // Route::get('/customers', [SaleController::class, 'index'])->name('customers.index');
 
+        
         Route::get('/customers/{customerName}', [SaleController::class, 'showCustomer'])->name('customers.show');
 
 
@@ -123,34 +121,35 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
         
         Route::get('/rooms/difference/shops/{building_id}', [RoomController::class, 'shopsDifference'])->name('shops.difference');
 
-                // Route for Kiosks
+
         Route::get('/buildings/{building_id}/kiosks', [RoomController::class, 'showKiosks'])->name('kiosks.index');
 
-        // Route for Chair Spaces
+
         Route::get('/buildings/{building_id}/chair-spaces', [RoomController::class, 'showChairSpaces'])->name('chair-spaces.index');
 
-        // Route for Table Spaces
+
         Route::get('/buildings/{building_id}/table-spaces', [RoomController::class, 'showTableSpaces'])->name('table-spaces.index');
 
 
         Route::put('/installments/markAsPaid', [SaleController::class, 'markAsPaid'])->name('installments.markAsPaid');
-        // Route::post('/installments/{installment}/mark-paid', [SaleController::class, 'markAsPaid'])->name('installments.markPaid');
+
         Route::put('/installments/{id}/markAsPaid', [SaleController::class, 'markAsPaid'])
         ->name('installments.markAsPaid');
         Route::put('/customers/{customer}/installments/{installment}/markAsPaid', [SaleController::class, 'markAsPaid'])->name('installments.markAsPaid');
         Route::put('/installments/markMultipleAsPaid', [SaleController::class, 'markMultipleAsPaid'])->name('installments.markMultipleAsPaid');
 
-
-        
-        // Route::put('admin/customers/{id}', [SaleController::class, 'update'])->name('customers.update');
-        // Route::get('admin/customers/{id}', [SaleController::class, 'update'])->name('customers.update');
-        // Route::post('admin/customers/{customer}', [SaleController::class, 'update'])->name('customers.update');
         Route::put('/customers/{id}', [SaleController::class, 'update'])->name('customers.update');
 
         Route::get('customers/total-customers', [RoomController::class, 'totalCustomers'])->name('customers.total_customers');
 
         Route::get('/customers/{customerName}/download', [SaleController::class, 'downloadCustomerDetails'])->name('customers.download');
         Route::get('/customers/download-pdf/{customerName}', [SaleController::class, 'downloadPdf'])->name('customers.downloadPdf');
+
+        Route::get('/installments/{id}/downloadPdf', [SaleController::class, 'downloadInstallmentPdf'])->name('installments.downloadPdf');
+        Route::get('/test-pdf', function () {
+            return view('test_pdf');
+        });
+        
 
         
 

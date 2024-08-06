@@ -406,10 +406,10 @@ class SaleController extends Controller
 
     public function downloadPdf($customerName)
     {
-        // Fetch customer by name
+
         $customer = Sale::where('customer_name', $customerName)->firstOrFail();
         
-        // Fetch related sales records for the customer
+
         $sales = Sale::where('customer_name', $customerName)->get();
         
         if ($sales->isEmpty()) {
@@ -418,10 +418,10 @@ class SaleController extends Controller
     
         $room = $sales->first()->room;
     
-        // Fetch related installments
+
         $installments = Installment::whereIn('sale_id', $sales->pluck('id'))->get();
     
-        // Calculate required details
+
         $totalPaidInstallments = $installments->where('status', 'paid')->sum('installment_amount');
         $remainingBalanceAfterInstallments = $customer->remaining_balance - $totalPaidInstallments;
         $emi_amount = $installments->sum('installment_amount');
@@ -429,7 +429,7 @@ class SaleController extends Controller
         $emi_start_date = $installments->first()->installment_date;
         $emi_end_date = $installments->last()->installment_date;
     
-        // Generate PDF from the new Blade view
+
         $pdf = PDF::loadView('pdf.customer-details', [
             'customer' => $customer,
             'installments' => $installments,
@@ -441,9 +441,36 @@ class SaleController extends Controller
             'room' => $room
         ]);
     
-        // Download PDF
+
         return $pdf->download('customer-details.pdf');
     }
+  public function downloadInstallmentPdf($id)
+{
+    $installment = Installment::find($id);
+    $sale = $installment ? Sale::find($installment->sale_id) : null;
+    
+    // Extracting customer and room details directly from the sale
+    $customer_name = $sale ? $sale->customer_name : 'N/A';
+    $customer_email = $sale ? $sale->customer_email : 'N/A';
+    $customer_contact = $sale ? $sale->customer_contact : 'N/A';
 
+    $data = [
+        'installment' => $installment,
+        'customer_name' => $customer_name,
+        'customer_email' => $customer_email,
+        'customer_contact' => $customer_contact,
+        'emi_start_date' => $installment ? $installment->emi_start_date : 'N/A',
+        'emi_end_date' => $installment ? $installment->emi_end_date : 'N/A',
+        'emi_amount' => $installment ? $installment->emi_amount : 0,
+        'tenure_months' => $installment ? $installment->tenure_months : 'N/A',
+        'remainingBalanceAfterInstallments' => $sale ? $sale->remaining_balance_after_installments : 0,
+        'room' => $sale ? $sale->room : null
+    ];
 
+    $pdf = PDF::loadView('pdf.installment_detail', $data);
+    return $pdf->download('installment_detail.pdf');
+}
+
+    
+    
 }
