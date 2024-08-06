@@ -279,8 +279,56 @@
                                                                                 <div class="card mt-3">
                                                                                     <div class="card-header d-flex justify-content-between align-items-center">
                                                                                         <strong style="text-transform: capitalize">{{ $sale->room->room_type }} Details</strong>
-                                                                                        <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#cancelCustomerModal" data-customer-id="{{ $customer->id }}">Cancel Customer</button>
+                                                                                        <!-- Button to open the modal -->
+                                                                                        <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#cancelSaleModal" onclick="setSaleId({{ $sale->id }})">Cancel Sale</button>
                                                                                     </div>
+<!-- Cancel Sale Modal -->
+<div class="modal fade" id="cancelSaleModal" tabindex="-1" role="dialog" aria-labelledby="cancelSaleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="cancelSaleModalLabel">Cancel Sale</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="cancelSaleForm" method="POST" action="{{ route('admin.sales.cancel') }}">
+                @csrf
+                <input type="hidden" name="sale_id" id="sale_id">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="fine_amount">Fine Amount</label>
+                        <input type="number" class="form-control" id="fine_amount" name="fine_amount" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="payment_method">Payment Method</label>
+                        <select class="form-control" id="payment_method" name="payment_method" required>
+                            <option value="cash">Cash</option>
+                            <option value="bank">Bank</option>
+                            <option value="cheque">Cheque</option>
+                        </select>
+                    </div>
+                    <div class="form-group d-none" id="bank_id_group">
+                        <label for="bank_id">Bank ID</label>
+                        <input type="text" class="form-control" id="bank_id" name="bank_id">
+                    </div>
+                    <div class="form-group d-none" id="cheque_id_group">
+                        <label for="cheque_id">Cheque ID</label>
+                        <input type="text" class="form-control" id="cheque_id" name="cheque_id">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-danger">Cancel Sale</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+
+
                                                                                     <div class="card-body">
                                                                                         <div class="row mb-4">
                                                                                             <div class="col-12">
@@ -402,7 +450,7 @@
                                                                                                                     <a href="{{ route('admin.installments.downloadPdf', $installment->id) }}" class="btn btn-primary">
                                                                                                                         <i class="fas fa-download"></i> PDF
                                                                                                                     </a>
-                                                                                                                                                                                                                                    </td>
+                                                                                                            </td>
                                                                                                         
                                                                                                                 
                                                                                                                 @else
@@ -420,7 +468,7 @@
                                                                             </td>
                                                                         </tr>
                                                                     @endforeach
-                                                                    </tbody>
+                                                                </tbody>
                                                                     
                                                             </table>
                                                         </div>
@@ -519,4 +567,27 @@
 
 
 </script>
+
+<script>
+    function setSaleId(saleId) {
+        document.getElementById('sale_id').value = saleId;
+    }
+
+    document.getElementById('payment_method').addEventListener('change', function() {
+        var paymentMethod = this.value;
+        var bankIdGroup = document.getElementById('bank_id_group');
+        var chequeIdGroup = document.getElementById('cheque_id_group');
+
+        bankIdGroup.classList.add('d-none');
+        chequeIdGroup.classList.add('d-none');
+
+        if (paymentMethod === 'bank') {
+            bankIdGroup.classList.remove('d-none');
+        } else if (paymentMethod === 'cheque') {
+            chequeIdGroup.classList.remove('d-none');
+        }
+    });
+</script>
+
+
 @endsection

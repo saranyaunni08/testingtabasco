@@ -41,6 +41,10 @@ class SaleController extends Controller
             'installment_date' => 'nullable|date',
             'cash_in_hand_percent' => 'nullable|numeric',
             'in_hand_amount' => 'nullable|numeric',
+
+         
+        
+            
         ]);
 
         $room = Room::find($validatedData['room_id']);
@@ -84,12 +88,16 @@ class SaleController extends Controller
         $sale->total_with_discount = $totalWithDiscount;
         $sale->remaining_balance = $remainingBalance;
 
+        $sale->cuspayment_method = $request->input('cuspayment_method');
+        $sale->custransfer_id = $request->input('custransfer_id');
+        $sale->cuscheque_id = $request->input('cuscheque_id');
+        $sale->status = 'cancel';
+
         $sale->save();
 
         $room->status = 'sold';
         $room->save();
 
-        // Create installments
         $installmentAmount = $remainingBalance / $validatedData['installments'];
         $installmentDate = Carbon::parse($validatedData['installment_date']);
 
@@ -444,46 +452,85 @@ class SaleController extends Controller
 
         return $pdf->download('customer-details.pdf');
     }
+       
     public function downloadInstallmentPdf($id)
-{
-    $installment = Installment::find($id);
-    $sale = $installment ? Sale::find($installment->sale_id) : null;
+    {
+        $installment = Installment::find($id);
+        $sale = $installment ? Sale::find($installment->sale_id) : null;
 
-    // Extracting customer and room details directly from the sale
-    $customer_name = $sale ? $sale->customer_name : 'N/A';
-    $customer_email = $sale ? $sale->customer_email : 'N/A';
-    $customer_contact = $sale ? $sale->customer_contact : 'N/A';
+        // Extracting customer and room details directly from the sale
+        $customer_name = $sale ? $sale->customer_name : 'N/A';
+        $customer_email = $sale ? $sale->customer_email : 'N/A';
+        $customer_contact = $sale ? $sale->customer_contact : 'N/A';
 
-    // Fetch all installments for the given sale_id
-    $installments = $sale ? Installment::where('sale_id', $sale->id)->get() : collect();
+        // Fetch all installments for the given sale_id
+        $installments = $sale ? Installment::where('sale_id', $sale->id)->get() : collect();
 
-    // Determine the EMI start and end dates
-    $emi_start_date = $installments->min('installment_date') ?? 'N/A';
-    $emi_end_date = $installments->max('installment_date') ?? 'N/A';
+        // Determine the EMI start and end dates
+        $emi_start_date = $installments->min('installment_date') ?? 'N/A';
+        $emi_end_date = $installments->max('installment_date') ?? 'N/A';
 
-    $emi_amount = $installment ? $installment->installment_amount : 0;
-    $tenure_months = $installments->count();
+        $emi_amount = $installment ? $installment->installment_amount : 0;
+        $tenure_months = $installments->count();
 
-    // Remaining balance calculation
-    $total_paid_installments = $installments->where('status', 'paid')->sum('installment_amount');
-    $remaining_balance_after_installments = $sale ? $sale->remaining_balance - $total_paid_installments : 0;
+        // Remaining balance calculation
+        $total_paid_installments = $installments->where('status', 'paid')->sum('installment_amount');
+        $remaining_balance_after_installments = $sale ? $sale->remaining_balance - $total_paid_installments : 0;
 
-    $data = [
-        'installment' => $installment,
-        'customer_name' => $customer_name,
-        'customer_email' => $customer_email,
-        'customer_contact' => $customer_contact,
-        'sale' => $sale,
-        'emi_start_date' => $emi_start_date,
-        'emi_end_date' => $emi_end_date,
-        'emi_amount' => $emi_amount,
-        'tenure_months' => $tenure_months,
-        'remainingBalanceAfterInstallments' => $remaining_balance_after_installments,
-        'room' => $sale ? $sale->room : null
-    ];
+        $data = [
+            'installment' => $installment,
+            'customer_name' => $customer_name,
+            'customer_email' => $customer_email,
+            'customer_contact' => $customer_contact,
+            'sale' => $sale,
+            'emi_start_date' => $emi_start_date,
+            'emi_end_date' => $emi_end_date,
+            'emi_amount' => $emi_amount,
+            'tenure_months' => $tenure_months,
+            'remainingBalanceAfterInstallments' => $remaining_balance_after_installments,
+            'room' => $sale ? $sale->room : null
+        ];
 
-    $pdf = PDF::loadView('pdf.installment_detail', $data);
-    return $pdf->download('installment_detail.pdf');
-}
+        $pdf = PDF::loadView('pdf.installment_detail', $data);
+        return $pdf->download('installment_detail.pdf');
+    }
 
+    public function cancelSale(Request $request)
+    {
+        $request->validate([
+            'sale_id' => 'required|exists:sales,id',
+            'fine_amount' => 'required|numeric',
+            'payment_method' => 'required|in:cash,bank,cheque',
+            'bank_id' => 'nullable|required_if:payment_method,bank',
+            'cheque_id' => 'nullable|required_if:payment_method,cheque',
+        ]);
+
+        // Find the sale record
+        $sale = Sale::findOrFail($request->sale_id);
+        $sale->cancellation_fine_amount = $request->fine_amount;
+        $sale->cancellation_payment_method = $request->payment_method;
+
+        // Set the payment details
+        if ($request->payment_method === 'bank') {
+            $sale->cancellation_bank_id = $request->bank_id;
+            $sale->cancellation_cheque_id = null;
+        } elseif ($request->payment_method === 'cheque') {
+            $sale->cancellation_cheque_id = $request->cheque_id;
+            $sale->cancellation_bank_id = null;
+        } else {
+            $sale->cancellation_bank_id = null;
+            $sale->cancellation_cheque_id = null;
+        }
+
+        // Update the status of the sale
+        $sale->status = 'cancelled';
+        $sale->save();
+
+        // Update the room status to "available"
+        $room = Room::findOrFail($sale->room_id);
+        $room->status = 'available';
+        $room->save();
+
+        return redirect()->back()->with('success', 'Sale has been cancelled successfully and the room status has been updated.');
+    }
 }

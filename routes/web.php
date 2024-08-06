@@ -102,8 +102,7 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
         Route::get('/room-dashboard/{building_id}', [RoomController::class, 'showBuildingRooms'])->name('building-room-dashboard');
 
 
-        Route::get('/masters', [MasterSettingsController::class, 'index'])->name('masters.index');
-        Route::post('/masters', [MasterSettingsController::class, 'store'])->name('masters.store');
+  
         Route::get('/get-gst-percentages', [MasterSettingsController::class, 'getGstPercentages'])->name('getGstPercentages');
 
         Route::get('/flats/{building_id}', [RoomController::class, 'showFlats'])->name('flats.index');
@@ -150,6 +149,8 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
             return view('test_pdf');
         });
         
+        Route::post('/sales/cancel', [SaleController::class, 'cancelSale'])->name('sales.cancel');
+
 
         
 
