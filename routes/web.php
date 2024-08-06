@@ -150,7 +150,8 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
         });
         
         Route::post('/sales/cancel', [SaleController::class, 'cancelSale'])->name('sales.cancel');
-
+        Route::get('/sales/cancelled', [SaleController::class, 'listCancelledSales'])->name('sales.cancelled');
+        Route::get('/sales/cancelled/{id}', [SaleController::class, 'viewCancelledSaleDetails'])->name('sales.cancelled_details');
 
         
 

@@ -533,4 +533,36 @@ class SaleController extends Controller
 
         return redirect()->back()->with('success', 'Sale has been cancelled successfully and the room status has been updated.');
     }
+
+    public function listCancelledSales()
+    {
+        $cancelledSales = Sale::where('status', 'cancelled')->get();
+        $page = 'cancelled-sales';
+        return view('admin.sales.cancelled', compact('cancelledSales', 'page'));
+    }
+    
+    // Method to view details of a cancelled sale
+    public function viewCancelledSaleDetails($id)
+    {
+        $sale = Sale::findOrFail($id);
+        $room = Room::findOrFail($sale->room_id);
+        $installments = Installment::where('sale_id', $sale->id)->get();
+
+        $emi_start_date = now(); // Replace with actual logic to get start date
+        $emi_end_date = now()->addMonths($sale->tenure_months); // Replace with actual logic to get end date
+        $emi_amount = $sale->emi_amount; // Replace with actual EMI amount logic
+        $tenure_months = $sale->tenure_months;
+        $remainingBalanceAfterInstallments = $sale->remaining_balance; // Replace with actual logic
+
+        return view('admin.sales.cancelled_details', compact(
+            'sale', 
+            'room', 
+            'installments', 
+            'emi_start_date', 
+            'emi_end_date', 
+            'emi_amount', 
+            'tenure_months', 
+            'remainingBalanceAfterInstallments'
+        ));
+    }
 }

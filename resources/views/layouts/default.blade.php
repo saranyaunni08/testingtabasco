@@ -177,6 +177,13 @@
       </a>
   </li>
 
+  <li class="nav-item {{ $page == 'cancelled-sales' ? 'active bg-gradient-info' : '' }}">
+    <a class="nav-link" href="{{ route('admin.sales.cancelled') }}">
+        <i class="material-icons opacity-10">cancel</i>
+        <span class="nav-link-text">Cancelled Sales</span>
+    </a>
+</li>
+
         @endif 
 
         
