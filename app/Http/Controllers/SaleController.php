@@ -444,26 +444,41 @@ class SaleController extends Controller
 
         return $pdf->download('customer-details.pdf');
     }
-  public function downloadInstallmentPdf($id)
+    public function downloadInstallmentPdf($id)
 {
     $installment = Installment::find($id);
     $sale = $installment ? Sale::find($installment->sale_id) : null;
-    
+
     // Extracting customer and room details directly from the sale
     $customer_name = $sale ? $sale->customer_name : 'N/A';
     $customer_email = $sale ? $sale->customer_email : 'N/A';
     $customer_contact = $sale ? $sale->customer_contact : 'N/A';
+
+    // Fetch all installments for the given sale_id
+    $installments = $sale ? Installment::where('sale_id', $sale->id)->get() : collect();
+
+    // Determine the EMI start and end dates
+    $emi_start_date = $installments->min('installment_date') ?? 'N/A';
+    $emi_end_date = $installments->max('installment_date') ?? 'N/A';
+
+    $emi_amount = $installment ? $installment->installment_amount : 0;
+    $tenure_months = $installments->count();
+
+    // Remaining balance calculation
+    $total_paid_installments = $installments->where('status', 'paid')->sum('installment_amount');
+    $remaining_balance_after_installments = $sale ? $sale->remaining_balance - $total_paid_installments : 0;
 
     $data = [
         'installment' => $installment,
         'customer_name' => $customer_name,
         'customer_email' => $customer_email,
         'customer_contact' => $customer_contact,
-        'emi_start_date' => $installment ? $installment->emi_start_date : 'N/A',
-        'emi_end_date' => $installment ? $installment->emi_end_date : 'N/A',
-        'emi_amount' => $installment ? $installment->emi_amount : 0,
-        'tenure_months' => $installment ? $installment->tenure_months : 'N/A',
-        'remainingBalanceAfterInstallments' => $sale ? $sale->remaining_balance_after_installments : 0,
+        'sale' => $sale,
+        'emi_start_date' => $emi_start_date,
+        'emi_end_date' => $emi_end_date,
+        'emi_amount' => $emi_amount,
+        'tenure_months' => $tenure_months,
+        'remainingBalanceAfterInstallments' => $remaining_balance_after_installments,
         'room' => $sale ? $sale->room : null
     ];
 
@@ -471,6 +486,4 @@ class SaleController extends Controller
     return $pdf->download('installment_detail.pdf');
 }
 
-    
-    
 }
