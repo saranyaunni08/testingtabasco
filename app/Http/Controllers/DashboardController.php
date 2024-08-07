@@ -52,6 +52,7 @@ class DashboardController extends Controller
             'ExpectedPrice' => $expectedPrice,
             'expectedAmountData' => $expectedAmountData,
             'soldAmountData' => $soldAmountData,
+            'page' => 'dashboard' ,
         ]);
     }
 }

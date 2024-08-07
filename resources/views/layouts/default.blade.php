@@ -25,7 +25,10 @@
   <link rel="stylesheet" href="{{ asset('path/to/now-ui-icons.css') }}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
-
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  
 
 
 
@@ -46,7 +49,7 @@
       <ul class="navbar-nav">
 
         <li class="nav-item" id="dashboardMenu">
-          <a class="nav-link text-white {{ $page == 'dashboard' ? 'active bg-gradient-info' : '' }}"
+          <a class="nav-link text-white"
              href="{{ route('admin.dashboard') }}">
               <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
                   <i class="material-icons opacity-10">dashboard</i>

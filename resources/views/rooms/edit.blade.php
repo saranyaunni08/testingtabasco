@@ -8,7 +8,14 @@
                 <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
                     <div class="bg-gradient-info shadow-info border-radius-lg p-3">
                         <h6 class="text-white text-capitalize">Edit Room</h6>
+                        <form action="{{ route('admin.edit_delete_auth.logout') }}" method="POST" style="display: inline;">
+                            @csrf
+                            <!-- Capture the current URL -->
+                            <input type="hidden" name="redirect_url" value="{{ url()->current() }}">
+                            <button type="submit" class="btn btn-danger">Logout</button>
+                        </form>
                     </div>
+                    
                 </div>
                 <div class="card-body px-0 pb-2">
                     <form action="{{ route('admin.rooms.update', $room->id) }}" method="POST">
@@ -21,28 +28,46 @@
                                 <input type="text" class="form-control" id="room_type" name="room_type" value="{{ $room->room_type }}" readonly>
                             </div>
 
-                            <!-- Flat Fields -->
-                            <div class="col-md-6" id="flatFields" style="display: {{ $room->room_type == 'Flat' ? 'block' : 'none' }};">
-                                <div class="form-group mb-4">
-                                    <h5 class="form-label">Room Number</h5>
-                                    <input type="text" name="room_number" class="form-control" style="text-transform: capitalize" value="{{ $room->room_number }}">
-                                </div>
-                                <div class="form-group mb-4">
-                                    <h5 class="form-label">Flat model</h5>
-                                    <input type="text" name="flat_model" class="form-control" value="{{ $room->flat_model }}">
-                                </div>
-                                <div class="form-group mb-4">
-                                    <h5 class="form-label">Carpet Area (sq ft)</h5>
-                                    <input type="text" name="flat_carpet_area" class="form-control" value="{{ $room->flat_carpet_area }}">
-                                </div>
-                                
-                                <div class="form-group mb-4">
-                                    <h5 class="form-label">Carpet Area Price</h5>
-                                    <input type="text" name="flat_carpet_area_price" class="form-control" value="{{ $room->flat_carpet_area_price }}">
-                                </div>
-                               
-                            </div>
+        <!-- Flat Fields -->
+        <div class="col-md-6" id="flatFields" style="display: {{ $room->room_type == 'Flat' ? 'block' : 'none' }};">
+            <div class="form-group mb-4">
+                <h5 class="form-label">Room Number</h5>
+                <input type="text" name="room_number" class="form-control" style="text-transform: capitalize" value="{{ $room->room_number }}">
+                
+            </div>
+            <div class="form-group mb-4">
+                <h5 class="form-label">Flat Model</h5>
+                <input type="text" name="flat_model" class="form-control" value="{{ $room->flat_model }}">
+            </div>
+            <div class="form-group mb-4">
+                <h5 class="form-label">Carpet Area (sq ft)</h5>
+                <input type="text" id="flat_carpet_area" name="flat_carpet_area" class="form-control" value="{{ $room->flat_carpet_area }}">
+            </div>
+            <div class="form-group mb-4">
+                <h5 class="form-label">Carpet Area Price</h5>
+                <input type="text" id="flat_carpet_area_price" name="flat_carpet_area_price" class="form-control" value="{{ $room->flat_carpet_area_price }}">
+            </div>
+            <div class="form-group mb-4">
+                <h5 class="form-label">Super Build Up Area (sq ft)</h5>
+                <input type="text" id="flat_build_up_area" name="flat_build_up_area" class="form-control" value="{{ $room->flat_build_up_area }}">
+            </div>
+            <div class="form-group mb-4">
+                <h5 class="form-label">Super Build Up Area Price (sq ft)</h5>
+                <input type="text" id="flat_super_build_up_price" name="flat_super_build_up_price" class="form-control" value="{{ $room->flat_super_build_up_price }}">
+            </div>
 
+            <div class="form-group mb-4">
+                <h5 class="form-label">Expected Carpet Area Price</h5>
+                <input type="text" id="flat_expected_carpet_area_price_display" class="form-control" value="{{ $room->flat_carpet_area * $room->flat_carpet_area_price }}" readonly>
+                <input type="hidden" id="flat_expected_carpet_area_price" name="flat_expected_carpet_area_price" value="{{ $room->flat_carpet_area * $room->flat_carpet_area_price }}">
+            </div>
+            <div class="form-group mb-4">
+                <h5 class="form-label">Expected Super Build Up Area Price</h5>
+                <input type="text" id="flat_expected_super_build_up_area_display" class="form-control" value="{{ $room->flat_build_up_area * $room->flat_super_build_up_price }}" readonly>
+                <input type="hidden" id="flat_expected_super_build_up_area" name="flat_expected_super_build_up_area" value="{{ $room->flat_build_up_area * $room->flat_super_build_up_price }}">
+            </div>
+        </div>
+    </div>
                             <!-- Shops Fields -->
                             <div class="col-md-6" id="shopsFields" style="display: {{ $room->room_type == 'Shops' ? 'block' : 'none' }};">
                                 <div class="form-group mb-4">
@@ -181,3 +206,25 @@
     </div>
 </div>
 @endsection
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        function updateExpectedAmounts() {
+            const flatCarpetArea = parseFloat(document.getElementById('flat_carpet_area').value) || 0;
+            const flatCarpetAreaPrice = parseFloat(document.getElementById('flat_carpet_area_price').value) || 0;
+            const flatBuildUpArea = parseFloat(document.getElementById('flat_build_up_area').value) || 0;
+            const flatSuperBuildUpPrice = parseFloat(document.getElementById('flat_super_build_up_price').value) || 0;
+
+            const flatExpectedCarpetAreaPrice = flatCarpetArea * flatCarpetAreaPrice;
+            const flatExpectedSuperBuildUpArea = flatBuildUpArea * flatSuperBuildUpPrice;
+
+            document.getElementById('flat_expected_carpet_area_price_display').value = flatExpectedCarpetAreaPrice.toFixed(2);
+            document.getElementById('flat_expected_super_build_up_area_display').value = flatExpectedSuperBuildUpArea.toFixed(2);
+
+            document.getElementById('flat_expected_carpet_area_price').value = flatExpectedCarpetAreaPrice.toFixed(2);
+            document.getElementById('flat_expected_super_build_up_area').value = flatExpectedSuperBuildUpArea.toFixed(2);
+        }
+
+        const inputs = document.querySelectorAll('#flat_carpet_area, #flat_carpet_area_price, #flat_build_up_area, #flat_super_build_up_price');
+        inputs.forEach(input => input.addEventListener('input', updateExpectedAmounts));
+    });
+</script>

@@ -8,6 +8,7 @@ use App\Http\Controllers\SaleController;
 use Illuminate\Support\Facades\Mail;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MasterSettingsController;
+use App\Http\Controllers\EditDeleteAuthController;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Illuminate\Support\Facades\Log;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -73,7 +74,8 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
 
         Route::delete('buildings/{building_id}/rooms/{room_id}', [RoomController::class, 'destroy'])->name('rooms.destroy');
 
-        Route::get('rooms/{room}/edit', [RoomController::class, 'edit'])->name('rooms.edit');
+        // Route::get('rooms/{room}/edit', [RoomController::class, 'edit'])->name('rooms.edit');
+
         Route::put('rooms/{room}', [RoomController::class, 'update'])->name('rooms.update');
         Route::get('/shops/{id}/edit', [RoomController::class, 'edit'])->name('shops.edit');
         Route::put('/shops/{id}', [RoomController::class, 'update'])->name('shops.update');
@@ -153,7 +155,15 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
         Route::get('/sales/cancelled', [SaleController::class, 'listCancelledSales'])->name('sales.cancelled');
         Route::get('/sales/cancelled/{id}', [SaleController::class, 'viewCancelledSaleDetails'])->name('sales.cancelled_details');
 
-        
+        Route::get('/edit-delete-login', [EditDeleteAuthController::class, 'showLogin'])->name('edit_delete_auth.show_login');
+        Route::post('/edit-delete-login', [EditDeleteAuthController::class, 'authenticate'])->name('edit_delete_auth.authenticate');
+        Route::post('/edit-delete-logout', [EditDeleteAuthController::class, 'logout'])->name('edit_delete_auth.logout');
 
+        Route::post('/auth', [EditDeleteAuthController::class, 'authenticate'])->name('auth');
+        
+        Route::get('/rooms/{roomId}/{buildingId}/edit', [EditDeleteAuthController::class, 'showEditPage'])->name('rooms.edit');
+        Route::post('/edit-delete-logout', [EditDeleteAuthController::class, 'logout'])->name('edit_delete_auth.logout');
+
+        Route::delete('/building/{building_id}/room/{room_id}', [EditDeleteAuthController::class, 'deleteRoom'])->name('rooms.destroy');
     });
 });
