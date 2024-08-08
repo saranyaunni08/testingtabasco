@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\EditDeleteAuth;
 use App\Models\room;
 use Illuminate\Support\Facades\Hash; 
+use Illuminate\Support\Facades\Session;
+
 
 
 class EditDeleteAuthController extends Controller
@@ -25,26 +27,31 @@ class EditDeleteAuthController extends Controller
         $user = EditDeleteAuth::where('username', $credentials['username'])->first();
     
         if ($user && Hash::check($credentials['password'], $user->password)) {
-            $request->session()->put('edit_delete_auth', true);
-            return redirect($request->input('redirect_url'))->with('success', 'Authenticated successfully');
+            // Authentication successful
+            Session::put('edit_delete_auth', true);
+            $redirectUrl = $request->input('redirect_url');
+            
+            // Redirect to the URL where the authenticated action should be performed
+            return redirect()->to($redirectUrl)->with('success', 'Authenticated successfully');
         }
     
+        // Authentication failed
         return redirect()->back()->withErrors(['Invalid credentials']);
     }
     
     public function logout(Request $request)
-{
-    // Store the current building_id in the session or another method to capture it
-    $buildingId = $request->session()->get('building_id', null);
-
-    // Perform the logout logic
-    Auth::logout();
-    $request->session()->invalidate();
-    $request->session()->regenerateToken();
-
-    // Redirect to the desired route
-    return redirect()->route('flats.index', ['building_id' => $buildingId]);
-}
+    {
+        // Store the current building_id in the session or another method to capture it
+        $buildingId = $request->session()->get('building_id', null);
+    
+        // Perform the logout logic
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+    
+        // Redirect to the login route
+        return redirect()->route('login')->with('success', 'Logged out successfully');
+    }
     
     
 
@@ -53,7 +60,7 @@ class EditDeleteAuthController extends Controller
         session(['building_id' => $building_id]);
 
         if (!$request->session()->has('edit_delete_auth')) {
-            return redirect()->route('edit_delete_auth.show_login');
+            return redirect()->route('admin.edit_delete_auth.show_login');
         }
     
         $room = Room::find($roomId);
@@ -66,22 +73,23 @@ class EditDeleteAuthController extends Controller
         return view('rooms.edit', compact('room'));
     }
     
-    public function deleteRoom(Request $request, $roomId)
+    public function deleteRoom(Request $request, $buildingId, $roomId)
     {
         if (!$request->session()->has('edit_delete_auth')) {
-            return redirect()->route('edit_delete_auth.show_login');
+            return redirect()->route('admin.edit_delete_auth.show_login');
         }
 
-        // Find and delete the room
-        $room = Room::find($roomId);
+        // Find the room with the given IDs
+        $room = Room::where('id', $roomId)->where('building_id', $buildingId)->first();
         
         if (!$room) {
             return redirect()->back()->withErrors(['Room not found']);
         }
 
+        // Soft delete the room
         $room->delete();
 
-        return redirect()->route('rooms.index')->with('success', 'Room deleted successfully');
+        return redirect()->route('admin.rooms.index')->with('success', 'Room deleted successfully');
     }
     
 }

@@ -69,17 +69,16 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
         Route::post('admin/rooms', [RoomController::class, 'store'])->name('rooms.store');
 
         Route::get('rooms', [RoomController::class, 'index'])->name('rooms.index');
-        Route::delete('/building/{building_id}/room/{room_id}', [RoomController::class, 'destroy'])
-        ->name('rooms.destroy');
+        // Route::delete('/building/{building_id}/room/{room_id}', [RoomController::class, 'destroy'])
+        // ->name('rooms.destroy');
 
-        Route::delete('buildings/{building_id}/rooms/{room_id}', [RoomController::class, 'destroy'])->name('rooms.destroy');
+        // Route::delete('buildings/{building_id}/rooms/{room_id}', [RoomController::class, 'destroy'])->name('rooms.destroy');
 
-        // Route::get('rooms/{room}/edit', [RoomController::class, 'edit'])->name('rooms.edit');
 
         Route::put('rooms/{room}', [RoomController::class, 'update'])->name('rooms.update');
         Route::get('/shops/{id}/edit', [RoomController::class, 'edit'])->name('shops.edit');
         Route::put('/shops/{id}', [RoomController::class, 'update'])->name('shops.update');
-        Route::delete('/shops/{id}', [RoomController::class, 'destroy'])->name('shops.destroy');
+        // Route::delete('/shops/{id}', [RoomController::class, 'destroy'])->name('shops.destroy');
         Route::post('/admin/rooms/store', [RoomController::class, 'store'])->name('admin.rooms.store');
         Route::put('rooms/{id}/sell', [RoomController::class, 'processSell'])->name('rooms.sell');
         Route::get('/rooms/{room}/sell', [SaleController::class, 'create'])->name('sales.create');
@@ -164,6 +163,8 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
         Route::get('/rooms/{roomId}/{buildingId}/edit', [EditDeleteAuthController::class, 'showEditPage'])->name('rooms.edit');
         Route::post('/edit-delete-logout', [EditDeleteAuthController::class, 'logout'])->name('edit_delete_auth.logout');
 
-        Route::delete('/building/{building_id}/room/{room_id}', [EditDeleteAuthController::class, 'deleteRoom'])->name('rooms.destroy');
+      
+        Route::delete('/buildings/{building_id}/rooms/{room_id}', [EditDeleteAuthController::class, 'deleteRoom'])->name('rooms.destroy');
+        
     });
 });
