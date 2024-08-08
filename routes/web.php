@@ -69,12 +69,7 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
         Route::post('admin/rooms', [RoomController::class, 'store'])->name('rooms.store');
 
         Route::get('rooms', [RoomController::class, 'index'])->name('rooms.index');
-        // Route::delete('/building/{building_id}/room/{room_id}', [RoomController::class, 'destroy'])
-        // ->name('rooms.destroy');
-
-        // Route::delete('buildings/{building_id}/rooms/{room_id}', [RoomController::class, 'destroy'])->name('rooms.destroy');
-
-
+      
         Route::put('rooms/{room}', [RoomController::class, 'update'])->name('rooms.update');
         Route::get('/shops/{id}/edit', [RoomController::class, 'edit'])->name('shops.edit');
         Route::put('/shops/{id}', [RoomController::class, 'update'])->name('shops.update');
@@ -164,7 +159,8 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
         Route::post('/edit-delete-logout', [EditDeleteAuthController::class, 'logout'])->name('edit_delete_auth.logout');
 
       
-        Route::delete('/buildings/{building_id}/rooms/{room_id}', [EditDeleteAuthController::class, 'deleteRoom'])->name('rooms.destroy');
-        
+        // Route::delete('/buildings/{building_id}/rooms/{room_id}', [EditDeleteAuthController::class, 'deleteRoom'])->name('rooms.destroy');
+        Route::delete('/rooms/{roomId}/{buildingId}', [EditDeleteAuthController::class, 'deleteRoom'])->name('rooms.destroy');
+
     });
 });

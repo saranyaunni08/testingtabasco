@@ -45,38 +45,146 @@
                             <td>{{ $room->carpet_area_price }} sq ft</td>
                             <td>₹{{ number_format($room->expected_carpet_area_price, 2) }}</td>
                             <td>
+                                @php
+                                    $sale = $room->sales->first();
+                                    $isPaid = $sale && $installments->where('sale_id', $sale->id)->where('status', 'sold')->isNotEmpty();
+                                @endphp
+            
                                 @if($room->status == 'available')
                                     <span class="badge badge-info">Available</span>
-                                @elseif($room->status == 'sold')
+                                @elseif($isPaid)
+                                    <span class="badge badge-success">Paid</span>
+                                @else
                                     <span class="badge badge-danger">Booking</span>
                                 @endif
                             </td>
-                            <td>
-                                <a href="{{ route('admin.rooms.edit', $room->id) }}" class="btn btn-success btn-sm">
-                                    <i class="bx bx-edit bx-sm"></i> 
-                                </a>
-                                <form action="{{ route('admin.rooms.destroy', ['building_id' => $room->building_id, 'room_id' => $room->id]) }}" 
-                                    method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this room?');">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-danger btn-sm">
-                                        <i class="fas fa-trash-alt bx-sm"></i>
-                                    </button>
-                                </form>
-                                
-
-                                @if ($room->status === 'available')
-
-                                <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#sellModal{{ $room->id }}">
-                                    Sell Room
+                            <td class="d-flex">
+                                @if($room->status == 'available' || $room->status == 'booking')
+                                <button type="button" class="btn btn-success btn-sm me-2" data-toggle="modal" data-target="#authModal{{ $room->id }}" data-building-id="{{ $room->building_id }}" data-room-id="{{ $room->id }}" data-action="edit">
+                                    <i class="bx bx-edit bx-sm"></i>
                                 </button>
+                                
+                                
+                                <button type="button" class="btn btn-danger btn-sm me-2" data-toggle="modal" data-target="#deleteModal{{ $room->id }}" data-building-id="{{ $room->building_id }}" data-room-id="{{ $room->id }}" data-action="delete">
+                                    <i class="fas fa-trash-alt bx-sm"></i>
+                                </button>
+                                
+                                
+                                
+                                
+                                
+                                
+                                @endif
+            
+                                @if ($room->status === 'available')
+                                    <button type="button" class="btn btn-primary btn-sm me-2" data-toggle="modal" data-target="#sellModal{{ $room->id }}">
+                                        Sell
+                                    </button>
+                                @elseif ($room->status === 'sold')
+                                    @if ($room->sale && $room->sale->customer_name)
+                                        <a href="{{ route('admin.customers.show', ['customerName' => $room->sale->customer_name]) }}"
+                                            style="color: #28a745; font-weight: bold; font-size: 1.2em; border: 2px solid #28a745;
+                                            padding: 5px 10px; border-radius: 5px; background-color: #e9f7ef; text-decoration:none;">View
+                                        </a>
+                                    @else
+                                        <button type="button" class="btn btn-secondary btn-sm me-2" disabled>
+                                            No Sale Info
+                                        </button>
+                                    @endif
                                 @else
+                                    <button type="button" class="btn btn-secondary btn-sm me-2" disabled>
+                                        Not Available
+                                    </button>
+                                @endif
 
-                                <a href="{{ route('admin.customers.show', ['customerName' => $room->sale->customer_name]) }}"
-                                    style="color: #28a745; font-weight: bold; font-size: 1.2em; border: 2px solid #28a745;
-                                     padding: 5px 10px; border-radius: 5px; background-color: #e9f7ef; text-decoration:none;">View
-                                </a>
-                                @endif  
+<!-- Authentication Modal for Edit -->
+<div class="modal fade" id="authModal{{ $room->id }}" tabindex="-1" aria-labelledby="authModalLabel{{ $room->id }}" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="authModalLabel{{ $room->id }}">Authenticate for Editing</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="authForm{{ $room->id }}" action="{{ route('admin.edit_delete_auth.authenticate') }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="redirect_url" id="redirectUrl{{ $room->id }}">
+                    <input type="hidden" name="room_id" value="{{ $room->id }}">
+                    <input type="hidden" name="building_id" value="{{ $room->building_id }}">
+                    <input type="hidden" name="action" value="edit">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="username" name="username" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                    </div>
+                    <div class="container mt-4">
+                        @if($errors->any())
+                        <div class="alert alert-danger">
+                            <ul>
+                                @foreach($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                        @endif
+                        
+                        @if(session('success'))
+                            <div class="alert alert-success">
+                                {{ session('success') }}
+                            </div>
+                        @endif
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<!-- Authentication Modal for Delete -->
+<div class="modal fade" id="deleteModal{{ $room->id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ $room->id }}" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel{{ $room->id }}">Authenticate for Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="deleteAuthForm{{ $room->id }}" action="{{ route('admin.rooms.destroy', ['roomId' => $room->id, 'buildingId' => $room->building_id]) }}" method="POST">
+                    @csrf
+                    @method('DELETE')
+                    <input type="hidden" name="redirect_url" value="{{ url()->previous() }}">
+                    <input type="hidden" name="room_id" value="{{ $room->id }}">
+                    <input type="hidden" name="building_id" value="{{ $room->building_id }}">
+                    <input type="hidden" name="action" value="delete">
+                    <div class="mb-3">
+                        <label for="deleteUsername" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="deleteUsername" name="username" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="deletePassword" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="deletePassword" name="password" required>
+                    </div>
+                    <div class="container mt-4">
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </div>
+                </form>
+                
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
                                 <div class="modal fade" id="sellModal{{ $room->id }}" tabindex="-1" aria-labelledby="sellModalLabel{{ $room->id }}" aria-hidden="true">
                                     <div class="modal-dialog modal-lg"> 
                                         <div class="modal-content">
@@ -520,6 +628,17 @@ modalElements.forEach((modalElement) => {
 
 
 </script>
-
-
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('button[data-toggle="modal"]').forEach(button => {
+        button.addEventListener('click', function() {
+          const roomId = this.getAttribute('data-room-id');
+          const buildingId = this.getAttribute('data-building-id');
+          const redirectUrl = `{{ route('admin.rooms.destroy', ['roomId' => '__ROOM_ID__', 'buildingId' => '__BUILDING_ID__']) }}`.replace('__ROOM_ID__', roomId).replace('__BUILDING_ID__', buildingId);
+          document.getElementById('redirectUrl' + roomId).value = redirectUrl;
+        });
+      });
+    });
+  </script>
+  
 @endsection

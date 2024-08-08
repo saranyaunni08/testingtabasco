@@ -342,16 +342,35 @@ class RoomController extends Controller
     
         return view('rooms.flats', compact('rooms', 'page', 'building_id', 'building','installments'));
     }
-        public function showShops($building_id)
+        
+    public function showShops($buildingId)
     {
-        $building = Building::find($building_id);
-        $rooms = Room::where('building_id', $building_id)->where('room_type', 'Shops')->get();
-        $page = 'Shops'; 
-
-        Log::info('Fetched rooms:', $rooms->toArray());
+        // Fetch the building
+        $building = Building::find($buildingId);
+        
+        // Fetch shops (rooms with room_type 'Shops')
+        $shops = Room::where('building_id', $buildingId)
+                     ->where('room_type', 'Shops') // Filter by room_type
+                     ->get();
     
-        return view('rooms.shops', compact('rooms', 'building', 'page','building_id'));
+        $rooms = Room::where('building_id', $buildingId)
+        ->where('room_type', 'Shops') // Filter by room_type
+        ->get();
+        $installments = Installment::all(); // Adjust according to your logic for fetching installments
+        $page = 'Shops';
+    
+        // Pass the building_id to the view
+        return view('rooms.shops', [
+            'building_id' => $buildingId,
+            'shops' => $shops,
+            'rooms' => $rooms,
+            'installments' => $installments,
+            'page' => $page,
+            'building' => $building,
+        ]);
     }
+    
+    
     public function showTableSpaces($building_id)
     {
         $building = Building::find($building_id);

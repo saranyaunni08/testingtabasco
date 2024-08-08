@@ -209,16 +209,18 @@
                                                                 data-room-number="{{ $room->room_number }}">
                                                                 Sell
                                                             </button>
-                                                            <a href="{{ route('admin.rooms.edit', $room->id) }}"
+                                                            <a href="{{ route('admin.rooms.destroy', ['roomId' => $room->id, 'buildingId' => $building->id]) }}
+"
                                                                 class="btn btn-warning btn-sm me-2">Edit</a>
+                                                             
                                                             <form
-                                                                action="{{ route('admin.rooms.destroy', ['building_id' => $building->id, 'room_id' => $room->id]) }}"
+                                                                action="{{ route('admin.rooms.destroy', ['roomId' => $room->id, 'buildingId' => $building->id]) }}"
                                                                 method="POST" style="display: inline-block;">
                                                                 @csrf
                                                                 @method('DELETE')
-                                                                <button type="submit"
-                                                                    class="btn btn-danger btn-sm">Delete</button>
+                                                                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
                                                             </form>
+                                                            
                                                         @else
                                                             <span
                                                                 style="color: #28a745; font-weight: bold; font-size: 1.2em; border: 2px solid #28a745; padding: 5px 10px; border-radius: 5px; background-color: #e9f7ef;">

@@ -66,10 +66,12 @@
                                             <button type="button" class="btn btn-success btn-sm me-2" data-toggle="modal" data-target="#authModal{{ $room->id }}" data-building-id="{{ $room->building_id }}" data-room-id="{{ $room->id }}" data-action="edit">
                                                 <i class="bx bx-edit bx-sm"></i>
                                             </button>
-                                            <form action="{{ route('admin.rooms.destroy', ['building_id' => $building->id, 'room_id' => $room->id]) }}" method="POST" style="display: inline;">
+                                            <form action="{{ route('admin.rooms.destroy', ['roomId' => $room->id, 'buildingId' => $building_id]) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this room?');">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="btn btn-danger">Delete</button>
+                                                <button type="submit" class="btn btn-danger btn-sm">
+                                                    <i class="fas fa-trash-alt bx-sm"></i>
+                                                </button>
                                             </form>
                                             
                                             @endif
@@ -492,16 +494,21 @@
     </script>
     
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            document.querySelectorAll('button[data-toggle="modal"]').forEach(button => {
-                button.addEventListener('click', function() {
-                    const roomId = this.getAttribute('data-room-id');
-                    const buildingId = this.getAttribute('data-building-id');
-                    const redirectUrl = `{{ route('admin.rooms.destroy', ['building_id' => '__BUILDING_ID__', 'room_id' => '__ROOM_ID__']) }}`.replace('__BUILDING_ID__', buildingId).replace('__ROOM_ID__', roomId);
-                    document.getElementById('redirectUrl' + roomId).value = redirectUrl;
-                });
-            });
+      document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('button[data-toggle="modal"]').forEach(button => {
+        button.addEventListener('click', function() {
+            const roomId = this.getAttribute('data-room-id');
+            const buildingId = this.getAttribute('data-building-id');
+
+            const redirectUrl = `{{ route('admin.rooms.destroy', ['roomId' => '__ROOM_ID__', 'buildingId' => '__BUILDING_ID__']) }}`
+                .replace('__ROOM_ID__', roomId)
+                .replace('__BUILDING_ID__', buildingId);
+
+            document.getElementById('redirectUrl' + roomId).value = redirectUrl;
         });
+    });
+});
+
     </script>
     
     

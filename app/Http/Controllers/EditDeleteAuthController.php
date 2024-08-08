@@ -29,15 +29,31 @@ class EditDeleteAuthController extends Controller
         if ($user && Hash::check($credentials['password'], $user->password)) {
             // Authentication successful
             Session::put('edit_delete_auth', true);
+    
+            // Check the action to perform
+            $action = $request->input('action');
+            $roomId = $request->input('room_id');
+            $buildingId = $request->input('building_id');
+    
+            if ($action === 'delete') {
+                // Perform soft delete
+                $room = Room::findOrFail($roomId);
+                $room->delete(); // Soft delete
+    
+                // Redirect with success message
+                return redirect()->route('admin.rooms.index', ['buildingId' => $buildingId])->with('success', 'Room deleted successfully.');
+            }
+    
+            // Handle other actions if needed
+            // For now, just redirect to the URL with a success message
             $redirectUrl = $request->input('redirect_url');
-            
-            // Redirect to the URL where the authenticated action should be performed
             return redirect()->to($redirectUrl)->with('success', 'Authenticated successfully');
         }
     
         // Authentication failed
         return redirect()->back()->withErrors(['Invalid credentials']);
     }
+    
     
     public function logout(Request $request)
     {
@@ -73,23 +89,31 @@ class EditDeleteAuthController extends Controller
         return view('rooms.edit', compact('room'));
     }
     
-    public function deleteRoom(Request $request, $buildingId, $roomId)
+    public function deleteRoom(Request $request, $roomId, $buildingId)
     {
+        // Check if the user has the authentication session
         if (!$request->session()->has('edit_delete_auth')) {
             return redirect()->route('admin.edit_delete_auth.show_login');
         }
-
+    
         // Find the room with the given IDs
-        $room = Room::where('id', $roomId)->where('building_id', $buildingId)->first();
-        
+        $room = Room::where('id', $roomId)
+                    ->where('building_id', $buildingId)
+                    ->first();
+    
+        // Handle the case where the room is not found
         if (!$room) {
             return redirect()->back()->withErrors(['Room not found']);
         }
-
+    
         // Soft delete the room
         $room->delete();
+        $redirectUrl = $request->input('redirect_url', route('admin.shops.index')); // Default to a route if no redirect URL is provided
 
-        return redirect()->route('admin.rooms.index')->with('success', 'Room deleted successfully');
+        return redirect($redirectUrl)->with('success', 'Room deleted successfully.');
+
     }
+    
+    
     
 }
