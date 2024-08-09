@@ -16,12 +16,68 @@ class RoomController extends Controller
 {
     public function index(Request $request)
     {
-        $building = Building::findOrFail($request->building_id);
+        // Validate and get the building ID from the request
+        $building_id = $request->input('building_id');
+        
+        // Find the building by ID
+        $building = Building::findOrFail($building_id);
+    
+        // Retrieve rooms associated with the building and paginate them
         $rooms = Room::where('building_id', $building->id)->paginate(10);
-        $page = 'rooms';
-        $building_id = $request->building_id;
-
-        return view('rooms.show', compact('rooms', 'building', 'page', 'building_id'));
+    
+        // Calculate room statistics
+        $roomStats = [
+            'Flat Expected Amount' => [
+                'count' => $rooms->where('room_type', 'Flat')->count(),
+                'total' => $rooms->where('room_type', 'Flat')->sum('flat_expected_carpet_area_price'),
+            ],
+            'Shops Expected Amount' => [
+                'count' => $rooms->where('room_type', 'Shops')->count(),
+                'total' => $rooms->where('room_type', 'Shops')->sum('expected_carpet_area_price'),
+            ],
+            'Table space Expected Amount' => [
+                'count' => $rooms->where('room_type', 'Table space')->count(),
+                'total' => $rooms->where('room_type', 'Table space')->sum('space_expected_price'),
+            ],
+            'Kiosk Expected Amount' => [
+                'count' => $rooms->where('room_type', 'Kiosk')->count(),
+                'total' => $rooms->where('room_type', 'Kiosk')->sum('kiosk_expected_price'),
+            ],
+            'Chair space Expected Amount' => [
+                'count' => $rooms->where('room_type', 'Chair space')->count(),
+                'total' => $rooms->where('room_type', 'Chair space')->sum('chair_space_expected_rate'),
+            ],
+        ];
+    
+        // Prepare data for charts
+        $totalFlats = $roomStats['Flat Expected Amount']['count'];
+        $totalShops = $roomStats['Shops Expected Amount']['count'];
+        $totalTableSpaces = $roomStats['Table space Expected Amount']['count'];
+        $totalKiosks = $roomStats['Kiosk Expected Amount']['count'];
+        $totalChairSpaces = $roomStats['Chair space Expected Amount']['count'];
+    
+        // Example data for the bar chart (replace with actual data)
+        $buildings = Building::all(); // Retrieve buildings data
+        $soldAmountData = []; // Populate with actual sold amounts
+        $expectedPriceData = []; // Populate with actual expected prices
+    
+        $page = 'rooms'; // Define $page variable
+    
+        return view('rooms.show', compact(
+            'rooms',
+            'building',
+            'page',
+            'building_id',
+            'roomStats',
+            'totalFlats',
+            'totalShops',
+            'totalTableSpaces',
+            'totalKiosks',
+            'totalChairSpaces',
+            'soldAmountData',
+            'expectedPriceData',
+            'buildings'
+        ));
     }
     
     public function create(Request $request)

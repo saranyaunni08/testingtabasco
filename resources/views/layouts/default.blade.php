@@ -67,22 +67,24 @@
           </a>
         </li>
 
+        
         @if(isset($buildings))
         @foreach($buildings as $b)
-        
-          <li class="nav-item">
-            <a class="nav-link text-white {{ $page == 'building-'.$b->id ? 'active bg-gradient-info' : '' }}"
-               href="{{ route('admin.rooms.index', ['building_id' => $b->id]) }}">
-              <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
-                <i class="material-icons opacity-10">location_city</i>
-              </div>
-              <span class="nav-link-text ms-1" style="text-transform: capitalize">{{ $b->building_name }}</span>
-            </a>
-          </li>
-          
-        
+          @if(request()->routeIs('admin.rooms.index') || request()->routeIs('admin.flats.index') || request()->routeIs('admin.shops.index') || request()->routeIs('admin.table-spaces.index') || request()->routeIs('admin.kiosks.index') || request()->routeIs('admin.chair-spaces.index'))
+            <li class="nav-item">
+              <a class="nav-link text-white {{ $page == 'building-'.$b->id ? 'active bg-gradient-info' : '' }}"
+                 href="{{ route('admin.rooms.index', ['building_id' => $b->id]) }}">
+                <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+                  <i class="material-icons opacity-10">location_city</i>
+                </div>
+                <span class="nav-link-text ms-1" style="text-transform: capitalize">{{ $b->building_name }}</span>
+              </a>
+            </li>
+          @endif
         @endforeach
       @endif
+          
+    
         @if(isset($rooms))
         <li class="nav-item">
           <a class="nav-link text-white {{ $page == 'flats' ? 'active bg-gradient-info' : '' }}"
