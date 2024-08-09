@@ -66,13 +66,16 @@
                                             <button type="button" class="btn btn-success btn-sm me-2" data-toggle="modal" data-target="#authModal{{ $room->id }}" data-building-id="{{ $room->building_id }}" data-room-id="{{ $room->id }}" data-action="edit">
                                                 <i class="bx bx-edit bx-sm"></i>
                                             </button>
-                                            <form action="{{ route('admin.rooms.destroy', ['roomId' => $room->id, 'buildingId' => $building_id]) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this room?');">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-danger btn-sm">
-                                                    <i class="fas fa-trash-alt bx-sm"></i>
-                                                </button>
-                                            </form>
+                                            
+                                            
+                                            <button type="button" class="btn btn-danger btn-sm me-2" data-toggle="modal" data-target="#deleteModal{{ $room->id }}" data-building-id="{{ $room->building_id }}" data-room-id="{{ $room->id }}" data-action="delete">
+                                                <i class="fas fa-trash-alt bx-sm"></i>
+                                            </button>
+                                            
+                                            
+                                            
+                                            
+                                            
                                             
                                             @endif
                         
@@ -96,20 +99,22 @@
                                                     Not Available
                                                 </button>
                                             @endif
-  <!-- Authentication Modal -->
+
+            <!-- Authentication Modal for Edit -->
 <div class="modal fade" id="authModal{{ $room->id }}" tabindex="-1" aria-labelledby="authModalLabel{{ $room->id }}" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="authModalLabel{{ $room->id }}">Authenticate</h5>
+                <h5 class="modal-title" id="authModalLabel{{ $room->id }}">Authenticate for Editing</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="authForm{{ $room->id }}" action="{{ route('admin.edit_delete_auth.authenticate') }}" method="POST">
+                <form id="authForm{{ $room->id }}" action="{{ route('admin.rooms.authenticate', ['roomId' => $room->id, 'buildingId' => $room->building_id]) }}" method="POST">
                     @csrf
                     <input type="hidden" name="redirect_url" id="redirectUrl{{ $room->id }}">
                     <input type="hidden" name="room_id" value="{{ $room->id }}">
                     <input type="hidden" name="building_id" value="{{ $room->building_id }}">
+                    <input type="hidden" name="action" value="edit">
                     <div class="mb-3">
                         <label for="username" class="form-label">Username</label>
                         <input type="text" class="form-control" id="username" name="username" required>
@@ -143,122 +148,253 @@
         </div>
     </div>
 </div>
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="11" class="text-center">No records found.</td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                        
+
+
+<!-- Authentication Modal for Delete -->
+<div class="modal fade" id="deleteModal{{ $room->id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ $room->id }}" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel{{ $room->id }}">Authenticate for Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="deleteAuthForm{{ $room->id }}" action="{{ route('admin.rooms.destroy.flat', ['roomId' => $room->id, 'buildingId' => $room->building_id]) }}" method="POST">
+                    @csrf
+                    @method('DELETE')
+                    <input type="hidden" name="redirect_url" value="{{ url()->previous() }}">
+                    <input type="hidden" name="room_id" value="{{ $room->id }}">
+                    <input type="hidden" name="building_id" value="{{ $room->building_id }}">
+                    <input type="hidden" name="action" value="delete">
+                    <div class="mb-3">
+                        <label for="deleteUsername" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="deleteUsername" name="username" required>
                     </div>
-                </div>
+                    <div class="mb-3">
+                        <label for="deletePassword" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="deletePassword" name="password" required>
+                    </div>
+                    <div class="container mt-4">
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </div>
+                </form>
+                
+                
             </div>
         </div>
     </div>
-
-    @foreach ($rooms as $room)
-        @if ($room->status === 'available')
-            <div class="modal fade" id="sellModal{{ $room->id }}" tabindex="-1" aria-labelledby="sellModalLabel{{ $room->id }}" aria-hidden="true">
-                <div class="modal-dialog modal-lg"> 
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="sellModalLabel{{ $room->id }}">Sell Room {{ $room->name }}</h5>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                        <div class="modal-body">
-                            <form action="{{ route('admin.sales.store') }}" method="POST">
-                                @csrf
-                                <input type="hidden" name="room_id" value="{{ $room->id }}">
-                                <div class="row">
-                                    <div class="col-6">
-                                        <div class="form-group">
-                                            <label class="font-weight-bold" for="customer_name">Customer Name</label>
-                                            <input type="text" class="form-control" id="customer_name" name="customer_name" required>
-                                        </div>
-                                    </div>
-                                    <div class="col-6">
-                                        <div class="form-group">
-                                            <label class="font-weight-bold" for="customer_email">Customer Email</label>
-                                            <input type="email" class="form-control" id="customer_email" name="customer_email" required>
-                                        </div>
-                                    </div>
-                                    <div class="col-6">
-                                        <div class="form-group">
-                                            <label class="font-weight-bold" for="customer_contact">Customer Contact</label>
-                                            <input type="text" class="form-control" id="customer_contact" name="customer_contact" required>
-                                        </div>
-                                    </div>
-                                    <div class="col-6">
-                                        <div class="form-group">
-                                            <label class="font-weight-bold" for="sale_amount">Sale Amount in sq</label>
-                                            <input type="number" class="form-control" id="sale_amount" name="sale_amount" required>
-                                        </div>
-                                    </div>
-                                    <div class="col-6">
-                                        <div class="form-group">
-                                            <label class="font-weight-bold" for="area_calculation_type">Area Calculation Type</label>
-                                            <select class="form-control" id="area_calculation_type" name="area_calculation_type" required>
-                                                <option value="" selected disabled>Select</option>
-                                                <option value="carpet_area_rate">Carpet Area Rate</option>
-                                                <option value="built_up_area_rate">Super Built-up Area Rate</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    @if($room->room_type == 'Flat')
-                                        <div class="col-6">
-                                            <div class="form-group">
-                                                <label class="font-weight-bold" for="flat_build_up_area">Super Build-Up Area Rate</label>
-                                                <input type="text" class="form-control" id="flat_build_up_area" name="flat_build_up_area" value="{{ $room->flat_build_up_area }}" readonly>
-                                            </div>
-                                        </div>
-                                        <div class="col-6">
-                                            <div class="form-group">
-                                                <label class="font-weight-bold" for="flat_carpet_area">Carpet Area</label>
-                                                <input type="text" class="form-control" id="flat_carpet_area" name="flat_carpet_area" value="{{ $room->flat_carpet_area }}" readonly>
-                                            </div>
-                                        </div>
-                                    @endif  
-                                    <div class="col-6">
-                                        <div class="form-group">
-                                            <label class="font-weight-bold" for="calculation_type">Calculation Type for Parking</label>
-                                            <select class="form-control" id="calculation_type" name="calculation_type" required>
-                                                <option value="fixed_amount">Unparked</option>
-                                                <option value="rate_per_sq_ft">Rate per sq ft</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="col-6">
-                                        <div class="form-group d-none" id="parking_rate_per_sq_ft_group{{ $room->id }}">
-                                            <label class="font-weight-bold" for="parking_rate_per_sq_ft">Parking Rate (per sq ft)</label>
-                                            <input type="number" class="form-control" id="parking_rate_per_sq_ft" name="parking_rate_per_sq_ft">
-                                        </div>
-                                    </div>
-                                    <div class="col-6">
-                                        <div class="form-group d-none" id="fixed_parking_amount_group{{ $room->id }}">
-                                            <label class="font-weight-bold" for="fixed_parking_amount">Fixed Parking Amount</label>
-                                            <input type="number" class="form-control" id="fixed_parking_amount" name="fixed_parking_amount">
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="font-weight-bold" for="notes">Notes</label>
-                                    <textarea class="form-control" id="notes" name="notes" rows="3"></textarea>
-                                </div>
-                                <button type="submit" class="btn btn-primary">Sell Room</button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        @endif
-    @endforeach
 </div>
 
+<div class="modal fade" id="sellModal{{ $room->id }}" tabindex="-1" aria-labelledby="sellModalLabel{{ $room->id }}" aria-hidden="true">
+    <div class="modal-dialog modal-lg"> 
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="sellModalLabel{{ $room->id }}">Sell Room {{ $room->name }}</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form action="{{ route('admin.sales.store') }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="room_id" value="{{ $room->id }}">
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label class="font-weight-bold" for="customer_name">Customer Name</label>
+                                <input type="text" class="form-control" id="customer_name" name="customer_name" required>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label class="font-weight-bold" for="customer_email">Customer Email</label>
+                                <input type="email" class="form-control" id="customer_email" name="customer_email" required>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label class="font-weight-bold" for="customer_contact">Customer Contact</label>
+                                <input type="text" class="form-control" id="customer_contact" name="customer_contact" required>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label class="font-weight-bold" for="sale_amount">Sale Amount in sq</label>
+                                <input type="number" class="form-control" id="sale_amount" name="sale_amount" required>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label class="font-weight-bold" for="area_calculation_type">Area Calculation Type</label>
+                                <select class="form-control" id="area_calculation_type" name="area_calculation_type" required>
+                                    <option value="" selected disabled>Select</option>
+                                    <option value="carpet_area_rate">Carpet Area Rate</option>
+                                    <option value="built_up_area_rate">Super Built-up Area Rate</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        @if($room->room_type == 'Flat')
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label class="font-weight-bold" for="flat_build_up_area">Super Build-Up Area Rate</label>
+                                <input type="text" class="form-control" id="flat_build_up_area" name="flat_build_up_area" value="{{ $room->flat_build_up_area }}" readonly>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label class="font-weight-bold" for="flat_carpet_area">Carpet Area Rate</label>
+                                <input type="text" class="form-control" id="flat_carpet_area" name="flat_carpet_area" value="{{ $room->flat_carpet_area }}" readonly>
+                            </div>
+                        </div>
+                        @endif  
+
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label class="font-weight-bold" for="calculation_type">Calculation Type for Parking</label>
+                                <select class="form-control" id="calculation_type" name="calculation_type" required>
+                                    <option value="fixed_amount">Unparked</option>
+                                    <option value="rate_per_sq_ft">Rate per sq ft</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-group d-none" id="parking_rate_per_sq_ft_group{{ $room->id }}">
+                                <label class="font-weight-bold" for="parking_rate_per_sq_ft">Parking Rate (per sq ft)</label>
+                                <input type="number" class="form-control" id="parking_rate_per_sq_ft" name="parking_rate_per_sq_ft">
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-group d-none" id="total_sq_ft_group{{ $room->id }}">
+                                <label class="font-weight-bold" for="total_sq_ft_for_parking">Total Square Feet</label>
+                                <input type="number" class="form-control" id="total_sq_ft_for_parking" name="total_sq_ft_for_parking">
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label class="font-weight-bold" for="discount_percent">Discount (%)</label>
+                                <input type="number" step="0.01" class="form-control" id="discount_percent" name="discount_percent">
+                            </div>
+                        </div>
+                      
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label class="font-weight-bold" for="cash_in_hand_percent">Cash in Hand %</label>
+                                <input type="number" step="0.01" class="form-control" id="cash_in_hand_percent{{ $room->id }}" name="cash_in_hand_percent" oninput="calculateInHandAmount({{ $room->id }})">
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label class="font-weight-bold" for="in_hand_amount">In Hand Amount</label>
+                                <input type="number" step="0.01" class="form-control" id="in_hand_amount{{ $room->id }}" name="in_hand_amount" readonly>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label class="font-weight-bold" for="gst_percent">GST Percent</label>
+                                <input type="number" step="0.01" class="form-control" id="gst_percent" name="gst_percent" required>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label class="font-weight-bold" for="advance_payment">Total Advance Payment</label>
+                                <select class="form-control" id="advance_payment" name="advance_payment" required>
+                                    <option value="now">Paying Now</option>
+                                    <option value="later">Paying Later</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-group d-none" id="advance_amount_group">
+                                <label class="font-weight-bold" for="advance_amount">Advance Amount</label>
+                                <input type="number" class="form-control" id="advance_amount" name="advance_amount">
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label class="font-weight-bold" for="partner_name">Partner Name</label>
+                                <input type="text" class="form-control" id="partner_name" name="partner_name" required>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-group d-none" id="last_date_group">
+                                <label class="font-weight-bold" for="last_date">Last Date for Advance Payment</label>
+                                <input type="date" class="form-control" id="last_date" name="last_date">
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label class="font-weight-bold" for="installments">Number of Installments</label>
+                                <input type="number" class="form-control" id="installments" name="installments" required>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label class="font-weight-bold" for="installment_date">Installment Date</label>
+                                <input type="date" class="form-control" id="installment_date" name="installment_date">
+                            </div>
+                        </div>
+                    
+                        <div class="col-6">
+                            <div class="form-group d-none" id="payment_method_group">
+                                <label class="font-weight-bold" for="payment_method">Payment Method</label>
+                                <select class="form-control" id="payment_method" name="payment_method">
+                                    <option value="cash">Cash</option>
+                                    <option value="bank_transfer">Bank Transfer</option>
+                                    <option value="cheque">Cheque</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-group d-none" id="transfer_id_group">
+                                <label class="font-weight-bold" for="transfer_id">Bank Transfer ID</label>
+                                <input type="text" class="form-control" id="transfer_id" name="transfer_id">
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-group d-none" id="cheque_id_group">
+                                <label class="font-weight-bold" for="cheque_id">Cheque ID</label>
+                                <input type="text" class="form-control" id="cheque_id" name="cheque_id">
+                            </div>
+                        </div>
+
+                        <div  id="gst_amount_group" class="col-12">
+                            <h4 for="gst_amount">GST Amount :₹<span id="gst_amount"></span> </h4>
+                        </div>
+                        
+                        
+                        <div class="col-12">
+                            <h4>Total amount: ₹<span id="total"></span></h4>
+                        </div>
+                        {{-- <div class="col-12">
+                            <h4>Remaining Balance: ₹<span id="remaining_balance"></span></h4>
+                        </div> --}}
+                        <div class="col-12">
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                <button type="submit" class="btn btn-primary">Sell Room</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+</td>
+</tr>
+@empty
+<tr>
+<td colspan="10" class="text-center">No records found.</td>
+</tr>
+@endforelse
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -494,22 +630,17 @@
     </script>
     
     <script>
-      document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('button[data-toggle="modal"]').forEach(button => {
-        button.addEventListener('click', function() {
-            const roomId = this.getAttribute('data-room-id');
-            const buildingId = this.getAttribute('data-building-id');
-
-            const redirectUrl = `{{ route('admin.rooms.destroy', ['roomId' => '__ROOM_ID__', 'buildingId' => '__BUILDING_ID__']) }}`
-                .replace('__ROOM_ID__', roomId)
-                .replace('__BUILDING_ID__', buildingId);
-
-            document.getElementById('redirectUrl' + roomId).value = redirectUrl;
+        document.addEventListener('DOMContentLoaded', function() {
+          document.querySelectorAll('button[data-toggle="modal"]').forEach(button => {
+            button.addEventListener('click', function() {
+              const roomId = this.getAttribute('data-room-id');
+              const buildingId = this.getAttribute('data-building-id');
+              const redirectUrl = `{{ route('admin.rooms.destroy.flat', ['roomId' => '__ROOM_ID__', 'buildingId' => '__BUILDING_ID__']) }}`.replace('__ROOM_ID__', roomId).replace('__BUILDING_ID__', buildingId);
+              document.getElementById('redirectUrl' + roomId).value = redirectUrl;
+            });
+          });
         });
-    });
-});
-
-    </script>
+      </script>
     
     
     

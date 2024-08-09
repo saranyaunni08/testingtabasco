@@ -106,7 +106,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="authForm{{ $room->id }}" action="{{ route('admin.edit_delete_auth.authenticate') }}" method="POST">
+                <form id="authForm{{ $room->id }}" action="{{ route('admin.rooms.authenticate', ['roomId' => $room->id, 'buildingId' => $room->building_id]) }}" method="POST">
                     @csrf
                     <input type="hidden" name="redirect_url" id="redirectUrl{{ $room->id }}">
                     <input type="hidden" name="room_id" value="{{ $room->id }}">
@@ -157,7 +157,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="deleteAuthForm{{ $room->id }}" action="{{ route('admin.rooms.destroy', ['roomId' => $room->id, 'buildingId' => $room->building_id]) }}" method="POST">
+                <form id="deleteAuthForm{{ $room->id }}" action="{{ route('admin.rooms.destroy.Shops', ['roomId' => $room->id, 'buildingId' => $room->building_id]) }}" method="POST">
                     @csrf
                     @method('DELETE')
                     <input type="hidden" name="redirect_url" value="{{ url()->previous() }}">
@@ -634,7 +634,7 @@ modalElements.forEach((modalElement) => {
         button.addEventListener('click', function() {
           const roomId = this.getAttribute('data-room-id');
           const buildingId = this.getAttribute('data-building-id');
-          const redirectUrl = `{{ route('admin.rooms.destroy', ['roomId' => '__ROOM_ID__', 'buildingId' => '__BUILDING_ID__']) }}`.replace('__ROOM_ID__', roomId).replace('__BUILDING_ID__', buildingId);
+          const redirectUrl = `{{ route('admin.rooms.destroy.Shops', ['roomId' => '__ROOM_ID__', 'buildingId' => '__BUILDING_ID__']) }}`.replace('__ROOM_ID__', roomId).replace('__BUILDING_ID__', buildingId);
           document.getElementById('redirectUrl' + roomId).value = redirectUrl;
         });
       });

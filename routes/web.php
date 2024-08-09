@@ -156,11 +156,18 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
         Route::post('/auth', [EditDeleteAuthController::class, 'authenticate'])->name('auth');
         
         Route::get('/rooms/{roomId}/{buildingId}/edit', [EditDeleteAuthController::class, 'showEditPage'])->name('rooms.edit');
+        // Define route for handling POST requests
+        Route::post('/rooms/{roomId}/{buildingId}/edit', [EditDeleteAuthController::class, 'authenticate'])->name('rooms.authenticate');
+
         Route::post('/edit-delete-logout', [EditDeleteAuthController::class, 'logout'])->name('edit_delete_auth.logout');
 
       
-        // Route::delete('/buildings/{building_id}/rooms/{room_id}', [EditDeleteAuthController::class, 'deleteRoom'])->name('rooms.destroy');
         Route::delete('/rooms/{roomId}/{buildingId}', [EditDeleteAuthController::class, 'deleteRoom'])->name('rooms.destroy');
+        Route::delete('/rooms/{roomId}/{buildingId}/deleteFlat', [EditDeleteAuthController::class, 'deleteFlat'])->name('rooms.destroy.flat');
+        Route::delete('/rooms/{roomId}/{buildingId}/deleteShops', [EditDeleteAuthController::class, 'deleteShops'])->name('rooms.destroy.Shops');
+        Route::delete('/rooms/{roomId}/{buildingId}/deleteShops', [EditDeleteAuthController::class, 'deleteKiosk'])->name('rooms.destroy.Kiosk');
+        Route::delete('/rooms/{roomId}/{buildingId}/deleteTableSpace', [EditDeleteAuthController::class, 'deleteTableSpace'])->name('rooms.destroy.deleteTableSpace');
+        Route::delete('/rooms/{roomId}/{buildingId}/deleteChairSpace', [EditDeleteAuthController::class, 'deleteChairSpace'])->name('rooms.destroy.chairspace');
 
     });
 });

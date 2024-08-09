@@ -209,12 +209,12 @@
                                                                 data-room-number="{{ $room->room_number }}">
                                                                 Sell
                                                             </button>
-                                                            <a href="{{ route('admin.rooms.destroy', ['roomId' => $room->id, 'buildingId' => $building->id]) }}
+                                                            {{-- <a href="{{ route('admin.rooms.destroy', ['roomId' => $room->id, 'buildingId' => $building->id]) }} --}}
 "
                                                                 class="btn btn-warning btn-sm me-2">Edit</a>
                                                              
                                                             <form
-                                                                action="{{ route('admin.rooms.destroy', ['roomId' => $room->id, 'buildingId' => $building->id]) }}"
+                                                                {{-- action="{{ route('admin.rooms.destroy', ['roomId' => $room->id, 'buildingId' => $building->id]) }}" --}}
                                                                 method="POST" style="display: inline-block;">
                                                                 @csrf
                                                                 @method('DELETE')
