@@ -18,32 +18,46 @@
                         </div>
                     </div>
                 </div>
+                @if ($type == 'Chair space Expected Amount')
+                    <!-- Add the total expected amount card -->
+                    <div class="col-xl-3 col-lg-4 col-sm-5 col-7 mb-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="card-title d-flex align-items-start justify-content-between">
+                                    <div class="avatar flex-shrink-0">
+                                        <img src="{{ asset('img/image.png') }}" alt="Total Expected Amount" class="rounded">
+                                    </div>
+                                </div>
+                                <span class="fw-medium d-block mb-1">Total Expected Amount</span>
+                                <h4 class="card-title mb-2">₹{{ number_format($totalExpectedAmount, 2) }}</h4>
+                            </div>
+                        </div>
+                    </div>
+                @endif
             @endforeach
         </div>
 
         <!-- Charts -->
         <div class="container-fluid pt-4 px-3">
-
-        <div class="row">
-            <!-- Small Donut Chart -->
-            <div class="col-sm-12 col-md-6 col-xl-4 mb-4">
-                <div class="bg-light rounded h-100 p-4">
-                    <h6 class="mb-4">Room Types Distribution</h6>
-                    <canvas id="doughnut-chart" height="200"></canvas> <!-- Reduced height for a smaller chart -->
+            <div class="row">
+                <!-- Small Donut Chart -->
+                <div class="col-sm-12 col-md-6 col-xl-4 mb-4">
+                    <div class="bg-light rounded h-100 p-4">
+                        <h6 class="mb-4">Room Types Distribution</h6>
+                        <canvas id="doughnut-chart" height="200"></canvas> <!-- Reduced height for a smaller chart -->
+                    </div>
                 </div>
-            </div>
 
-            <!-- Bar Chart -->
-            <div class="col-sm-12 col-md-6 col-xl-8 mb-4">
-                <div class="bg-light rounded h-100 p-4">
-                    <h6 class="mb-4">Sold Amount and Expected Price</h6>
-                  <canvas id="bar-chart" width="1000" height="487" style="display: block; box-sizing: border-box; height: 389.6px; width: 780px;"></canvas>
+                <!-- Bar Chart -->
+                <div class="col-sm-12 col-md-6 col-xl-8 mb-4">
+                    <div class="bg-light rounded h-100 p-4">
+                        <h6 class="mb-4">Sold Amount and Expected Price</h6>
+                        <canvas id="bar-chart" width="1000" height="487" style="display: block; box-sizing: border-box; height: 389.6px; width: 780px;"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
-
 
     <!-- Include Chart.js library -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

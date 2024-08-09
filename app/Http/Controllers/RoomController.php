@@ -49,6 +49,19 @@ class RoomController extends Controller
             ],
         ];
     
+        // Calculate the total expected amount
+        $totalExpectedAmount = array_sum(array_column($roomStats, 'total'));
+    
+        // Calculate the total expected amount for sold room types
+        $soldRooms = $rooms->where('status', 'sold');
+        $soldAmountData = [
+            'Flat Expected Amount' => $soldRooms->where('room_type', 'Flat')->sum('flat_expected_carpet_area_price'),
+            'Shops Expected Amount' => $soldRooms->where('room_type', 'Shops')->sum('expected_carpet_area_price'),
+            'Table space Expected Amount' => $soldRooms->where('room_type', 'Table space')->sum('space_expected_price'),
+            'Kiosk Expected Amount' => $soldRooms->where('room_type', 'Kiosk')->sum('kiosk_expected_price'),
+            'Chair space Expected Amount' => $soldRooms->where('room_type', 'Chair space')->sum('chair_space_expected_rate'),
+        ];
+    
         // Prepare data for charts
         $totalFlats = $roomStats['Flat Expected Amount']['count'];
         $totalShops = $roomStats['Shops Expected Amount']['count'];
@@ -58,8 +71,13 @@ class RoomController extends Controller
     
         // Example data for the bar chart (replace with actual data)
         $buildings = Building::all(); // Retrieve buildings data
-        $soldAmountData = []; // Populate with actual sold amounts
-        $expectedPriceData = []; // Populate with actual expected prices
+        $expectedPriceData = [
+            'Flat Expected Amount' => $roomStats['Flat Expected Amount']['total'],
+            'Shops Expected Amount' => $roomStats['Shops Expected Amount']['total'],
+            'Table space Expected Amount' => $roomStats['Table space Expected Amount']['total'],
+            'Kiosk Expected Amount' => $roomStats['Kiosk Expected Amount']['total'],
+            'Chair space Expected Amount' => $roomStats['Chair space Expected Amount']['total'],
+        ];
     
         $page = 'rooms'; // Define $page variable
     
@@ -76,7 +94,8 @@ class RoomController extends Controller
             'totalChairSpaces',
             'soldAmountData',
             'expectedPriceData',
-            'buildings'
+            'buildings',
+            'totalExpectedAmount' // Pass total expected amount to the view
         ));
     }
     

@@ -1,173 +1,127 @@
-@extends('layouts.default', ['title' => 'Dashboard', 'page' => 'dashboard'])
+@extends('layouts.default', ['title' => 'Rooms'])
 
 @section('content')
-<div class="content">
-    <main class="main">
-        <div class="container-fluid pt-4 px-4">
-            <div class="row g-4">
-                <div class="col-md-6 col-xl-3">
-                    <div class="bg-light rounded d-flex flex-column align-items-center justify-content-center p-4 h-100">
-                        <i class="fa fa-chart-line fa-4x text-primary mb-3"></i>
-                        <div class="text-center">
-                            <p class="mb-2">Expected Amount</p>
-                            <h5 class="font-weight-bolder">₹{{ number_format($ExpectedPrice) }}</h5>
+    <div class="container-fluid py-4">
+        <div class="row">
+            <!-- Room Stats Cards -->
+            @foreach ($roomStats as $type => $stats)
+                <div class="col-xl-3 col-lg-4 col-sm-5 col-7 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="card-title d-flex align-items-start justify-content-between">
+                                <div class="avatar flex-shrink-0">
+                                    <img src="{{ asset('img/image.png') }}" alt="Credit Card" class="rounded">
+                                </div>
+                            </div>
+                            <span class="fw-medium d-block mb-1">{{ $type }}</span>
+                            <h4 class="card-title mb-2">₹{{ number_format($stats['total'], 2) }}</h4>
                         </div>
                     </div>
                 </div>
-            </div>
+                @if ($type == 'Chair space Expected Amount')
+                    <!-- Add the total expected amount card -->
+                    <div class="col-xl-3 col-lg-4 col-sm-5 col-7 mb-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="card-title d-flex align-items-start justify-content-between">
+                                    <div class="avatar flex-shrink-0">
+                                        <img src="{{ asset('img/image.png') }}" alt="Total Expected Amount" class="rounded">
+                                    </div>
+                                </div>
+                                <span class="fw-medium d-block mb-1">Total Expected Amount</span>
+                                <h4 class="card-title mb-2">₹{{ number_format($totalExpectedAmount, 2) }}</h4>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+            @endforeach
         </div>
 
-        <!-- Rest of your code -->
-
+        <!-- Charts -->
         <div class="container-fluid pt-4 px-3">
-            <div class="row g-4">
-                <div class="col-sm-12 col-xl-5">
+            <div class="row">
+                <!-- Small Donut Chart -->
+                <div class="col-sm-12 col-md-6 col-xl-4 mb-4">
                     <div class="bg-light rounded h-100 p-4">
-                        <h6 class="mb-4">TOTAL ROOMS</h6>
-                        <canvas id="doughnut-chart" height="400"></canvas>
+                        <h6 class="mb-4">Room Types Distribution</h6>
+                        <canvas id="doughnut-chart" height="200"></canvas> <!-- Reduced height for a smaller chart -->
                     </div>
                 </div>
 
-                <div class="col-sm-12 col-xl-6">
+                <!-- Bar Chart -->
+                <div class="col-sm-12 col-md-6 col-xl-8 mb-4">
                     <div class="bg-light rounded h-100 p-4">
-                        <h6 class="mb-4"></h6><br><br>
-                        <canvas id="bar-chart" width="1000" height="487" style="display: block; box-sizing: border-box; height: 389.6px; width: 780px;"></canvas>
+                        <h6 class="mb-4">Sold Amount and Expected Price</h6>
+                        <canvas id="bar-chart" width="1000" height="400"></canvas>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <div class="container-fluid pt-4 px-4">
-            <table class="table table-bordered dataTable no-footer" id="DataTables_Table_0" aria-describedby="DataTables_Table_0_info" style="width: 100%; background-color: #f0f0f0;">
-                <thead>
-                    <tr>
-                        <th>sl.no</th>
-                        <th>Customer</th>
-                        <th>Date</th>
-                        <th>Sold Amount</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody style="background-color: #ffffff;">
-                    @foreach($sales as $index => $sale)
-                    <tr>
-                        <td>{{ $index + 1 }}</td>
-                        <td>{{ $sale->customer_name }}</td>
-                        <td>{{ $sale->created_at->format('Y-m-d') }}</td>
-                        <td>₹ {{ number_format($sale->total_with_discount) }}</td>
-                        <td>
-                            <a href="{{ route('admin.customers.show', $sale->customer_name) }}" class="btn btn-info btn-sm">View</a>
-                        </td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
+    <!-- Include Chart.js library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-        <div class="container-fluid pt-4 px-4">
-            <div class="row g-4">
-                <div class="col-sm-6 col-xl-3">
-                    <div class="bg-light text-center rounded p-4">
-                        <i class="fa fa-users fa-3x text-primary"></i>
-                        <div class="mt-3">
-                            <h6 class="mb-0">Total Customers</h6>
-                            <h5 class="font-weight-bolder">
-                                {{ $totalCustomers }}
-                            </h5>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-sm-6 col-xl-3">
-                    <div class="bg-light text-center rounded p-4">
-                        <i class="fa fa-store fa-3x text-primary"></i>
-                        <div class="mt-3">
-                            <h6 class="mb-0">Total Shops</h6>
-                            <h5 class="font-weight-bolder">
-                                {{ $totalShops }}
-                            </h5>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-sm-6 col-xl-3">
-                    <div class="bg-light text-center rounded p-4">
-                        <i class="fa fa-building fa-3x text-primary"></i>
-                        <div class="mt-3">
-                            <h6 class="mb-0">Total Flats</h6>
-                            <h5 class="font-weight-bolder">
-                                {{ $totalFlats }}
-                            </h5>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Donut chart
+            var ctxPie = document.getElementById('doughnut-chart').getContext('2d');
+            var myPieChart = new Chart(ctxPie, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Flats', 'Shops', 'Table Spaces', 'Kiosks', 'Chair Spaces'],
+                    datasets: [{
+                        label: 'Room Types',
+                        data: [
+                            {{ $totalFlats }},
+                            {{ $totalShops }},
+                            {{ $totalTableSpaces }},
+                            {{ $totalKiosks }},
+                            {{ $totalChairSpaces }},
+                        ],
+                        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4CAF50', '#FF5733']
+                    }]
+                },
+              
+            });
 
-        <div class="container-fluid pt-4 px-4">
-            <div class="bg-light text-center rounded p-4">
-                <div id="calendar"></div>
-            </div>
-        </div>
-    </main>
-</div>
-@endsection
-
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Pie chart
-        var ctxPie = document.getElementById('doughnut-chart').getContext('2d');
-        var myPieChart = new Chart(ctxPie, {
-            type: 'pie',
-            data: {
-                labels: ['Flats', 'Shops', 'Kiosks', 'Chair Spaces', 'Table Spaces'],
-                datasets: [{
-                    label: 'Room Types',
-                    data: [
-                        {{ $totalFlats }},
-                        {{ $totalShops }},
-                        {{ $totalKiosks }},
-                        {{ $totalChairSpaces }},
-                        {{ $totalTableSpaces }},
-                    ],
-                    backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4CAF50', '#FF5733']
-                }]
-            },
-        });
-
-        // Bar chart
-        var ctxBar = document.getElementById('bar-chart').getContext('2d');
-        var myBarChart = new Chart(ctxBar, {
-            type: 'bar',
-            data: {
-                labels: [
-                    @foreach ($buildings as $building)
-                        '{{ strtoupper($building->building_name) }}',
-                    @endforeach
-                ],
-                datasets: [
-                    
-                    {
-                        label: 'Sold Amount',
-                        data: @json($soldAmountData),
-                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                        borderColor: 'rgba(255, 99, 132, 1)',
-                        borderWidth: 1
-                    },
-                    {
-                        label: 'Total Expected Price',
-                        data: Array({{ count($buildings) }}).fill({{ $ExpectedPrice }}),
-                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                        borderColor: 'rgba(54, 162, 235, 1)',
-                        borderWidth: 1
-                    }
-                ]
-            },
-                options: {
-                    scales: {
-                        y: {
-                            beginAtZero: true
+            // Bar chart
+            var ctxBar = document.getElementById('bar-chart').getContext('2d');
+            var myBarChart = new Chart(ctxBar, {
+                type: 'bar',
+                data: {
+                    labels: ['Flats', 'Shops', 'Table Spaces', 'Kiosks', 'Chair Spaces'],
+                    datasets: [
+                        {
+                            label: 'Sold Amount',
+                            data: [
+                                {{ $soldAmountData['Flat Expected Amount'] }},
+                                {{ $soldAmountData['Shops Expected Amount'] }},
+                                {{ $soldAmountData['Table space Expected Amount'] }},
+                                {{ $soldAmountData['Kiosk Expected Amount'] }},
+                                {{ $soldAmountData['Chair space Expected Amount'] }},
+                            ],
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Total Expected Price',
+                            data: [
+                                {{ $expectedPriceData['Flat Expected Amount'] }},
+                                {{ $expectedPriceData['Shops Expected Amount'] }},
+                                {{ $expectedPriceData['Table space Expected Amount'] }},
+                                {{ $expectedPriceData['Kiosk Expected Amount'] }},
+                                {{ $expectedPriceData['Chair space Expected Amount'] }},
+                            ],
+                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
                         }
-                    }
-                }
+                    ]
+                },
+               
+            });
         });
-    });
-</script>
+    </script>
+@endsection
