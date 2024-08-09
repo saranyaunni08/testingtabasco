@@ -6,10 +6,11 @@
         <h2>Sale Details</h2>
         <div class="cancelled-status">Cancelled</div>
         <div class="details">
-            <span>Sale ID: {{ $sale->id }}</span>
-            <span>Room Type: {{ $sale->room->room_type }}</span><br>
+            <span>Sale ID: {{ $sale->id }}</span><br>
+            <span>Room Number: {{ $sale->room_number }}</span><br>
+            <span>Room Type: {{ $sale->room_type }}</span><br>
             <span>Sale Amount: {{ $sale->sale_amount }}</span><br>
-            <span>EMI Start Date: {{ \Carbon\Carbon::parse($sale->emi_start_date)->format('d/m/Y') }}</span>
+            <span>EMI Start Date: {{ \Carbon\Carbon::parse($sale->emi_start_date)->format('d/m/Y') }}</span><br>
             <span>EMI End Date: {{ \Carbon\Carbon::parse($sale->emi_end_date)->format('d/m/Y') }}</span><br>
             <span>EMI Amount: {{ $sale->emi_amount }}</span><br>
             <span>Tenure (Months): {{ $sale->tenure_months }}</span><br>

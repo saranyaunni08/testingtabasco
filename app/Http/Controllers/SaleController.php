@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Sale;
 use App\Models\Room;
 use App\Models\Installment;
+use App\Models\Building;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
@@ -536,33 +537,24 @@ class SaleController extends Controller
 
     public function listCancelledSales()
     {
-        $cancelledSales = Sale::where('status', 'cancelled')->get();
+        $cancelledSales = Sale::with('room')->where('status', 'cancelled')->get();
         $page = 'cancelled-sales';
         return view('admin.sales.cancelled', compact('cancelledSales', 'page'));
     }
-    
-    // Method to view details of a cancelled sale
     public function viewCancelledSaleDetails($id)
     {
-        $sale = Sale::findOrFail($id);
-        $room = Room::findOrFail($sale->room_id);
-        $installments = Installment::where('sale_id', $sale->id)->get();
-
-        $emi_start_date = now(); // Replace with actual logic to get start date
-        $emi_end_date = now()->addMonths($sale->tenure_months); // Replace with actual logic to get end date
-        $emi_amount = $sale->emi_amount; // Replace with actual EMI amount logic
-        $tenure_months = $sale->tenure_months;
-        $remainingBalanceAfterInstallments = $sale->remaining_balance; // Replace with actual logic
-
-        return view('admin.sales.cancelled_details', compact(
-            'sale', 
-            'room', 
-            'installments', 
-            'emi_start_date', 
-            'emi_end_date', 
-            'emi_amount', 
-            'tenure_months', 
-            'remainingBalanceAfterInstallments'
-        ));
+        // Fetch the sale details by ID with the related room
+        $sale = Sale::with('room')->find($id);
+    
+        // Check if sale is found and status is 'cancelled'
+        if (!$sale || $sale->status !== 'cancelled') {
+            return redirect()->route('admin.sales.cancelled')->withErrors('Sale not found or not cancelled.');
+        }
+    
+        // Fetch the installments related to this sale
+        $installments = Installment::where('sale_id', $id)->get();
+    
+        return view('admin.sales.cancelled_details', compact('sale', 'installments'));
     }
+    
 }
