@@ -223,21 +223,7 @@ class RoomController extends Controller
         return redirect()->back()->with('success', 'Room deleted successfully');
     }
 
-    // public function edit($id)
-    // {
-    //     $room = Room::find($id);
-
-    //     if (!$room) {
-    //         // Redirect to the login page or another appropriate page
-    //         return redirect()->route('login')->withErrors(['error' => 'Room not found.']);
-    //     }
-    //     $room = Room::findOrFail($id);
-    //     $page = 'edit-room'; // Assign the appropriate value to the $page variable
-    //     return view('rooms.edit', [
-    //         'room' => $room,
-    //         'page' => $page // Pass the $page variable to the view
-    //     ]);
-    // }
+   
     
     public function update(Request $request, $id)
     {
