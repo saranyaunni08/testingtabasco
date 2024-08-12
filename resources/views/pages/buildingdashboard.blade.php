@@ -17,41 +17,34 @@
                         <div class="container-fluid mt-3">
                             <div class="row">
                                 @foreach($buildings as $building)
+                                @php
+                                $soldRoomsCount = $building->rooms()->where('status', 'sold')->count();
+                                $availableRoomsCount = $building->rooms()->where('status', 'available')->count();
+                                $totalRoomsCount = $soldRoomsCount + $availableRoomsCount;
+
+                                $soldPercentage = $totalRoomsCount == 0 ? 0 : round(($soldRoomsCount / $totalRoomsCount) * 100);
+                                $availablePercentage = $totalRoomsCount == 0 ? 0 : round(100 - $soldPercentage);
+
+                                // Get unique room types in the building
+                                $roomTypes = $building->rooms()->distinct()->pluck('room_type')->toArray();
+
+                                // Prepare data for chart
+                                $chartLabels = [];
+                                $chartData = [];
+                                foreach ($roomTypes as $roomType) {
+                                    $count = $building->rooms()->where('room_type', $roomType)->count();
+                                    $chartLabels[] = ucfirst($roomType);
+                                    $chartData[] = $count;
+                                }
+                                $chartLabels = json_encode($chartLabels);
+                                $chartData = json_encode($chartData);
+                                @endphp
+
                                 <div class="col-lg-4 col-md-6 col-sm-12 mb-4">
                                     <div class="card shadow">
                                         <a href="{{ route('admin.rooms.index', ['building_id' => $building->id]) }}">
                                             <div class="card-body">
                                                 <h4 class="card-title text-black" style="text-transform: capitalize">{{ $building->building_name }}</h4>
-
-                                                @php
-                                                $soldRoomsCount = $building->rooms()->where('status', 'sold')->count();
-                                                $availableRoomsCount = $building->rooms()->where('status', 'available')->count();
-                                                $totalRoomsCount = $soldRoomsCount + $availableRoomsCount;
-
-                                                if ($totalRoomsCount == 0) {
-                                                    $soldPercentage = 0;
-                                                    $availablePercentage = 0;
-                                                    $roomsStatus = "Empty"; 
-                                                } else {
-                                                    $soldPercentage = ($soldRoomsCount / $totalRoomsCount) * 100;
-                                                    $availablePercentage = 100 - $soldPercentage;
-                                                    $roomsStatus = "";
-                                                }
-
-                                                // Get unique room types in the building
-                                                $roomTypes = $building->rooms()->distinct()->pluck('room_type')->toArray();
-
-                                                // Prepare data for chart
-                                                $chartLabels = [];
-                                                $chartData = [];
-                                                foreach ($roomTypes as $roomType) {
-                                                    $count = $building->rooms()->where('room_type', $roomType)->count();
-                                                    $chartLabels[] = ucfirst($roomType);
-                                                    $chartData[] = $count;
-                                                }
-                                                $chartLabels = json_encode($chartLabels);
-                                                $chartData = json_encode($chartData);
-                                                @endphp
 
                                                 <canvas id="buildingChart_{{ $building->id }}" style="width: 100%; height: 200px;"></canvas>
 
@@ -71,7 +64,6 @@
                                                     <div class="progress-bar bg-success" role="progressbar" style="width: {{ $soldPercentage }}%" aria-valuenow="{{ $soldPercentage }}" aria-valuemin="0" aria-valuemax="100"></div>
                                                     <div class="progress-bar bg-warning" role="progressbar" style="width: {{ $availablePercentage }}%" aria-valuenow="{{ $availablePercentage }}" aria-valuemin="0" aria-valuemax="100"></div>
                                                 </div>
-                                                <p class="text-gray mb-0">{{ $roomsStatus }}</p>
                                             </div>
                                         </a>
                                     </div>

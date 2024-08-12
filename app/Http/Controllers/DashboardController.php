@@ -14,12 +14,26 @@ class DashboardController extends Controller
         // Get all buildings
         $buildings = Building::all();
 
-        // Calculate expected and sold amounts for each building
-        $expectedAmountData = [];
+        // Initialize arrays to hold the expected and sold amounts
+        $expectedAmountByBuilding = [];
         $soldAmountData = [];
 
         foreach ($buildings as $building) {
-            $expectedAmountData[] = $building->rooms->sum('expected_amount');
+            // Calculate the total expected amount for each building
+            $expectedAmount = Room::where('building_id', $building->id)
+                ->sum('expected_super_buildup_area_price') + 
+                Room::where('building_id', $building->id)
+                ->sum('flat_expected_super_buildup_area_price') +
+                Room::where('building_id', $building->id)
+                ->sum('space_expected_price') +
+                Room::where('building_id', $building->id)
+                ->sum('kiosk_expected_price') +
+                Room::where('building_id', $building->id)
+                ->sum('chair_space_expected_rate');
+            
+            $expectedAmountByBuilding[$building->id] = $expectedAmount;
+
+            // Calculate the sold amount for each building
             $soldAmountData[] = Sale::whereHas('room', function($query) use ($building) {
                 $query->where('building_id', $building->id);
             })->sum('total_with_discount');
@@ -50,9 +64,9 @@ class DashboardController extends Controller
             'totalTableSpaces' => Room::where('room_type', 'Table Space')->count(),
             'sales' => Sale::latest()->take(5)->get(),
             'ExpectedPrice' => $expectedPrice,
-            'expectedAmountData' => $expectedAmountData,
+            'expectedAmountByBuilding' => $expectedAmountByBuilding,
             'soldAmountData' => $soldAmountData,
-            'page' => 'dashboard' ,
+            'page' => 'dashboard',
         ]);
     }
 }

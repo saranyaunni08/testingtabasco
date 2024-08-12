@@ -131,6 +131,7 @@
                 }]
             },
         });
+
         // Bar chart
         var ctxBar = document.getElementById('bar-chart').getContext('2d');
         var myBarChart = new Chart(ctxBar, {
@@ -142,7 +143,6 @@
                     @endforeach
                 ],
                 datasets: [
-                    
                     {
                         label: 'Sold Amount',
                         data: @json($soldAmountData),
@@ -152,20 +152,20 @@
                     },
                     {
                         label: 'Total Expected Price',
-                        data: Array({{ count($buildings) }}).fill({{ $ExpectedPrice }}),
+                        data: @json(array_values($expectedAmountByBuilding)),
                         backgroundColor: 'rgba(54, 162, 235, 0.2)',
                         borderColor: 'rgba(54, 162, 235, 1)',
                         borderWidth: 1
                     }
                 ]
             },
-                options: {
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
                     }
                 }
+            }
         });
     });
 </script>
