@@ -451,16 +451,20 @@ class RoomController extends Controller
     }
     public function showChairSpaces($building_id)
     {
-        $type = 'Chair Space'; 
-    
+        $building = Building::findOrFail($building_id);
         $chairSpaces = Room::where('building_id', $building_id)
-                           ->where('room_type', 'Chair Space')
-                           ->get();
-    
-        $page = 'chair-spaces'; 
-    
-        return view('rooms.chair-space', compact('chairSpaces', 'type', 'page','building_id'));
+            ->where('room_type', 'Chair Space')
+            ->get();
+        
+        return view('rooms.chair-space', [
+            'building' => $building,
+            'chairSpaces' => $chairSpaces,
+            'type' => 'Chair Space',
+            'page' => 'chair-spaces',
+            'building_id' => $building_id,
+        ]);
     }
+    
    // In RoomController.php
    public function difference($id)
    {

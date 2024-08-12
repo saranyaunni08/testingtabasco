@@ -59,7 +59,7 @@
       </li>
      
         <li class="nav-item" id="dashboardMenu">
-          <a class="nav-link text-white" href="{{ route('admin.buildingdashboard') }}">
+          <a class="nav-link text-white"href="{{ route('admin.buildingdashboard', ['building_id' => $building->id]) }}">
             <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
               <i class="material-icons opacity-10">home</i>
             </div>
@@ -71,41 +71,42 @@
         @if(isset($buildings))
         @foreach($buildings as $b)
           @if(request()->routeIs('admin.rooms.index') || request()->routeIs('admin.flats.index') || request()->routeIs('admin.shops.index') || request()->routeIs('admin.table-spaces.index') || request()->routeIs('admin.kiosks.index') || request()->routeIs('admin.chair-spaces.index'))
-            <li class="nav-item">
-              <a class="nav-link text-white {{ $page == 'building-'.$b->id ? 'active bg-gradient-info' : '' }}"
-                 href="{{ route('admin.rooms.index', ['building_id' => $b->id]) }}">
+          <li class="nav-item">
+            <a class="nav-link text-white {{ $page == 'rooms' ? 'active bg-gradient-info' : '' }}"
+               href="{{ route('admin.rooms.index', ['building_id' => $building->id]) }}">
                 <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
-                  <i class="material-icons opacity-10">location_city</i>
+                    <i class="material-icons opacity-10">location_city</i>
                 </div>
-                <span class="nav-link-text ms-1" style="text-transform: capitalize">{{ $b->building_name }}</span>
-              </a>
-            </li>
+                <span class="nav-link-text ms-1" style="text-transform: capitalize">Rooms</span>
+            </a>
+        </li>
           @endif
         @endforeach
       @endif
           
     
         @if(isset($rooms))
-        <li class="nav-item">
-          <a class="nav-link text-white {{ $page == 'flats' ? 'active bg-gradient-info' : '' }}"
-          href="{{ route('admin.flats.index', ['building_id' => $building->id]) }}">
-           <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
-            <i class="material-icons opacity-10">apartment</i>
-          </div>
-           <span class="nav-link-text ms-1">Flats</span>
-       </a>
-       
+      
+<li class="nav-item">
+  <a class="nav-link text-white {{ $page == 'flats' ? 'active bg-gradient-info' : '' }}"
+     href="{{ route('admin.flats.index', ['building_id' => $building->id]) }}">
+      <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+          <i class="material-icons opacity-10">apartment</i>
+      </div>
+      <span class="nav-link-text ms-1">Flats</span>
+  </a>
+</li>
 
-      </li>
-      <li class="nav-item">
-          <a class="nav-link text-white {{ $page == 'Shops' ? 'active bg-gradient-info' : '' }}"
-             href="{{ route('admin.shops.index', ['building_id' => $building->id ?? 0]) }}">
-              <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
-                  <i class="material-icons opacity-10">store</i>
-              </div>
-              <span class="nav-link-text ms-1">Shops</span>
-          </a>
-      </li>
+<li class="nav-item">
+  <a class="nav-link text-white {{ $page == 'shops' ? 'active bg-gradient-info' : '' }}"
+     href="{{ route('admin.shops.index', ['building_id' => $building->id]) }}">
+      <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+          <i class="material-icons opacity-10">store</i>
+      </div>
+      <span class="nav-link-text ms-1">Shops</span>
+  </a>
+</li>
+
       <li class="nav-item">
           <a class="nav-link text-white {{ $page == 'table-spaces' ? 'active bg-gradient-info' : '' }}"
              href="{{ route('admin.table-spaces.index', ['building_id' => $building->id ?? 0]) }}">

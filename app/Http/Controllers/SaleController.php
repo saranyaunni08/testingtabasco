@@ -537,10 +537,15 @@ class SaleController extends Controller
 
     public function listCancelledSales()
     {
+        // Example logic to get the building. Adjust as needed.
+        $building = Building::first(); // or another method to get the specific building
+        
         $cancelledSales = Sale::with('room')->where('status', 'cancelled')->get();
         $page = 'cancelled-sales';
-        return view('admin.sales.cancelled', compact('cancelledSales', 'page'));
+        
+        return view('admin.sales.cancelled', compact('cancelledSales', 'page', 'building'));
     }
+    
     public function viewCancelledSaleDetails($id)
     {
         // Fetch the sale details by ID with the related room

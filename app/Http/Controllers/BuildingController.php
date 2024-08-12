@@ -12,35 +12,38 @@ use App\Models\Sale;
 class BuildingController extends Controller
 {
     public function showRooms($building_id, Request $request)
-    {
-        // Retrieve rooms belonging to the specified building
-        $rooms = Room::where('building_id', $building_id)->get();
-        
-        // Check if a customer_id is provided in the request
-        if ($request->has('customer_id')) {
-            $customer_id = $request->input('customer_id');
-            // Retrieve customer names associated with the rooms in the specified building
-            $customerNames = Sale::whereIn('room_id', $rooms->pluck('id'))
-                                ->where('customer_id', $customer_id)
-                                ->pluck('customer_name');
-        } else {
-            // If no customer_id provided, set customerNames to null
-            $customerNames = null;
-        }
+{
+    // Retrieve the specified building
+    $building = Building::findOrFail($building_id);
+    
+    // Retrieve rooms belonging to the specified building
+    $rooms = Room::where('building_id', $building_id)->get();
+    
+    // Check if a customer_id is provided in the request
+    if ($request->has('customer_id')) {
+        $customer_id = $request->input('customer_id');
+        // Retrieve customer names associated with the rooms in the specified building
+        $customerNames = Sale::whereIn('room_id', $rooms->pluck('id'))
+                            ->where('customer_id', $customer_id)
+                            ->pluck('customer_name');
+    } else {
+        // If no customer_id provided, set customerNames to null
+        $customerNames = null;
+    }
 
-        // Pass the rooms and customerNames to the view
-        return view('rooms.show', compact('rooms', 'customerNames'));
-    }
-    public function index()
-    {
-        $buildings = Building::all(); // Fetch all buildings
-        
+    // Pass the building, rooms, and customerNames to the view
+    return view('rooms.show', compact('building', 'rooms', 'customerNames'));
+}
+
+
+public function index()
+{
+    // Fetch all buildings
+    $buildings = Building::all(); // Adjust query as needed
     
-        return view('pages.buildingdashboard', [
-            'buildings' => $buildings,
-        ]);
-    }
-    
+    // Pass the buildings to the view
+    return view('pages.buildingdashboard', compact('buildings'));
+}
     public function create()
     {
         return view('pages.addbuilding');
@@ -150,28 +153,26 @@ class BuildingController extends Controller
         $rooms = Room::all(); 
         return view('pages.building', compact('buildings', 'rooms'));
     }
-    public function show($id)
-    {
-        $building = Building::findOrFail($id);
-        $rooms = $building->rooms()->get(); // Ensure rooms are retrieved
-    
-        // Define an empty array to store room types
-        $roomTypes = [
-            'Flat' => [],
-            'Shops' => [],
-            'Car parking' => [],
-            'Table space' => [],
-            'Chair space' => [],
-            'Kiosk' => []
-        ];
-    
-        // Iterate over the rooms and categorize them into different types
-        foreach ($rooms as $room) {
-            $roomTypes[$room->room_type][] = $room;
-        }
-    
-        // Pass the building and room types to the view
-        return view('rooms.show', compact('building', 'roomTypes'));
-    }
-    
+   // app/Http/Controllers/BuildingController.php
+
+public function show($id)
+{
+    // Fetch the building by ID
+    $building = Building::findOrFail($id);
+
+    // Fetch rooms related to the building
+    $rooms = $building->rooms;
+
+    // Fetch room types
+    $roomTypes = $building->rooms()->distinct()->pluck('room_type')->toArray();
+
+    // Pass data to the view
+    return view('pages.buildingdetails', [
+        'building' => $building,
+        'rooms' => $rooms,
+        'roomTypes' => $roomTypes,
+        'selectedBuildingName' => $building->name,
+    ]);
+}
+
 }

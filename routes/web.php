@@ -34,9 +34,8 @@ Route::controller(AuthController::class)->group(function () {
     Route::get('/forgot_password', 'sendResetLinkEmail')->name('forgot_password');
 });
 
-// Admin routes
-Route::middleware('auth:admin')->prefix('admin')->group(function () {
-    Route::name('admin.')->group(function () {
+        Route::middleware('auth:admin')->prefix('admin')->group(function () {
+        Route::name('admin.')->group(function () {
         Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
         Route::resource('rooms', RoomController::class);
         Route::get('/buildings', [BuildingController::class, 'index'])->name('building');
@@ -106,7 +105,9 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
         Route::get('buildings/{building_id}/kiosks', [RoomController::class, 'kiosks'])->name('kiosks.index');
         Route::get('/buildings/{building_id}/chair-spaces', [RoomController::class, 'chairSpaces'])->name('chair-spaces.index');
 
-        Route::get('/buildingdashboard', 'App\Http\Controllers\BuildingController@index')->name('buildingdashboard');
+        Route::get('/buildingdashboard/{building_id}', [BuildingController::class, 'index'])->name('buildingdashboard');
+
+
         Route::post('/installments/{sale}/mark-paid', [SaleController::class, 'markInstallmentPaid'])->name('installments.markPaid');
 
         
@@ -165,7 +166,7 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
         Route::delete('/rooms/{roomId}/{buildingId}', [EditDeleteAuthController::class, 'deleteRoom'])->name('rooms.destroy');
         Route::delete('/rooms/{roomId}/{buildingId}/deleteFlat', [EditDeleteAuthController::class, 'deleteFlat'])->name('rooms.destroy.flat');
         Route::delete('/rooms/{roomId}/{buildingId}/deleteShops', [EditDeleteAuthController::class, 'deleteShops'])->name('rooms.destroy.Shops');
-        Route::delete('/rooms/{roomId}/{buildingId}/deleteShops', [EditDeleteAuthController::class, 'deleteShops'])->name('rooms.destroy.Kiosk');
+        Route::delete('/rooms/{roomId}/{buildingId}/deleteKiosk', [EditDeleteAuthController::class, 'deleteKiosk'])->name('rooms.destroy.Kiosk');
         Route::delete('/rooms/{roomId}/{buildingId}/deleteTableSpace', [EditDeleteAuthController::class, 'deleteTableSpace'])->name('rooms.destroy.deleteTableSpace');
         Route::delete('/rooms/{roomId}/{buildingId}/deleteChairSpace', [EditDeleteAuthController::class, 'deleteChairSpace'])->name('rooms.destroy.chairspace');
        
