@@ -81,29 +81,26 @@ class EditDeleteAuthController extends Controller
     }
     
     public function deleteShops(Request $request, $roomId, $buildingId)
-    {
-        // Check if the user has the authentication session
-        if (!$request->session()->has('edit_delete_auth')) {
-            return redirect()->route('admin.edit_delete_auth.show_login');
-        }
-    
-        // Find the room with the given IDs
-        $room = Room::where('id', $roomId)
-                    ->where('building_id', $buildingId)
-                    ->first();
-    
-        // Handle the case where the room is not found
-        if (!$room) {
+{
+    // Validate credentials
+    $credentials = EditDeleteAuth::where('username', $request->username)->first();
+
+    if ($credentials && Hash::check($request->password, $credentials->password)) {
+        // Find the room and delete it
+        $room = Room::where('id', $roomId)->where('building_id', $buildingId)->first();
+
+        if ($room) {
+            $room->delete();
+            $redirectUrl = $request->input('redirect_url', route('admin.rooms.index')); // Use an existing route name
+            return redirect($redirectUrl)->with('success', 'Room deleted successfully.');
+        } else {
             return redirect()->back()->withErrors(['Room not found']);
         }
-    
-        // Soft delete the room
-        $room->delete();
-        $redirectUrl = $request->input('redirect_url', route('admin.rooms.shops.index')); // Default to a route if no redirect URL is provided
-
-        return redirect($redirectUrl)->with('success', 'Room deleted successfully.');
-
+    } else {
+        return redirect()->back()->withErrors(['Invalid credentials']);
     }
+}
+
     public function destroyFlat(Request $request, $roomId, $buildingId)
     {
         // Validate credentials
