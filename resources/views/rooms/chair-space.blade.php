@@ -626,16 +626,17 @@ modalElements.forEach((modalElement) => {
 </script>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      document.querySelectorAll('button[data-toggle="modal"]').forEach(button => {
+   document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('button[data-toggle="modal"]').forEach(button => {
         button.addEventListener('click', function() {
-          const roomId = this.getAttribute('data-room-id');
-          const buildingId = this.getAttribute('data-building-id');
-          const redirectUrl = `{{ route('admin.rooms.destroy.chairspace', ['roomId' => '__ROOM_ID__', 'buildingId' => '__BUILDING_ID__']) }}`.replace('__ROOM_ID__', roomId).replace('__BUILDING_ID__', buildingId);
-          document.getElementById('redirectUrl' + roomId).value = redirectUrl;
+            const roomId = this.getAttribute('data-room-id');
+            const buildingId = this.getAttribute('data-building-id');
+            const redirectUrl = `{{ route('admin.chair-spaces.index', ['building_id' => '__BUILDING_ID__']) }}`.replace('__BUILDING_ID__', buildingId);
+            document.getElementById('redirectUrl' + roomId).value = redirectUrl;
         });
-      });
     });
+});
+
   </script>
 
 

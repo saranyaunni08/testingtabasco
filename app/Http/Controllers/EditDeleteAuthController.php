@@ -164,7 +164,7 @@ class EditDeleteAuthController extends Controller
     
         // Soft delete the room
         $room->delete();
-        $redirectUrl = $request->input('redirect_url', route('kiosks.index')); // Default to a route if no redirect URL is provided
+        $redirectUrl = $request->input('redirect_url', route('admin.kiosks.index')); // Default to a route if no redirect URL is provided
     
         return redirect($redirectUrl)->with('success', 'Room deleted successfully.');
     }
@@ -187,12 +187,12 @@ class EditDeleteAuthController extends Controller
     
         // Soft delete the room
         $room->delete();
-        $redirectUrl = $request->input('redirect_url', route('admin.chair-spaces.index')); // Default to a route if no redirect URL is provided
+    
+        // Make sure to include building_id in the redirect URL
+        $redirectUrl = $request->input('redirect_url', route('admin.chair-spaces.index', ['building_id' => $buildingId]));
     
         return redirect($redirectUrl)->with('success', 'Room deleted successfully.');
     }
-      
-    
     
     
 }

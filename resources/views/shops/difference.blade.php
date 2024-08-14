@@ -27,7 +27,12 @@
                             <th class="text-center">Customer Name</th>
                             <th class="text-center">Sale Amount (RS)</th>
                             <th class="text-center">Total Amount</th>
-                            <th class="text-center">Difference</th> 
+                            @if($floorRooms->contains(fn($room) => !empty($room->status)))
+                                <th class="text-center">Status</th>
+                            @endif
+                            @if(!$floorRooms->contains(fn($room) => !empty($room->status)))
+                                <th class="text-center">Difference</th>
+                            @endif
                         </tr>
                     </thead>
                     <tbody>
@@ -39,6 +44,7 @@
                             $expectedAmount = $room->expected_super_buildup_area_price;
                             $difference = $totalAmount - $expectedAmount;
                             $isPositive = $difference > 0;
+                            $showDifference = empty($room->status);
                         @endphp
                         <tr>
                             <td class="text-center">{{ (int)$index + 1 }}</td>
@@ -67,13 +73,16 @@
                             </td>
                             <td class="text-right">{{ number_format($saleAmount, 2) }}</td>
                             <td class="text-right">{{ number_format($totalAmount, 2) }}</td>
-                            <td class="text-right">
-                                @if($isPositive)
-                                    <span style="color: green;">+{{ number_format($difference, 2) }}</span>
-                                @else
-                                    <span style="color: red;">-{{ number_format(abs($difference), 2) }}</span>
-                                @endif
-                            </td>
+                            @if($showDifference)
+                                <td class="text-right">
+                                    @if($isPositive)
+                                        <span style="color: green;">+{{ number_format($difference, 2) }}</span>
+                                    @else
+                                        <span style="color: red;">-{{ number_format(abs($difference), 2) }}</span>
+                                    @endif
+                                </td>
+                            @endif
+                            <td class="text-center">{{ $room->status }}</td> 
                         </tr>
                         @endforeach
                     </tbody>
