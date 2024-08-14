@@ -70,6 +70,8 @@ Route::controller(AuthController::class)->group(function () {
         Route::get('rooms', [RoomController::class, 'index'])->name('rooms.index');
       
         Route::put('rooms/{room}', [RoomController::class, 'update'])->name('rooms.update');
+
+        
         Route::get('/shops/{id}/edit', [RoomController::class, 'edit'])->name('shops.edit');
         Route::put('/shops/{id}', [RoomController::class, 'update'])->name('shops.update');
         // Route::delete('/shops/{id}', [RoomController::class, 'destroy'])->name('shops.destroy');
@@ -157,19 +159,19 @@ Route::controller(AuthController::class)->group(function () {
         Route::post('/auth', [EditDeleteAuthController::class, 'authenticate'])->name('auth');
         
         Route::get('/rooms/{roomId}/{buildingId}/edit', [EditDeleteAuthController::class, 'showEditPage'])->name('rooms.edit');
-        // Define route for handling POST requests
         Route::post('/rooms/{roomId}/{buildingId}/edit', [EditDeleteAuthController::class, 'authenticate'])->name('rooms.authenticate');
 
         Route::post('/edit-delete-logout', [EditDeleteAuthController::class, 'logout'])->name('edit_delete_auth.logout');
 
       
         Route::delete('/rooms/{roomId}/{buildingId}', [EditDeleteAuthController::class, 'deleteRoom'])->name('rooms.destroy');
-        Route::delete('/rooms/{roomId}/{buildingId}/deleteFlat', [EditDeleteAuthController::class, 'deleteFlat'])->name('rooms.destroy.flat');
+        Route::delete('/rooms/destroy/{roomId}/{buildingId}', [EditDeleteAuthController::class, 'destroyFlat'])->name('rooms.destroy.flat');
         Route::delete('/rooms/{roomId}/{buildingId}/deleteShops', [EditDeleteAuthController::class, 'deleteShops'])->name('rooms.destroy.Shops');
         Route::delete('/rooms/{roomId}/{buildingId}/deleteKiosk', [EditDeleteAuthController::class, 'deleteKiosk'])->name('rooms.destroy.Kiosk');
         Route::delete('/rooms/{roomId}/{buildingId}/deleteTableSpace', [EditDeleteAuthController::class, 'deleteTableSpace'])->name('rooms.destroy.deleteTableSpace');
         Route::delete('/rooms/{roomId}/{buildingId}/deleteChairSpace', [EditDeleteAuthController::class, 'deleteChairSpace'])->name('rooms.destroy.chairspace');
        
-       
+        Route::get('/kiosk/difference/{buildingId}', [RoomController::class, 'kioskDifference'])->name('kiosk.difference');
+
     });
 });

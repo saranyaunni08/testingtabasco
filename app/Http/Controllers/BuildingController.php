@@ -36,14 +36,12 @@ class BuildingController extends Controller
 }
 
 
-public function index()
-{
-    // Fetch all buildings
-    $buildings = Building::all(); // Adjust query as needed
-    
-    // Pass the buildings to the view
-    return view('pages.buildingdashboard', compact('buildings'));
-}
+    public function index($id)
+    {
+        $buildings = Building::all(); 
+        $building = Building::find($id);  
+        return view('pages.buildingdashboard', compact('buildings','building'));
+    }
     public function create()
     {
         return view('pages.addbuilding');

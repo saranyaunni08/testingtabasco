@@ -209,6 +209,7 @@ class SaleController extends Controller
         }
     
         $room = $sales->first()->room;
+        $building = $room ? $room->building : null; // Fetch the building if the room is not null
     
         // Fetch related installments
         $installments = Installment::whereIn('sale_id', $sales->pluck('id'))->get();
@@ -242,7 +243,8 @@ class SaleController extends Controller
             'emi_amount', 
             'tenure_months', 
             'emi_start_date', 
-            'emi_end_date'
+            'emi_end_date',
+            'building' // Pass the building variable to the view
         ));
     }
     
@@ -549,7 +551,7 @@ class SaleController extends Controller
     public function viewCancelledSaleDetails($id)
     {
         // Fetch the sale details by ID with the related room
-        $sale = Sale::with('room')->find($id);
+        $sale = Sale::with('room.building')->find($id);
     
         // Check if sale is found and status is 'cancelled'
         if (!$sale || $sale->status !== 'cancelled') {
@@ -559,7 +561,10 @@ class SaleController extends Controller
         // Fetch the installments related to this sale
         $installments = Installment::where('sale_id', $id)->get();
     
-        return view('admin.sales.cancelled_details', compact('sale', 'installments'));
+        // Get the related building
+        $building = $sale->room ? $sale->room->building : null;
+    
+        return view('admin.sales.cancelled_details', compact('sale', 'installments', 'building'));
     }
     
 }

@@ -480,27 +480,31 @@ class RoomController extends Controller
    
        return view('flats.difference', compact('building', 'floorRooms', 'title', 'page'));
    }
-   
-       public function shopsDifference($building_id)
-    {
-        // Fetch building information
-        $building = Building::findOrFail($building_id);
+   public function shopsDifference($building_id)
+{
+    // Fetch building information
+    $building = Building::findOrFail($building_id);
 
-        // Fetch rooms for the specified building and room type 'Shops'
-        $rooms = Room::where('building_id', $building_id)
-                      ->where('room_type', 'Shops')
-                      ->get()
-                      ->groupBy('room_floor');
+    // Fetch rooms for the specified building and room type 'Shops'
+    $rooms = Room::where('building_id', $building_id)
+                  ->where('room_type', 'Shops')
+                  ->get()
+                  ->groupBy('room_floor');
 
-        // Pass the data to the view
-        return view('shops.difference', [
-            'title' => 'Shops Difference',
-            'page' => 'shops_difference',
-            'building_id' => $building_id,
-            'building' => $building,
-            'rooms' => $rooms
-        ]);
-    }
+    // Fetch sales for the rooms
+    $sales = Sale::whereIn('room_id', $rooms->pluck('id'))->get()->groupBy('room_id');
+
+    // Pass the data to the view
+    return view('shops.difference', [
+        'title' => 'Shops Difference',
+        'page' => 'shops_difference',
+        'building_id' => $building_id,
+        'building' => $building,
+        'rooms' => $rooms,
+        'sales' => $sales
+    ]);
+}
+
     public function totalCustomers()
     {
         $customers = Sale::select(
@@ -528,6 +532,20 @@ class RoomController extends Controller
             ->get();
     
         return view('customers.show', compact('sales'));
+    }
+    public function kioskDifference($buildingId)
+    {
+        $building = Building::findOrFail($buildingId);
+        $kiosks = Room::where('building_id', $buildingId)
+        ->where('room_type', 'Kiosk')
+        ->get()
+        ->groupBy('room_floor');
+        
+        return view('kiosk.difference', [
+            'title' => 'Kiosk Difference',
+            'page' => 'kiosk_difference',
+            'building' => $building,
+            'kiosks' => $kiosks,        ]);
     }
     
 }    

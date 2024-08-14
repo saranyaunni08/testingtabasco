@@ -26,10 +26,17 @@
                             <th class="text-center">Customer Name</th>
                             <th class="text-center">Sale Amount (RS)</th>
                             <th class="text-center">Total Amount</th>
+                            <th class="text-center">Difference</th> <!-- New column for difference -->
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($rooms as $index => $room)
+                        @php
+                            $totalAmount = $room->sales->isNotEmpty() ? $room->sales->first()->total_amount : 0;
+                            $expectedAmount = $room->flat_expected_super_buildup_area_price;
+                            $difference = $totalAmount - $expectedAmount;
+                            $isPositive = $difference > 0;
+                        @endphp
                         <tr>
                             <td class="text-center">{{ (int)$index + 1 }}</td>
                             <td>{{ $room->room_number }}</td>
@@ -62,9 +69,16 @@
                             </td>
                             <td class="text-right">
                                 @if($room->sales->isNotEmpty())
-                                {{ $room->sales->first()->total_amount }}
+                                {{ $totalAmount }}
                                 @endif
                             </td>
+                            <td class="text-right">
+                                @if($room->sales->isNotEmpty())
+                                    <span class="{{ $isPositive ? 'text-success' : 'text-danger' }}">
+                                        {{ $isPositive ? '+' : '-' }}{{ abs($difference) }}
+                                    </span>
+                                @endif
+                            </td> <!-- Difference with color and sign -->
                         </tr>
                         @endforeach
                     </tbody>

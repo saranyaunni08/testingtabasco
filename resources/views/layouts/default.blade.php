@@ -59,7 +59,7 @@
       </li>
      
         <li class="nav-item" id="dashboardMenu">
-          <a class="nav-link text-white"href="{{ route('admin.buildingdashboard', ['building_id' => $building->id]) }}">
+          <a class="nav-link text-white" href="{{ route('admin.buildingdashboard', ['building_id' => $building->id ?? 0]) }}">
             <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
               <i class="material-icons opacity-10">home</i>
             </div>
@@ -157,8 +157,8 @@
         </a>
     </li>
     <li class="nav-item {{ $page == 'kiosks' ? 'active bg-gradient-info' : '' }}">
-      <a class="nav-link" href="{{ route('admin.kiosks.index', ['building_id' =>  $building->id ?? 0]) }}">
-        <i class="material-icons opacity-10">storefront</i> <!-- Kiosk-like icon -->
+      <a class="nav-link" href="{{ route('admin.kiosk.difference', ['buildingId' => $building->id ?? 0]) }}">
+        <i class="material-icons opacity-10">storefront</i> 
           <span class="nav-link-text">Kiosks Differences</span>
       </a>
   </li>
@@ -170,7 +170,7 @@
   </li>
   <li class="nav-item {{ $page == 'table-spaces' ? 'active bg-gradient-info' : '' }}">
       <a class="nav-link" href="{{ route('admin.table-spaces.index', ['building_id' => $building->id ?? 0]) }}">
-        <i class="material-icons opacity-10">table_chart</i> <!-- Updated icon -->
+        <i class="material-icons opacity-10">table_chart</i> 
           <span class="nav-link-text">Table Spaces Differences</span>
       </a>
   </li>

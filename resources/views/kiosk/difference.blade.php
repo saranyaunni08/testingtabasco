@@ -3,7 +3,7 @@
 @section('content')
 
 <div class="container-fluid py-4">
-    @foreach($rooms as $floor => $floorRooms)
+    @foreach($kiosks as $floor => $floorKiosks)
     <div class="card my-4">
         <div class="card-header bg-primary text-white">
             <h2 class="mb-0">Floor: {{ $floor }}</h2>
@@ -15,54 +15,51 @@
                         <tr>
                             <th class="text-center">No</th>
                             <th class="text-center">Door No</th>
-                            <th class="text-center">Shop Model</th>
-                            <th class="text-center">Super Build Up Area Sq Ft</th>
-                            <th class="text-center">Super Build Up Area Rate</th>
-                            <th class="text-center">Super Build Up Area Expected Amount</th>
-                            <th class="text-center">Carpet Area Sq Ft</th>
-                            <th class="text-center">Carpet Area Rate</th>
-                            <th class="text-center">Carpet Area Expected Amount</th>
+                            <th class="text-center">Kiosk type</th>
+                            <th class="text-center">Kiosk Name</th>
+                            <th class="text-center">Kiosk Area Sq Ft</th>
+                            <th class="text-center">Kiosk Area Rate</th>
+                            <th class="text-center">Kiosk Expected Amount</th>
                             <th class="text-center">GST Amount</th>
                             <th class="text-center">Parking Amount</th>
                             <th class="text-center">Customer Name</th>
                             <th class="text-center">Sale Amount (RS)</th>
                             <th class="text-center">Total Amount</th>
-                            <th class="text-center">Difference</th> 
+                            <th class="text-center">Difference</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($floorRooms as $index => $room)
+                        @foreach($floorKiosks as $index => $kiosk)
                         @php
                             // Calculate total amount and sale amount from the sales relationship
-                            $totalAmount = $room->sales->sum('total_amount');
-                            $saleAmount = $room->sales->sum('sale_amount');
-                            $expectedAmount = $room->expected_super_buildup_area_price;
+                            $totalAmount = $kiosk->sales->sum('total_amount');
+                            $saleAmount = $kiosk->sales->sum('sale_amount');
+                            $expectedAmount = $kiosk->expected_super_buildup_area_price;
                             $difference = $totalAmount - $expectedAmount;
                             $isPositive = $difference > 0;
                         @endphp
                         <tr>
                             <td class="text-center">{{ (int)$index + 1 }}</td>
-                            <td>{{ $room->room_number }}</td>
-                            <td>{{ $room->shop_type }}</td>
-                            <td class="text-right">{{ $room->build_up_area }}</td>
-                            <td class="text-right">{{ $room->super_build_up_price }}</td>
-                            <td class="text-right">{{ $expectedAmount }}</td>
-                            <td class="text-right">{{ $room->carpet_area }}</td>
-                            <td class="text-right">{{ $room->carpet_area_price }}</td>
-                            <td class="text-right">{{ $room->expected_carpet_area_price }}</td>
+                            <td>{{ $kiosk->room_number }}</td>
+                            <td>{{ $kiosk->kiosk_type }}</td>
+                            <td>{{ $kiosk->kiosk_name }}</td>
+                            <td class="text-right">{{ $kiosk->kiosk_area }}</td>
+                            <td class="text-right">{{ $kiosk->kiosk_rate }}</td>
+                           
+                            <td class="text-right">{{ $kiosk->kiosk_expected_price }}</td>
                             <td class="text-right">
-                                @if($room->sales->isNotEmpty())
-                                {{ $room->sales->first()->gst_amount }}
+                                @if($kiosk->sales->isNotEmpty())
+                                {{ $kiosk->sales->first()->gst_amount }}
                                 @endif
                             </td>
                             <td class="text-right">
-                                @if($room->sales->isNotEmpty())
-                                {{ $room->sales->first()->parking_amount }}
+                                @if($kiosk->sales->isNotEmpty())
+                                {{ $kiosk->sales->first()->parking_amount }}
                                 @endif
                             </td>
                             <td>
-                                @if($room->sales->isNotEmpty())
-                                {{ $room->sales->first()->customer_name }}
+                                @if($kiosk->sales->isNotEmpty())
+                                {{ $kiosk->sales->first()->customer_name }}
                                 @endif
                             </td>
                             <td class="text-right">{{ number_format($saleAmount, 2) }}</td>
