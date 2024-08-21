@@ -145,6 +145,22 @@
                                     <h4 class="card-amount total-build-up-area">
                                         {{ number_format($totalShopBuildUpArea, 2) }} sq ft
                                     </h4>
+
+                                    <h4 class="card-heading">Sold Build-Up Area</h4>
+                                    <h4 class="card-amount sold-build-up-area">
+                                        {{ number_format($stats['soldShopBuildUpArea'], 2) }} sq ft
+                                    </h4>
+                                    
+                                    <h4 class="card-heading">Balance Build-Up Area for Sell</h4>
+                                    <h4 class="card-amount balance-build-up-area">
+                                        {{ number_format($stats['totalShopBuildUpArea'] - $stats['allShopsSold'], 2) }} sq ft
+                                    </h4>
+
+                                    <h4 class="card-heading">Sold Amount</h4>
+                                    <h4 class="card-amount sold-amount">
+                                        ₹{{ number_format($roomStats['Shops Expected Amount']['soldShopAmount'], 2) }}
+                                    </h4>
+
                                 @endif
                             </div>
                         </div>

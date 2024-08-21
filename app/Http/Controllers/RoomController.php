@@ -23,6 +23,10 @@ class RoomController extends Controller
         $flatRooms = $rooms->filter(function($room) {
             return $room->room_type === 'Flat';
         });
+
+        $ShopRooms = $rooms->filter(function($room) {
+             return $room->room_type === 'Shops';
+        });
     
         // Calculate sold amount and expected amount for flats
         $soldAmount = Sale::whereIn('room_id', $flatRooms->pluck('id'))->sum('total_amount');
@@ -32,7 +36,15 @@ class RoomController extends Controller
         $totalBuildUpArea = $flatRooms->sum('flat_build_up_area');
         $soldBuildUpArea = $flatRooms->where('status', 'sold')->sum('flat_build_up_area');
 
-        $totalShopBuildUpArea = $rooms->    sum('build_up_area');
+
+        //shops
+        $soldShopAmount = Sale::whereIn('room_id', $ShopRooms->pluck('id'))->sum('total_amount');
+
+        $totalShopBuildUpArea = $rooms->sum('build_up_area');
+        $soldShopBuildUpArea = $ShopRooms->where('status', 'sold')->sum('build_up_area');
+        $allShopsSold = $ShopRooms->where('status', 'available')->isEmpty();
+
+
         
         $allFlatsSold = $flatRooms->where('status', 'available')->isEmpty();
         $profitOrLoss = $soldAmount - $expectedAmount;
@@ -55,8 +67,11 @@ class RoomController extends Controller
             'Shops Expected Amount' => [
                 'count' => $rooms->where('room_type', 'Shops')->count(),
                 'total' => $rooms->where('room_type', 'Shops')->sum('expected_carpet_area_price'),
-                'totalBuildUpArea' => $rooms->where('room_type', 'Shops')->sum('build_up_area'),
-                'soldBuildUpArea' => $rooms->where('room_type', 'Shops')->where('status', 'sold')->sum('build_up_area'),
+                'totalShopBuildUpArea' => $rooms->where('room_type', 'Shops')->sum('build_up_area'),
+                'soldShopBuildUpArea' => $rooms->where('room_type', 'Shops')->where('status', 'sold')->sum('build_up_area'),
+                'soldShopAmount' => $soldShopAmount,
+                'allShopsSold' => $allShopsSold,
+
             ],
             'Table space Expected Amount' => [
                 'count' => $rooms->where('room_type', 'Table space')->count(),
@@ -126,6 +141,7 @@ class RoomController extends Controller
             'buildings',
             'totalExpectedAmount',
             'totalShopBuildUpArea',
+            'soldShopBuildUpArea',
         ));
     }
     
