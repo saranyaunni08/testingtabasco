@@ -62,6 +62,7 @@ Route::controller(AuthController::class)->group(function () {
 
 
         Route::get('rooms/create/{building_id}', [RoomController::class, 'create'])->name('rooms.create');
+        // Route::get('/rooms/create/{building_id}', [RoomController::class, 'create'])->name('rooms.create');
 
 
 
@@ -76,7 +77,7 @@ Route::controller(AuthController::class)->group(function () {
         Route::put('/shops/{id}', [RoomController::class, 'update'])->name('shops.update');
         // Route::delete('/shops/{id}', [RoomController::class, 'destroy'])->name('shops.destroy');
         Route::post('/admin/rooms/store', [RoomController::class, 'store'])->name('admin.rooms.store');
-        Route::put('rooms/{id}/sell', [RoomController::class, 'processSell'])->name('rooms.sell');
+        // Route::put('rooms/{id}/sell', [RoomController::class, 'processSell'])->name('rooms.sell');
         Route::get('/rooms/{room}/sell', [SaleController::class, 'create'])->name('sales.create');
 
         Route::get('/sales', [SaleController::class, 'showSales'])->name('sales.index');
@@ -104,7 +105,6 @@ Route::controller(AuthController::class)->group(function () {
 
         Route::get('/flats/{building_id}', [RoomController::class, 'showFlats'])->name('flats.index');
         Route::get('/shops/{building_id}', [RoomController::class, 'showShops'])->name('shops.index');
-        Route::get('buildings/{building_id}/kiosks', [RoomController::class, 'kiosks'])->name('kiosks.index');
         Route::get('/buildings/{building_id}/chair-spaces', [RoomController::class, 'chairSpaces'])->name('chair-spaces.index');
 
         Route::get('/buildingdashboard/{building_id}', [BuildingController::class, 'index'])->name('buildingdashboard');
@@ -121,11 +121,7 @@ Route::controller(AuthController::class)->group(function () {
 
 
         Route::get('/buildings/{building_id}/kiosks', [RoomController::class, 'showKiosks'])->name('kiosks.index');
-
-
         Route::get('/buildings/{building_id}/chair-spaces', [RoomController::class, 'showChairSpaces'])->name('chair-spaces.index');
-
-
         Route::get('/buildings/{building_id}/table-spaces', [RoomController::class, 'showTableSpaces'])->name('table-spaces.index');
 
 
@@ -172,6 +168,12 @@ Route::controller(AuthController::class)->group(function () {
         Route::delete('/rooms/{roomId}/{buildingId}/deleteChairSpace', [EditDeleteAuthController::class, 'deleteChairSpace'])->name('rooms.destroy.chairspace');
        
         Route::get('/kiosk/difference/{buildingId}', [RoomController::class, 'kioskDifference'])->name('kiosk.difference');
+        Route::get('/chair-spaces/difference/{building_id}', [RoomController::class, 'showChairSpaceDifference'])->name('chair_spaces.difference');
+        Route::get('/table-space/difference/{building_id}', [RoomController::class, 'showTableSpaceDifference'])->name('table_spaces.difference');
+
+        Route::get('/rooms/sell/{room}/{buildingId}', [RoomController::class, 'showSellForm'])->name('rooms.sell');
+        // Route::get('/rooms/sell/{room}', [RoomController::class, 'sell'])->name('rooms.sell');
+
 
     });
 });

@@ -16,61 +16,88 @@ class RoomController extends Controller
 {
     public function index(Request $request)
     {
-        // Validate and get the building ID from the request
         $building_id = $request->input('building_id');
-        
-        // Find the building by ID
         $building = Building::findOrFail($building_id);
     
-        // Retrieve rooms associated with the building and paginate them
         $rooms = Room::where('building_id', $building->id)->paginate(10);
+        $flatRooms = $rooms->filter(function($room) {
+            return $room->room_type === 'Flat';
+        });
     
-        // Calculate room statistics
+        // Calculate sold amount and expected amount for flats
+        $soldAmount = Sale::whereIn('room_id', $flatRooms->pluck('id'))->sum('total_amount');
+        $expectedAmount = $flatRooms->sum('flat_expected_carpet_area_price');
+    
+        // Calculate total build-up area and sold build-up area
+        $totalBuildUpArea = $flatRooms->sum('flat_build_up_area');
+        $soldBuildUpArea = $flatRooms->where('status', 'sold')->sum('flat_build_up_area');
+        
+        $allFlatsSold = $flatRooms->where('status', 'available')->isEmpty();
+        $profitOrLoss = $soldAmount - $expectedAmount;
+        $profitOrLossText = ($profitOrLoss > 0) ? 'profit' : 'loss';
+        $profitOrLossColor = ($profitOrLoss > 0) ? 'green' : 'red';
+    
+        // Calculate room statistics for different types
         $roomStats = [
             'Flat Expected Amount' => [
-                'count' => $rooms->where('room_type', 'Flat')->count(),
-                'total' => $rooms->where('room_type', 'Flat')->sum('flat_expected_carpet_area_price'),
+                'count' => $flatRooms->count(),
+                'total' => $expectedAmount,
+                'totalBuildUpArea' => $totalBuildUpArea,
+                'soldBuildUpArea' => $soldBuildUpArea,
+                'soldAmount' => $soldAmount,
+                'allFlatsSold' => $allFlatsSold,
+                'profitOrLoss' => $profitOrLoss,
+                'profitOrLossText' => $profitOrLossText,
+                'profitOrLossColor' => $profitOrLossColor,
             ],
             'Shops Expected Amount' => [
                 'count' => $rooms->where('room_type', 'Shops')->count(),
                 'total' => $rooms->where('room_type', 'Shops')->sum('expected_carpet_area_price'),
+                'totalBuildUpArea' => $rooms->where('room_type', 'Shops')->sum('build_up_area'),
+                'soldBuildUpArea' => $rooms->where('room_type', 'Shops')->where('status', 'sold')->sum('build_up_area'),
             ],
             'Table space Expected Amount' => [
                 'count' => $rooms->where('room_type', 'Table space')->count(),
                 'total' => $rooms->where('room_type', 'Table space')->sum('space_expected_price'),
+                'totalBuildUpArea' => $rooms->where('room_type', 'Table space')->sum('build_up_area'),
+                'soldBuildUpArea' => $rooms->where('room_type', 'Table space')->where('status', 'sold')->sum('build_up_area'),
             ],
             'Kiosk Expected Amount' => [
                 'count' => $rooms->where('room_type', 'Kiosk')->count(),
                 'total' => $rooms->where('room_type', 'Kiosk')->sum('kiosk_expected_price'),
+                'totalBuildUpArea' => $rooms->where('room_type', 'Kiosk')->sum('build_up_area'),
+                'soldBuildUpArea' => $rooms->where('room_type', 'Kiosk')->where('status', 'sold')->sum('build_up_area'),
             ],
             'Chair space Expected Amount' => [
                 'count' => $rooms->where('room_type', 'Chair space')->count(),
                 'total' => $rooms->where('room_type', 'Chair space')->sum('chair_space_expected_rate'),
+                'totalBuildUpArea' => $rooms->where('room_type', 'Chair space')->sum('build_up_area'),
+                'soldBuildUpArea' => $rooms->where('room_type', 'Chair space')->where('status', 'sold')->sum('build_up_area'),
             ],
         ];
     
-        // Calculate the total expected amount
         $totalExpectedAmount = array_sum(array_column($roomStats, 'total'));
     
-        // Calculate the total expected amount for sold room types
-        $soldRooms = $rooms->where('status', 'sold');
+        // Calculate sold amounts for different room types
         $soldAmountData = [
-            'Flat Expected Amount' => $soldRooms->where('room_type', 'Flat')->sum('flat_expected_carpet_area_price'),
-            'Shops Expected Amount' => $soldRooms->where('room_type', 'Shops')->sum('expected_carpet_area_price'),
-            'Table space Expected Amount' => $soldRooms->where('room_type', 'Table space')->sum('space_expected_price'),
-            'Kiosk Expected Amount' => $soldRooms->where('room_type', 'Kiosk')->sum('kiosk_expected_price'),
-            'Chair space Expected Amount' => $soldRooms->where('room_type', 'Chair space')->sum('chair_space_expected_rate'),
+            'Flat Expected Amount' => $flatRooms->where('status', 'sold')->sum('flat_expected_carpet_area_price'),
+            'Shops Expected Amount' => $rooms->where('room_type', 'Shops')->where('status', 'sold')->sum('expected_carpet_area_price'),
+            'Table space Expected Amount' => $rooms->where('room_type', 'Table space')->where('status', 'sold')->sum('space_expected_price'),
+            'Kiosk Expected Amount' => $rooms->where('room_type', 'Kiosk')->where('status', 'sold')->sum('kiosk_expected_price'),
+            'Chair space Expected Amount' => $rooms->where('room_type', 'Chair space')->where('status', 'sold')->sum('chair_space_expected_rate'),
         ];
     
-        // Prepare data for charts
+        // Room type counts
         $totalFlats = $roomStats['Flat Expected Amount']['count'];
         $totalShops = $roomStats['Shops Expected Amount']['count'];
         $totalTableSpaces = $roomStats['Table space Expected Amount']['count'];
         $totalKiosks = $roomStats['Kiosk Expected Amount']['count'];
         $totalChairSpaces = $roomStats['Chair space Expected Amount']['count'];
     
-        // Example data for the bar chart (replace with actual data)
-        $buildings = Building::all(); // Retrieve buildings data
+        // Building data
+        $buildings = Building::all();
+    
+        // Expected price data
         $expectedPriceData = [
             'Flat Expected Amount' => $roomStats['Flat Expected Amount']['total'],
             'Shops Expected Amount' => $roomStats['Shops Expected Amount']['total'],
@@ -79,7 +106,7 @@ class RoomController extends Controller
             'Chair space Expected Amount' => $roomStats['Chair space Expected Amount']['total'],
         ];
     
-        $page = 'rooms'; // Define $page variable
+        $page = 'rooms';
     
         return view('rooms.show', compact(
             'rooms',
@@ -95,17 +122,8 @@ class RoomController extends Controller
             'soldAmountData',
             'expectedPriceData',
             'buildings',
-            'totalExpectedAmount' // Pass total expected amount to the view
+            'totalExpectedAmount'
         ));
-    }
-    
-    public function create(Request $request)
-    {
-        $building_id = $request->building_id; 
-        $room_type = $request->room_type;
-        $building = Building::findOrFail($building_id);
-    
-        return view('rooms.create', compact('building_id', 'building', 'room_type'));
     }
     
     public function store(Request $request)
@@ -337,22 +355,33 @@ class RoomController extends Controller
         return redirect()->back()->with('success', 'Room updated successfully!');
     }
     
-    public function sell($id)
-    {
-        $room = Room::findOrFail($id);
-        $room->status = 'sold';
-        $room->save();
-        return redirect()->route('admin.rooms.index')->with('success', 'Room marked as sold.');
-    }
+   public function sell($id)
+{
+    // Find the room by ID or fail with a 404 error if not found
+    $room = Room::findOrFail($id);
+    
+    // Mark the room as sold
+    $room->status = 'sold';
+    $room->save();
+    
+    // Find the building that the room belongs to
+    $buildingId = $room->building_id;
+
+    // Redirect to the flats.index route for the building where the room is located
+    return redirect()->route('flats.index', ['building_id' => $buildingId])
+                     ->with('success', 'Room marked as sold.');
+}
 
     public function showSellForm($id)
     {
         $room = Room::findOrFail($id);
         return view('rooms.sell', [
             'room' => $room,
-            'page' => 'rooms' 
+            'page' => 'rooms',
+            'title' => 'Sell Room'  // Add this line
         ]);
     }
+    
 
     public function processSell(Request $request, $id)
     {
@@ -440,6 +469,7 @@ class RoomController extends Controller
     
         return view('rooms.table-spaces', compact('rooms', 'building', 'page','building_id'));
     }
+    
     public function showKiosks($building_id)
     {
         $building = Building::find($building_id);
@@ -452,20 +482,42 @@ class RoomController extends Controller
     public function showChairSpaces($building_id)
     {
         $building = Building::findOrFail($building_id);
+    
         $chairSpaces = Room::where('building_id', $building_id)
             ->where('room_type', 'Chair Space')
             ->get();
-        
+    
+        // Prepare data for the view
+        $chairSpacesData = $chairSpaces->map(function($room) {
+            $totalAmount = $room->sales->sum('total_amount');
+            $saleAmount = $room->sales->sum('sale_amount');
+            $expectedAmount = $room->chair_space_expected_rate * $room->chair_space_area;
+            $difference = $totalAmount - $expectedAmount;
+            $isPositive = $difference > 0;
+            $showDifference = empty($room->status);
+            return [
+                'room' => $room,
+                'expected_amount' => $expectedAmount,
+                'total_amount' => $totalAmount,
+                'sale_amount' => $saleAmount,
+                'difference' => $difference,
+                'is_positive' => $isPositive,
+                'show_difference' => $showDifference,
+                'status' => $room->status
+            ];
+        });
+    
         return view('rooms.chair-space', [
             'building' => $building,
-            'chairSpaces' => $chairSpaces,
+            'chairSpacesData' => $chairSpacesData,
             'type' => 'Chair Space',
             'page' => 'chair-spaces',
             'building_id' => $building_id,
         ]);
     }
     
-   // In RoomController.php
+    
+    
    public function difference($id)
    {
        $building = Building::find($id);
@@ -547,5 +599,55 @@ class RoomController extends Controller
             'building' => $building,
             'kiosks' => $kiosks,        ]);
     }
+
+    public function showChairSpaceDifference($building_id)
+    {
+        // Fetch the building data
+        $building = Building::findOrFail($building_id);
+    
+        // Fetch chair spaces data based on building_id
+        $chairSpaces = Room::where('building_id', $building_id)
+                           ->where('room_type', 'Chair Space')
+                           ->get();
+    
+        // Pass the data to the view
+        return view('chair_spaces.difference', [
+            'building' => $building,
+            'chairSpacesData' => $chairSpaces
+        ]);
+    }
+    public function showTableSpaceDifference($building_id)
+    {
+        // Fetch the building data
+        $building = Building::findOrFail($building_id);
+    
+        // Fetch table spaces data based on building_id
+        $tableSpaces = Room::where('building_id', $building_id)
+                           ->where('room_type', 'Table Space')
+                           ->get();
+    
+        // Pass the data to the view
+        return view('table_spaces.difference', [
+            'building' => $building,
+            'tableSpacesData' => $tableSpaces
+        ]);
+    }
+    
+    // public function showSellPage($buildingId)
+    // {
+    //     Log::info('Building ID:', ['id' => $buildingId]);
+        
+    //     $building = Building::find($buildingId);
+    
+    //     if (!$building) {
+    //         abort(404, 'Building not found');
+    //     }
+    
+    //     $rooms = Room::where('building_id', $buildingId)->get();
+    //     $title = "Sell Room - " . $buildingId;
+    //     $page = "rooms";
+    
+    //     return view('rooms.sell', compact('building', 'rooms', 'title', 'page'));
+    // }
     
 }    

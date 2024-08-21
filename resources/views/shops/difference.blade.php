@@ -76,7 +76,7 @@
                             @if($showDifference)
                                 <td class="text-right">
                                     @if($isPositive)
-                                        <span style="color: green;">+{{ number_format($difference, 2) }}</span>
+                                        <span style="color: rgb(7, 152, 7);">+{{ number_format($difference, 2) }}</span>
                                     @else
                                         <span style="color: red;">-{{ number_format(abs($difference), 2) }}</span>
                                     @endif

@@ -41,7 +41,7 @@
     <div class="sidenav-header text-center">
       <i class="fas fa-times p-3 cursor-pointer text-white opacity-5 position-absolute end-0 top-0 d-none d-xl-none" aria-hidden="true" id="iconSidenav"></i>
       <a class="navbar-brand m-0" href="#" target="_blank">
-        <span class="ms-1 font-weight-bold text-white" style="text-transform:capitalize">{{ $building->building_name ?? 'Tabasco' }}</span>
+        <span class="ms-1 font-weight-bold text-white" style="text-transform:capitalize">Tabasco</span>
       </a>
     </div>
     <hr class="horizontal light mt-0 mb-2">
@@ -120,20 +120,21 @@
           <a class="nav-link text-white {{ $page == 'Kiosks' ? 'active bg-gradient-info' : '' }}"
              href="{{ route('admin.kiosks.index', ['building_id' => $building->id ?? 0]) }}">
               <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
-                <i class="material-icons opacity-10">storefront</i> <!-- Kiosk-like icon -->
+                <i class="material-icons opacity-10">storefront</i> 
               </div>
               <span class="nav-link-text ms-1">Kiosks</span>
           </a>
       </li>
       <li class="nav-item">
-          <a class="nav-link text-white {{ $page == 'chair-spaces' ? 'active bg-gradient-info' : '' }}"
-             href="{{ route('admin.chair-spaces.index', ['building_id' => $building->id ?? 0]) }}">
-              <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
-                  <i class="material-icons opacity-10">event_seat</i>
-              </div>
-              <span class="nav-link-text ms-1">Chair Spaces</span>
-          </a>
-      </li>
+        <a class="nav-link text-white {{ $page == 'chair-spaces' ? 'active bg-gradient-info' : '' }}"
+           href="{{ route('admin.chair-spaces.index', ['building_id' => $building->id ?? 0]) }}">
+            <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+                <i class="material-icons opacity-10">event_seat</i>
+            </div>
+            <span class="nav-link-text ms-1">Chair Spaces</span>
+        </a>
+    </li>
+    
     
 
       <li class="nav-item" id="flatDifferencesMenu">
@@ -163,13 +164,13 @@
       </a>
   </li>
   <li class="nav-item {{ $page == 'chair-spaces' ? 'active bg-gradient-info' : '' }}">
-      <a class="nav-link" href="{{ route('admin.chair-spaces.index', ['building_id' => $building->id ?? 0]) }}">
+      <a class="nav-link" href="{{ route('admin.chair_spaces.difference', ['building_id' => $building->id ?? 0]) }}">
         <i class="material-icons opacity-10">event_seat</i>
         <span class="nav-link-text">Chair Spaces Differences</span>
       </a>
   </li>
   <li class="nav-item {{ $page == 'table-spaces' ? 'active bg-gradient-info' : '' }}">
-      <a class="nav-link" href="{{ route('admin.table-spaces.index', ['building_id' => $building->id ?? 0]) }}">
+      <a class="nav-link" href="{{ route('admin.table_spaces.difference', ['building_id' => $building->id ?? 0]) }}">
         <i class="material-icons opacity-10">table_chart</i> 
           <span class="nav-link-text">Table Spaces Differences</span>
       </a>

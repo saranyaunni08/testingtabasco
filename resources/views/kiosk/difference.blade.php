@@ -15,7 +15,7 @@
                         <tr>
                             <th class="text-center">No</th>
                             <th class="text-center">Door No</th>
-                            <th class="text-center">Kiosk type</th>
+                            <th class="text-center">Kiosk Type</th>
                             <th class="text-center">Kiosk Name</th>
                             <th class="text-center">Kiosk Area Sq Ft</th>
                             <th class="text-center">Kiosk Area Rate</th>
@@ -25,7 +25,12 @@
                             <th class="text-center">Customer Name</th>
                             <th class="text-center">Sale Amount (RS)</th>
                             <th class="text-center">Total Amount</th>
-                            <th class="text-center">Difference</th>
+                            @if($floorKiosks->contains(fn($kiosk) => !empty($kiosk->status)))
+                                <th class="text-center">Status</th>
+                            @endif
+                            @if(!$floorKiosks->contains(fn($kiosk) => !empty($kiosk->status)))
+                                <th class="text-center">Difference</th>
+                            @endif
                         </tr>
                     </thead>
                     <tbody>
@@ -34,9 +39,10 @@
                             // Calculate total amount and sale amount from the sales relationship
                             $totalAmount = $kiosk->sales->sum('total_amount');
                             $saleAmount = $kiosk->sales->sum('sale_amount');
-                            $expectedAmount = $kiosk->expected_super_buildup_area_price;
+                            $expectedAmount = $kiosk->kiosk_expected_price;
                             $difference = $totalAmount - $expectedAmount;
                             $isPositive = $difference > 0;
+                            $showDifference = empty($kiosk->status);
                         @endphp
                         <tr>
                             <td class="text-center">{{ (int)$index + 1 }}</td>
@@ -45,7 +51,6 @@
                             <td>{{ $kiosk->kiosk_name }}</td>
                             <td class="text-right">{{ $kiosk->kiosk_area }}</td>
                             <td class="text-right">{{ $kiosk->kiosk_rate }}</td>
-                           
                             <td class="text-right">{{ $kiosk->kiosk_expected_price }}</td>
                             <td class="text-right">
                                 @if($kiosk->sales->isNotEmpty())
@@ -64,13 +69,16 @@
                             </td>
                             <td class="text-right">{{ number_format($saleAmount, 2) }}</td>
                             <td class="text-right">{{ number_format($totalAmount, 2) }}</td>
-                            <td class="text-right">
-                                @if($isPositive)
-                                    <span style="color: green;">+{{ number_format($difference, 2) }}</span>
-                                @else
-                                    <span style="color: red;">-{{ number_format(abs($difference), 2) }}</span>
-                                @endif
-                            </td>
+                            @if($showDifference)
+                                <td class="text-right">
+                                    @if($isPositive)
+                                        <span style="color: green;">+{{ number_format($difference, 2) }}</span>
+                                    @else
+                                        <span style="color: red;">-{{ number_format(abs($difference), 2) }}</span>
+                                    @endif
+                                </td>
+                            @endif
+                            <td class="text-center">{{ $kiosk->status }}</td> <!-- Status Data -->
                         </tr>
                         @endforeach
                     </tbody>

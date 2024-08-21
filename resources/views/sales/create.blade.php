@@ -9,7 +9,7 @@
                     <div class="bg-gradient-info shadow-info border-radius-lg p-3">
                         <div class="d-flex justify-content-between align-items-center">
                             <div class="pe-3">
-                                <a href="{{ route('admin.rooms.create') }}" class="btn btn-light m-0">Add Room</a>
+                                <a href="{{ route('admin.rooms.create', ['building_id' => $building_id]) }}" class="btn btn-light m-0">Add Room</a>
                             </div>
                         </div>
                     </div>

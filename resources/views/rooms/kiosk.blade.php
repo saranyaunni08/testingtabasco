@@ -76,9 +76,8 @@
                                 @endif
             
                                 @if ($room->status === 'available')
-                                    <button type="button" class="btn btn-primary btn-sm me-2" data-toggle="modal" data-target="#sellModal{{ $room->id }}">
-                                        Sell
-                                    </button>
+                                <a href="{{ route('admin.rooms.sell', ['room' => $room->id, 'buildingId' => $room->building_id]) }}" class="btn btn-primary">Sell Room</a>
+
                                 @elseif ($room->status === 'sold')
                                     @if ($room->sale && $room->sale->customer_name)
                                         <a href="{{ route('admin.customers.show', ['customerName' => $room->sale->customer_name]) }}"
