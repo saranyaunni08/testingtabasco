@@ -100,15 +100,15 @@
                         <div class="card">
                             <div class="card-body">
                                 <div class="card-title d-flex align-items-start justify-content-between">
-                                    <div class="avatar ">
+                                    <div class="avatar">
                                         <img src="{{ asset('img/wallet.png') }}" alt="Total Expected Amount" class="rounded">
                                     </div>
                                 </div>
                                 <span class="card-heading">{{ $type }}</span>
                                 <h4 class="card-amount">₹{{ number_format($stats['total'], 2) }}</h4>
-                                
+
                                 @if ($type == 'Flat Expected Amount')
-                                    <h4 class="card-heading ">Total Build-Up Area</h4>
+                                    <h4 class="card-heading">Total Build-Up Area</h4>
                                     <h4 class="card-amount total-build-up-area">
                                         {{ number_format($stats['totalBuildUpArea'], 2) }} sq ft
                                     </h4>
@@ -140,31 +140,36 @@
                                             </div>
                                         </div>
                                     @endif
+                                @elseif ($type == 'Shops Expected Amount')
+                                    <h4 class="card-heading">Total Build-Up Area</h4>
+                                    <h4 class="card-amount total-build-up-area">
+                                        {{ number_format($totalShopBuildUpArea, 2) }} sq ft
+                                    </h4>
                                 @endif
                             </div>
                         </div>
                     </a>
                 </div>
-
-                @if ($type == 'Chair space Expected Amount')
-                    <!-- Add the total expected amount card -->
-                    <div class="col-xl-3 col-lg-4 col-sm-5 col-7 mb-4">
-                        <a href="{{ route('admin.chair-spaces.index', ['building_id' => $building->id]) }}" class="link-blue">
-                            <div class="card">
-                                <div class="card-body">
-                                    <div class="card-title d-flex align-items-start justify-content-between">
-                                        <div class="avatar flex-shrink-0">
-                                            <img src="{{ asset('img/wallet.png') }}" alt="Total Expected Amount" class="rounded">
-                                        </div>
-                                    </div>
-                                    <span class="card-heading">Total Expected Amount</span>
-                                    <h4 class="card-amount">₹{{ number_format($totalExpectedAmount, 2) }}</h4>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                @endif
             @endforeach
+
+            <!-- Add the total expected amount card -->
+            @if ($roomStats['Chair space Expected Amount']['count'] > 0)
+                <div class="col-xl-3 col-lg-4 col-sm-5 col-7 mb-4">
+                    <a href="{{ route('admin.chair-spaces.index', ['building_id' => $building->id]) }}" class="link-blue">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="card-title d-flex align-items-start justify-content-between">
+                                    <div class="avatar flex-shrink-0">
+                                        <img src="{{ asset('img/wallet.png') }}" alt="Total Expected Amount" class="rounded">
+                                    </div>
+                                </div>
+                                <span class="card-heading">Total Expected Amount</span>
+                                <h4 class="card-amount">₹{{ number_format($totalExpectedAmount, 2) }}</h4>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            @endif
         </div>
 
         <!-- Charts -->

@@ -31,12 +31,14 @@ class RoomController extends Controller
         // Calculate total build-up area and sold build-up area
         $totalBuildUpArea = $flatRooms->sum('flat_build_up_area');
         $soldBuildUpArea = $flatRooms->where('status', 'sold')->sum('flat_build_up_area');
+
+        $totalShopBuildUpArea = $rooms->    sum('build_up_area');
         
         $allFlatsSold = $flatRooms->where('status', 'available')->isEmpty();
         $profitOrLoss = $soldAmount - $expectedAmount;
         $profitOrLossText = ($profitOrLoss > 0) ? 'profit' : 'loss';
         $profitOrLossColor = ($profitOrLoss > 0) ? 'green' : 'red';
-    
+
         // Calculate room statistics for different types
         $roomStats = [
             'Flat Expected Amount' => [
@@ -122,7 +124,8 @@ class RoomController extends Controller
             'soldAmountData',
             'expectedPriceData',
             'buildings',
-            'totalExpectedAmount'
+            'totalExpectedAmount',
+            'totalShopBuildUpArea',
         ));
     }
     
