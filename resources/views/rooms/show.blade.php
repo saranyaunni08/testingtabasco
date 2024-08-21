@@ -140,7 +140,8 @@
                                             </div>
                                         </div>
                                     @endif
-                                @elseif ($type == 'Shops Expected Amount')
+
+                                    @elseif ($type == 'Shops Expected Amount')
                                     <h4 class="card-heading">Total Build-Up Area</h4>
                                     <h4 class="card-amount total-build-up-area">
                                         {{ number_format($totalShopBuildUpArea, 2) }} sq ft
@@ -161,7 +162,78 @@
                                         ₹{{ number_format($roomStats['Shops Expected Amount']['soldShopAmount'], 2) }}
                                     </h4>
 
+
+                                @elseif ($type == 'Table space Expected Amount')
+
+                                    <h4 class="card-heading">Total Build-Up Area</h4>
+                                    <h4 class="card-amount total-build-up-area">
+                                        {{ number_format($totalTableBuildUpArea, 2) }} sq ft
+                                    </h4>
+
+                                    <h4 class="card-heading">Sold Build-Up Area</h4>
+                                    <h4 class="card-amount sold-build-up-area">
+                                        {{ number_format($stats['soldTableBuildUpArea'], 2) }} sq ft
+                                    </h4>
+                                    
+                                    <h4 class="card-heading">Balance Build-Up Area for Sell</h4>
+                                    <h4 class="card-amount balance-build-up-area">
+                                        {{ number_format($stats['totalTableBuildUpArea'] - $stats['allTableSold'], 2) }} sq ft
+                                    </h4>
+
+                                    <h4 class="card-heading">Sold Amount</h4>
+                                    <h4 class="card-amount sold-amount">
+                                        ₹{{ number_format($roomStats['Table space Expected Amount']['soldTableAmount'], 2) }}
+                                    </h4>
+
+
+
+                                @elseif ($type == 'Kiosk Expected Amount')
+
+                                    <h4 class="card-heading">Total Build-Up Area</h4>
+                                    <h4 class="card-amount total-build-up-area">
+                                        {{ number_format($totalKioskBuildUpArea, 2) }} sq ft
+                                    </h4>
+
+                                    <h4 class="card-heading">Sold Build-Up Area</h4>
+                                    <h4 class="card-amount sold-build-up-area">
+                                        {{ number_format($stats['soldKioskBuildUpArea'], 2) }} sq ft
+                                    </h4>
+                                    
+                                    <h4 class="card-heading">Balance Build-Up Area for Sell</h4>
+                                    <h4 class="card-amount balance-build-up-area">
+                                        {{ number_format($stats['totalKioskBuildUpArea'] - $stats['allKioskSold'], 2) }} sq ft
+                                    </h4>
+
+                                    <h4 class="card-heading">Sold Amount</h4>
+                                    <h4 class="card-amount sold-amount">
+                                        ₹{{ number_format($roomStats['Kiosk Expected Amount']['soldKioskAmount'], 2) }}
+                                    </h4>
+
+
+                                @elseif ($type == 'Chair space Expected Amount')
+
+                                    <h4 class="card-heading">Total Build-Up Area</h4>
+                                    <h4 class="card-amount total-build-up-area">
+                                        {{ number_format($totalChairBuildUpArea, 2) }} sq ft
+                                    </h4>
+
+                                    <h4 class="card-heading">Sold Build-Up Area</h4>
+                                    <h4 class="card-amount sold-build-up-area">
+                                        {{ number_format($stats['soldChairBuildUpArea'], 2) }} sq ft
+                                    </h4>
+                                    
+                                    <h4 class="card-heading">Balance Build-Up Area for Sell</h4>
+                                    <h4 class="card-amount balance-build-up-area">
+                                        {{ number_format($stats['totalChairBuildUpArea'] - $stats['allChairSold'], 2) }} sq ft
+                                    </h4>
+
+                                    <h4 class="card-heading">Sold Amount</h4>
+                                    <h4 class="card-amount sold-amount">
+                                        ₹{{ number_format($roomStats['Chair space Expected Amount']['soldChairAmount'], 2) }}
+                                    </h4>
                                 @endif
+                                
+                                    
                             </div>
                         </div>
                     </a>

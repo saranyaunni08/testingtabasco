@@ -27,6 +27,16 @@ class RoomController extends Controller
         $ShopRooms = $rooms->filter(function($room) {
              return $room->room_type === 'Shops';
         });
+        $TableRooms = $rooms->filter(function($room) {
+             return $room->room_type === 'Table space';
+        });
+    
+        $KioskRooms = $rooms->filter(function($room) {
+             return $room->room_type === 'Kiosk';
+        });
+        $ChairRooms = $rooms->filter(function($room) {
+             return $room->room_type === 'Chair space';
+        });
     
         // Calculate sold amount and expected amount for flats
         $soldAmount = Sale::whereIn('room_id', $flatRooms->pluck('id'))->sum('total_amount');
@@ -39,12 +49,27 @@ class RoomController extends Controller
 
         //shops
         $soldShopAmount = Sale::whereIn('room_id', $ShopRooms->pluck('id'))->sum('total_amount');
-
         $totalShopBuildUpArea = $rooms->sum('build_up_area');
         $soldShopBuildUpArea = $ShopRooms->where('status', 'sold')->sum('build_up_area');
         $allShopsSold = $ShopRooms->where('status', 'available')->isEmpty();
 
+       //Table space Expected Amount
+        $soldTableAmount = Sale::whereIn('room_id', $TableRooms->pluck('id'))->sum('total_amount');
+        $totalTableBuildUpArea = $rooms->sum('space_area');
+        $soldTableBuildUpArea = $TableRooms->where('status', 'sold')->sum('space_area');
+        $allTableSold = $TableRooms->where('status', 'available')->isEmpty();
 
+        //Kiosk Expected Amount
+        $soldKioskAmount = Sale::whereIn('room_id', $TableRooms->pluck('id'))->sum('total_amount');
+        $totalKioskBuildUpArea = $rooms->sum('kiosk_area');
+        $soldKioskBuildUpArea = $KioskRooms->where('status', 'sold')->sum('kiosk_area');
+        $allKioskSold = $KioskRooms->where('status', 'available')->isEmpty();
+
+        //Chair space Expected Amount
+        $soldChairAmount = Sale::whereIn('room_id', $TableRooms->pluck('id'))->sum('total_amount');
+        $totalChairBuildUpArea = $rooms->sum('chair_space_in_sq');
+        $soldChairBuildUpArea = $ChairRooms->where('status', 'sold')->sum('chair_space_in_sq');
+        $allChairSold = $ChairRooms->where('status', 'available')->isEmpty();
         
         $allFlatsSold = $flatRooms->where('status', 'available')->isEmpty();
         $profitOrLoss = $soldAmount - $expectedAmount;
@@ -76,20 +101,29 @@ class RoomController extends Controller
             'Table space Expected Amount' => [
                 'count' => $rooms->where('room_type', 'Table space')->count(),
                 'total' => $rooms->where('room_type', 'Table space')->sum('space_expected_price'),
-                'totalBuildUpArea' => $rooms->where('room_type', 'Table space')->sum('build_up_area'),
-                'soldBuildUpArea' => $rooms->where('room_type', 'Table space')->where('status', 'sold')->sum('build_up_area'),
+                'totalTableBuildUpArea' => $rooms->where('room_type', 'Table space')->sum('space_expected_price'),
+                'soldTableBuildUpArea' => $rooms->where('room_type', 'Table space')->where('status', 'sold')->sum('space_expected_price'),
+                'soldTableAmount' => $soldTableAmount,
+                'allTableSold' => $allTableSold,
             ],
             'Kiosk Expected Amount' => [
                 'count' => $rooms->where('room_type', 'Kiosk')->count(),
                 'total' => $rooms->where('room_type', 'Kiosk')->sum('kiosk_expected_price'),
-                'totalBuildUpArea' => $rooms->where('room_type', 'Kiosk')->sum('build_up_area'),
-                'soldBuildUpArea' => $rooms->where('room_type', 'Kiosk')->where('status', 'sold')->sum('build_up_area'),
+                'totalKioskBuildUpArea' => $rooms->where('room_type', 'Kiosk')->sum('kiosk_expected_price'),
+                'soldKioskBuildUpArea' => $rooms->where('room_type', 'Kiosk')->where('status', 'sold')->sum('kiosk_expected_price'),
+                'soldKioskAmount' => $soldKioskAmount,
+                'allKioskSold' => $allKioskSold,
             ],
             'Chair space Expected Amount' => [
                 'count' => $rooms->where('room_type', 'Chair space')->count(),
                 'total' => $rooms->where('room_type', 'Chair space')->sum('chair_space_expected_rate'),
-                'totalBuildUpArea' => $rooms->where('room_type', 'Chair space')->sum('build_up_area'),
-                'soldBuildUpArea' => $rooms->where('room_type', 'Chair space')->where('status', 'sold')->sum('build_up_area'),
+                'totalChairBuildUpArea' => $rooms->where('room_type', 'Chair space')->sum('chair_space_expected_rate'),
+                'soldChairBuildUpArea' => $rooms->where('room_type', 'Chair space')->where('status', 'sold')->sum('chair_space_expected_rate'),
+                'soldChairAmount' => $soldChairAmount,
+                'allChairSold' => $allChairSold,
+
+              
+
             ],
         ];
     
@@ -142,6 +176,18 @@ class RoomController extends Controller
             'totalExpectedAmount',
             'totalShopBuildUpArea',
             'soldShopBuildUpArea',
+            'totalTableBuildUpArea',
+            'soldTableBuildUpArea',
+            'soldTableAmount',
+            'allShopsSold',
+            'totalKioskBuildUpArea',
+            'soldKioskBuildUpArea',
+            'soldKioskAmount',
+            'allKioskSold',
+            'totalChairBuildUpArea',
+            'soldChairBuildUpArea',
+            'soldChairAmount',
+            'allChairSold',
         ));
     }
     
