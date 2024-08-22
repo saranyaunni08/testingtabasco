@@ -161,6 +161,18 @@
                                     <h4 class="card-amount sold-amount">
                                         ₹{{ number_format($roomStats['Shops Expected Amount']['soldShopAmount'], 2) }}
                                     </h4>
+                                @if ($roomStats['Shops Expected Amount']['allShopsSold'])
+                                    <div class="sold-expected-info">
+                                        <div class="info-header">Sold / Expected</div>
+                                        <div class="info-content">
+                                            <span class="amount-sold">₹{{ number_format($roomStats['Shops Expected Amount']['soldShopAmount'], 2) }}</span> /
+                                            <span class="amount-expected">₹{{ number_format($roomStats['Shops Expected Amount']['total'], 2) }}</span>
+                                        </div>
+                                        <div class="profit-loss" style="color: {{ $roomStats['Shops Expected Amount']['profitOrLossColorShop'] }}">
+                                            ({{ abs($roomStats['Shops Expected Amount']['profitOrLossShop']) }} {{ $roomStats['Shops Expected Amount']['profitOrLossTextShop'] }})
+                                        </div>
+                                    </div>
+                                @endif
 
 
                                 @elseif ($type == 'Table space Expected Amount')
@@ -184,6 +196,19 @@
                                     <h4 class="card-amount sold-amount">
                                         ₹{{ number_format($roomStats['Table space Expected Amount']['soldTableAmount'], 2) }}
                                     </h4>
+
+                                @if ($roomStats['Table space Expected Amount']['allTableSold'])
+                                    <div class="sold-expected-info">
+                                        <div class="info-header">Sold / Expected</div>
+                                        <div class="info-content">
+                                            <span class="amount-sold">₹{{ number_format($roomStats['Table space Expected Amount']['soldTableAmount'], 2) }}</span> /
+                                            <span class="amount-expected">₹{{ number_format($roomStats['Table space Expected Amount']['total'], 2) }}</span>
+                                        </div>
+                                        <div class="profit-loss" style="color: {{ $roomStats['Table space Expected Amount']['profitOrLossColorTable'] }}">
+                                            ({{ abs($roomStats['Table space Expected Amount']['profitOrLossTable']) }} {{ $roomStats['Table space Expected Amount']['profitOrLossTextTable'] }})
+                                        </div>
+                                    </div>
+                                @endif
 
 
 
@@ -210,6 +235,19 @@
                                     </h4>
 
 
+                                    @if ($roomStats['Kiosk Expected Amount']['allKioskSold'])
+                                    <div class="sold-expected-info">
+                                        <div class="info-header">Sold / Expected</div>
+                                        <div class="info-content">
+                                            <span class="amount-sold">₹{{ number_format($roomStats['Kiosk Expected Amount']['soldKioskAmount'], 2) }}</span> /
+                                            <span class="amount-expected">₹{{ number_format($roomStats['Kiosk Expected Amount']['total'], 2) }}</span>
+                                        </div>
+                                        <div class="profit-loss" style="color: {{ $roomStats['Kiosk Expected Amount']['profitOrLossColorKiosk'] }}">
+                                            ({{ abs($roomStats['Kiosk Expected Amount']['profitOrLossKiosk']) }} {{ $roomStats['Kiosk Expected Amount']['profitOrLossTextKiosk'] }})
+                                        </div>
+                                    </div>
+                                @endif
+
                                 @elseif ($type == 'Chair space Expected Amount')
 
                                     <h4 class="card-heading">Total Build-Up Area</h4>
@@ -231,7 +269,21 @@
                                     <h4 class="card-amount sold-amount">
                                         ₹{{ number_format($roomStats['Chair space Expected Amount']['soldChairAmount'], 2) }}
                                     </h4>
+
+                                    @if ($roomStats['Chair space Expected Amount']['allChairSold'])
+                                    <div class="sold-expected-info">
+                                        <div class="info-header">Sold / Expected</div>
+                                        <div class="info-content">
+                                            <span class="amount-sold">₹{{ number_format($roomStats['Chair space Expected Amount']['soldChairAmount'], 2) }}</span> /
+                                            <span class="amount-expected">₹{{ number_format($roomStats['Chair space Expected Amount']['total'], 2) }}</span>
+                                        </div>
+                                        <div class="profit-loss" style="color: {{ $roomStats['Chair space Expected Amount']['profitOrLossColorChair'] }}">
+                                            ({{ abs($roomStats['Chair space Expected Amount']['profitOrLossChair']) }} {{ $roomStats['Chair space Expected Amount']['profitOrLossTextChair'] }})
+                                        </div>
+                                    </div>
                                 @endif
+                                @endif
+
                                 
                                     
                             </div>
@@ -280,7 +332,19 @@
                 </div>
             </div>
         </div>
+        <div class="container-fluid pt-4 px-3">
+            <div class="row">
+                <!-- Time Series Chart -->
+                <div class="col-sm-12 col-md-12 col-xl-12 mb-4">
+                    <div class="bg-light rounded h-100 p-4">
+                        <h6 class="mb-4">Expected vs Sold Amount Over Time</h6>
+                        <canvas id="time-series-chart" width="1000" height="400"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+
 
     <!-- Include Chart.js library -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -363,5 +427,39 @@
                 }
             });
         });
+
+        var ctxTimeSeries = document.getElementById('time-series-chart').getContext('2d');
+var timeSeriesChart = new Chart(ctxTimeSeries, {
+    type: 'line',
+    data: {
+        labels: @json(array_column($flatTimeSeries, 'time')),
+        datasets: [
+            {
+                label: 'Flat Expected Amount',
+                data: @json(array_column($flatTimeSeries, 'expected')),
+                borderColor: 'rgba(75, 192, 192, 1)',
+                fill: false,
+            },
+            {
+                label: 'Flat Sold Amount',
+                data: @json(array_column($flatTimeSeries, 'sold')),
+                borderColor: 'rgba(255, 99, 132, 1)',
+                fill: false,
+            },
+        ]
+    },
+    options: {
+        scales: {
+            x: {
+                stacked: true,
+            },
+            y: {
+                stacked: true,
+                beginAtZero: true
+            }
+        }
+    }
+});
+
     </script>
 @endsection

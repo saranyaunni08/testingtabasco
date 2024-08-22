@@ -13,12 +13,27 @@ use Illuminate\Support\Facades\Log;
 
 
 class RoomController extends Controller
-{
+{ 
+    
     public function index(Request $request)
     {
         $building_id = $request->input('building_id');
         $building = Building::findOrFail($building_id);
-    
+
+        $flats = Room::where('building_id', $building_id)->where('room_type', 'flat')->get();
+        $flatTimeSeries = [];
+
+        foreach ($flats as $flat) {
+            $flatTimeSeries[] = [
+                'time' => $flat->created_at->format('Y-m-d'), // Assuming 'created_at' is the time reference
+                'expected' => $flat->expected_super_buildup_area_price, // Example field for expected amount
+                'sold' => optional($flat->sale)->total_amount, // Assuming a 'sale' relationship on the room model
+            ];
+        }
+
+
+
+
         $rooms = Room::where('building_id', $building->id)->paginate(10);
         $flatRooms = $rooms->filter(function($room) {
             return $room->room_type === 'Flat';
@@ -40,41 +55,68 @@ class RoomController extends Controller
     
         // Calculate sold amount and expected amount for flats
         $soldAmount = Sale::whereIn('room_id', $flatRooms->pluck('id'))->sum('total_amount');
-        $expectedAmount = $flatRooms->sum('flat_expected_carpet_area_price');
-    
-        // Calculate total build-up area and sold build-up area
+        $expectedAmount = $flatRooms->sum('flat_expected_super_buildup_area_price');
         $totalBuildUpArea = $flatRooms->sum('flat_build_up_area');
         $soldBuildUpArea = $flatRooms->where('status', 'sold')->sum('flat_build_up_area');
-
-
-        //shops
-        $soldShopAmount = Sale::whereIn('room_id', $ShopRooms->pluck('id'))->sum('total_amount');
-        $totalShopBuildUpArea = $rooms->sum('build_up_area');
-        $soldShopBuildUpArea = $ShopRooms->where('status', 'sold')->sum('build_up_area');
-        $allShopsSold = $ShopRooms->where('status', 'available')->isEmpty();
-
-       //Table space Expected Amount
-        $soldTableAmount = Sale::whereIn('room_id', $TableRooms->pluck('id'))->sum('total_amount');
-        $totalTableBuildUpArea = $rooms->sum('space_area');
-        $soldTableBuildUpArea = $TableRooms->where('status', 'sold')->sum('space_area');
-        $allTableSold = $TableRooms->where('status', 'available')->isEmpty();
-
-        //Kiosk Expected Amount
-        $soldKioskAmount = Sale::whereIn('room_id', $TableRooms->pluck('id'))->sum('total_amount');
-        $totalKioskBuildUpArea = $rooms->sum('kiosk_area');
-        $soldKioskBuildUpArea = $KioskRooms->where('status', 'sold')->sum('kiosk_area');
-        $allKioskSold = $KioskRooms->where('status', 'available')->isEmpty();
-
-        //Chair space Expected Amount
-        $soldChairAmount = Sale::whereIn('room_id', $TableRooms->pluck('id'))->sum('total_amount');
-        $totalChairBuildUpArea = $rooms->sum('chair_space_in_sq');
-        $soldChairBuildUpArea = $ChairRooms->where('status', 'sold')->sum('chair_space_in_sq');
-        $allChairSold = $ChairRooms->where('status', 'available')->isEmpty();
-        
         $allFlatsSold = $flatRooms->where('status', 'available')->isEmpty();
         $profitOrLoss = $soldAmount - $expectedAmount;
         $profitOrLossText = ($profitOrLoss > 0) ? 'profit' : 'loss';
         $profitOrLossColor = ($profitOrLoss > 0) ? 'green' : 'red';
+
+        //shops
+        $soldShopAmount = Sale::whereIn('room_id', $ShopRooms->pluck('id'))->sum('total_amount');
+        $expectedAmountShop = $ShopRooms->sum('expected_super_buildup_area_price');
+
+        $totalShopBuildUpArea = $rooms->sum('build_up_area');
+        $soldShopBuildUpArea = $ShopRooms->where('status', 'sold')->sum('build_up_area');
+        $allShopsSold = $ShopRooms->where('status', 'available')->isEmpty();
+
+        $profitOrLossShop = $soldShopAmount - $expectedAmountShop;
+        $profitOrLossTextShop = ($profitOrLossShop > 0) ? 'profit' : 'loss';
+        $profitOrLossColorShop = ($profitOrLossShop > 0) ? 'green' : 'red';
+
+       
+
+       //Table space Expected Amount
+       $soldTableAmount = Sale::whereIn('room_id', $TableRooms->pluck('id'))->sum('total_amount');
+       $expectedAmountTable = $TableRooms->sum('space_expected_price');
+
+        $totalTableBuildUpArea = $rooms->sum('space_area');
+        $soldTableBuildUpArea = $TableRooms->where('status', 'sold')->sum('space_area');
+        $allTableSold = $TableRooms->where('status', 'available')->isEmpty();
+
+        $profitOrLossTable = $soldTableAmount - $expectedAmountTable;
+        $profitOrLossTextTable = ($profitOrLossTable > 0) ? 'profit' : 'loss';
+        $profitOrLossColorTable = ($profitOrLossTable > 0) ? 'green' : 'red';
+
+        //Kiosk Expected Amount
+        $soldKioskAmount = Sale::whereIn('room_id', $KioskRooms->pluck('id'))->sum('total_amount');
+        $expectedAmountKiosk = $KioskRooms->sum('kiosk_expected_price');
+
+
+        $totalKioskBuildUpArea = $rooms->sum('kiosk_area');
+        $soldKioskBuildUpArea = $KioskRooms->where('status', 'sold')->sum('kiosk_area');
+        $allKioskSold = $KioskRooms->where('status', 'available')->isEmpty();
+
+        $profitOrLossKiosk = $soldKioskAmount - $expectedAmountKiosk;
+        $profitOrLossTextKiosk = ($profitOrLossKiosk > 0) ? 'profit' : 'loss';
+        $profitOrLossColorKiosk = ($profitOrLossKiosk > 0) ? 'green' : 'red';
+    
+        //Chair space Expected Amount
+        $soldChairAmount = Sale::whereIn('room_id', $ChairRooms->pluck('id'))->sum('total_amount');
+        $expectedAmountKiosk = $ChairRooms->sum('chair_space_expected_rate');
+
+
+        $totalChairBuildUpArea = $rooms->sum('chair_space_in_sq');
+        $soldChairBuildUpArea = $ChairRooms->where('status', 'sold')->sum('chair_space_in_sq');
+        $allChairSold = $ChairRooms->where('status', 'available')->isEmpty();
+        
+        $profitOrLossChair = $soldChairAmount - $expectedAmountKiosk;
+        $profitOrLossTextChair = ($profitOrLossChair > 0) ? 'profit' : 'loss';
+        $profitOrLossColorChair = ($profitOrLossChair > 0) ? 'green' : 'red';
+
+     
+       
 
         // Calculate room statistics for different types
         $roomStats = [
@@ -90,52 +132,65 @@ class RoomController extends Controller
                 'profitOrLossColor' => $profitOrLossColor,
             ],
             'Shops Expected Amount' => [
-                'count' => $rooms->where('room_type', 'Shops')->count(),
-                'total' => $rooms->where('room_type', 'Shops')->sum('expected_carpet_area_price'),
-                'totalShopBuildUpArea' => $rooms->where('room_type', 'Shops')->sum('build_up_area'),
-                'soldShopBuildUpArea' => $rooms->where('room_type', 'Shops')->where('status', 'sold')->sum('build_up_area'),
+                'count' => $ShopRooms->count(),
+                'total' => $ShopRooms->sum('expected_carpet_area_price'),
+                'totalShopBuildUpArea' => $totalShopBuildUpArea,
+                'soldShopBuildUpArea' => $soldShopBuildUpArea,
                 'soldShopAmount' => $soldShopAmount,
                 'allShopsSold' => $allShopsSold,
+                'profitOrLossShop'=> $profitOrLossShop,
+                'profitOrLossTextShop'=> $profitOrLossTextShop,
+                'profitOrLossColorShop'=> $profitOrLossColorShop,
 
             ],
             'Table space Expected Amount' => [
-                'count' => $rooms->where('room_type', 'Table space')->count(),
-                'total' => $rooms->where('room_type', 'Table space')->sum('space_expected_price'),
-                'totalTableBuildUpArea' => $rooms->where('room_type', 'Table space')->sum('space_expected_price'),
-                'soldTableBuildUpArea' => $rooms->where('room_type', 'Table space')->where('status', 'sold')->sum('space_expected_price'),
+                'count' => $TableRooms->count(),
+                'total' => $TableRooms->sum('space_expected_price'),
+                'totalTableBuildUpArea' => $totalTableBuildUpArea,
+                'soldTableBuildUpArea' => $soldTableBuildUpArea,
                 'soldTableAmount' => $soldTableAmount,
                 'allTableSold' => $allTableSold,
+                'profitOrLossTable'=> $profitOrLossTable,
+                'profitOrLossTextTable'=> $profitOrLossTextTable,
+                'profitOrLossColorTable'=> $profitOrLossColorTable,
+
+               
             ],
             'Kiosk Expected Amount' => [
-                'count' => $rooms->where('room_type', 'Kiosk')->count(),
-                'total' => $rooms->where('room_type', 'Kiosk')->sum('kiosk_expected_price'),
-                'totalKioskBuildUpArea' => $rooms->where('room_type', 'Kiosk')->sum('kiosk_expected_price'),
-                'soldKioskBuildUpArea' => $rooms->where('room_type', 'Kiosk')->where('status', 'sold')->sum('kiosk_expected_price'),
+                'count' => $KioskRooms->count(),
+                'total' => $KioskRooms->sum('kiosk_expected_price'),
+                'totalKioskBuildUpArea' => $totalKioskBuildUpArea,
+                'soldKioskBuildUpArea' => $soldKioskBuildUpArea,
                 'soldKioskAmount' => $soldKioskAmount,
                 'allKioskSold' => $allKioskSold,
+                'profitOrLossKiosk'=> $profitOrLossKiosk,
+                'profitOrLossTextKiosk'=> $profitOrLossTextKiosk,
+                'profitOrLossColorKiosk'=> $profitOrLossColorKiosk,
             ],
             'Chair space Expected Amount' => [
-                'count' => $rooms->where('room_type', 'Chair space')->count(),
-                'total' => $rooms->where('room_type', 'Chair space')->sum('chair_space_expected_rate'),
-                'totalChairBuildUpArea' => $rooms->where('room_type', 'Chair space')->sum('chair_space_expected_rate'),
-                'soldChairBuildUpArea' => $rooms->where('room_type', 'Chair space')->where('status', 'sold')->sum('chair_space_expected_rate'),
+                'count' => $ChairRooms->count(),
+                'total' => $ChairRooms->sum('chair_space_expected_rate'),
+                'totalChairBuildUpArea' => $totalChairBuildUpArea,
+                'soldChairBuildUpArea' => $soldChairBuildUpArea,
                 'soldChairAmount' => $soldChairAmount,
                 'allChairSold' => $allChairSold,
 
-              
+                'profitOrLossChair'=> $profitOrLossChair,
+                'profitOrLossTextChair'=> $profitOrLossTextChair,
+                'profitOrLossColorChair'=> $profitOrLossColorChair,
 
+              
             ],
         ];
     
-        $totalExpectedAmount = array_sum(array_column($roomStats, 'total'));
-    
+        $totalExpectedAmount = array_sum(array_column($roomStats, 'total'));    
         // Calculate sold amounts for different room types
         $soldAmountData = [
             'Flat Expected Amount' => $flatRooms->where('status', 'sold')->sum('flat_expected_carpet_area_price'),
-            'Shops Expected Amount' => $rooms->where('room_type', 'Shops')->where('status', 'sold')->sum('expected_carpet_area_price'),
-            'Table space Expected Amount' => $rooms->where('room_type', 'Table space')->where('status', 'sold')->sum('space_expected_price'),
-            'Kiosk Expected Amount' => $rooms->where('room_type', 'Kiosk')->where('status', 'sold')->sum('kiosk_expected_price'),
-            'Chair space Expected Amount' => $rooms->where('room_type', 'Chair space')->where('status', 'sold')->sum('chair_space_expected_rate'),
+            'Shops Expected Amount' => $ShopRooms->where('status', 'sold')->sum('expected_carpet_area_price'),
+            'Table space Expected Amount' => $TableRooms->where('status', 'sold')->sum('space_expected_price'),
+            'Kiosk Expected Amount' => $KioskRooms->where('status', 'sold')->sum('kiosk_expected_price'),
+            'Chair space Expected Amount' => $ChairRooms->where('status', 'sold')->sum('chair_space_expected_rate'),
         ];
     
         // Room type counts
@@ -188,6 +243,24 @@ class RoomController extends Controller
             'soldChairBuildUpArea',
             'soldChairAmount',
             'allChairSold',
+            'flatTimeSeries',
+            
+            'profitOrLossShop',
+            'profitOrLossTextShop',
+            'profitOrLossColorShop',
+
+            'profitOrLossTable',
+            'profitOrLossTextTable',
+            'profitOrLossColorTable',
+
+            'profitOrLossKiosk',
+            'profitOrLossTextKiosk',
+            'profitOrLossColorKiosk',
+
+            'profitOrLossChair',
+            'profitOrLossTextChair',
+            'profitOrLossColorChair',
+
         ));
     }
     
