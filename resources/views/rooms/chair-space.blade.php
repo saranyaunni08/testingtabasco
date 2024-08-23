@@ -34,20 +34,20 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse ($chairSpaces as $room)
+                        @forelse ($chairSpacesData as $data)
                         <tr>
-                            <td>{{ $room->chair_name }}</td>
-                            <td>{{ $room->chair_type }}</td>
-                            <td>{{ $room->chair_space_in_sq }}</td>
-                            <td>{{ $room->chair_space_rate }}</td>
-                            <td>{{ $room->chair_space_expected_rate }}</td>
+                            <td>{{ $data['room']->chair_name }}</td>
+                            <td>{{ $data['room']->chair_type }}</td>
+                            <td>{{ $data['room']->chair_space_in_sq }}</td>
+                            <td>{{ $data['room']->chair_space_rate }}</td>
+                            <td>{{ $data['expected_amount'] }}</td>
                             <td>
                                 @php
-                                    $sale = $room->sales->first();
+                                    $sale = $data['room']->sales->first();
                                     $isPaid = $sale && $installments->where('sale_id', $sale->id)->where('status', 'sold')->isNotEmpty();
                                 @endphp
-            
-                                @if($room->status == 'available')
+                    
+                                @if($data['room']->status == 'available')
                                     <span class="badge badge-info">Available</span>
                                 @elseif($isPaid)
                                     <span class="badge badge-success">Paid</span>
@@ -56,26 +56,23 @@
                                 @endif
                             </td>
                             <td class="d-flex">
-                                @if($room->status == 'available' || $room->status == 'booking')
-                                <button type="button" class="btn btn-success btn-sm me-2" data-toggle="modal" data-target="#authModal{{ $room->id }}" data-building-id="{{ $room->building_id }}" data-room-id="{{ $room->id }}" data-action="edit">
-                                    <i class="bx bx-edit bx-sm"></i>
-                                </button>
-                                
-                                
-                                <button type="button" class="btn btn-danger btn-sm me-2" data-toggle="modal" data-target="#deleteModal{{ $room->id }}" data-building-id="{{ $room->building_id }}" data-room-id="{{ $room->id }}" data-action="delete">
-                                    <i class="fas fa-trash-alt bx-sm"></i>
-                                </button>
-                                
+                                @if($data['room']->status == 'available' || $data['room']->status == 'booking')
+                                    <button type="button" class="btn btn-success btn-sm me-2" data-toggle="modal" data-target="#authModal{{ $data['room']->id }}" data-building-id="{{ $data['room']->building_id }}" data-room-id="{{ $data['room']->id }}" data-action="edit">
+                                        <i class="bx bx-edit bx-sm"></i>
+                                    </button>
+                    
+                                    <button type="button" class="btn btn-danger btn-sm me-2" data-toggle="modal" data-target="#deleteModal{{ $data['room']->id }}" data-building-id="{{ $data['room']->building_id }}" data-room-id="{{ $data['room']->id }}" data-action="delete">
+                                        <i class="fas fa-trash-alt bx-sm"></i>
+                                    </button>
                                 @endif
-            
-                                @if ($room->status === 'available')
-                                  <a href="{{ route('admin.rooms.sell', ['room' => $room->id, 'buildingId' => $room->building_id]) }}" class="btn btn-primary">Sell Room</a>
-
-                                @elseif ($room->status === 'sold')
-                                    @if ($room->sale && $room->sale->customer_name)
-                                        <a href="{{ route('admin.customers.show', ['customerName' => $room->sale->customer_name]) }}"
-                                            style="color: #28a745; font-weight: bold; font-size: 1.2em; border: 2px solid #28a745;
-                                            padding: 5px 10px; border-radius: 5px; background-color: #e9f7ef; text-decoration:none;">View
+                    
+                                @if ($data['room']->status === 'available')
+                                    <a href="{{ route('admin.rooms.sell', ['room' => $data['room']->id, 'buildingId' => $data['room']->building_id]) }}" class="btn btn-primary">Sell Room</a>
+                                @elseif ($data['room']->status === 'sold')
+                                    @if ($data['room']->sale && $data['room']->sale->customer_name)
+                                        <a href="{{ route('admin.customers.show', ['customerName' => $data['room']->sale->customer_name]) }}"
+                                           style="color: #28a745; font-weight: bold; font-size: 1.2em; border: 2px solid #28a745;
+                                           padding: 5px 10px; border-radius: 5px; background-color: #e9f7ef; text-decoration:none;">View
                                         </a>
                                     @else
                                         <button type="button" class="btn btn-secondary btn-sm me-2" disabled>
@@ -87,7 +84,10 @@
                                         Not Available
                                     </button>
                                 @endif
-
+                                @empty
+                                <tr>
+                                    <td colspan="7">No chair spaces found.</td>
+                                </tr>
     <!-- Authentication Modal for Edit -->
     <div class="modal fade" id="authModal{{ $room->id }}" tabindex="-1" aria-labelledby="authModalLabel{{ $room->id }}" aria-hidden="true">
         <div class="modal-dialog">
@@ -373,10 +373,6 @@
     </div>
     
     </td>
-    </tr>
-    @empty
-    <tr>
-    <td colspan="10" class="text-center">No records found.</td>
     </tr>
     @endforelse
     </tbody>

@@ -60,6 +60,7 @@ class BuildingController extends Controller
             'country' => 'required|string',
             'super_built_up_area' => 'required|integer',
             'carpet_area' => 'required|integer',
+            'parking_amount' => 'required|integer',
         ]);
 
         $checkboxAmenities = implode(',', $request->input('building_amenities', []));
@@ -75,6 +76,7 @@ class BuildingController extends Controller
             'country' => $validatedData['country'],
             'super_built_up_area' => $validatedData['super_built_up_area'],
             'carpet_area' => $validatedData['carpet_area'],
+            'parking_amount' => $validatedData['parking_amount'],
             'building_amenities' => $checkboxAmenities,
             'additional_amenities' => $request->input('additional_amenities'),
             'created_at' => now(),

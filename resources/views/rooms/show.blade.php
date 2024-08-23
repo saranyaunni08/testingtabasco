@@ -128,7 +128,7 @@
                                         ₹{{ number_format($roomStats['Flat Expected Amount']['soldAmount'], 2) }}
                                     </h4>
 
-                                    @if ($roomStats['Flat Expected Amount']['allFlatsSold'])
+                                    @if ($roomStats['Flat Expected Amount'])
                                         <div class="sold-expected-info">
                                             <div class="info-header">Sold / Expected</div>
                                             <div class="info-content">
@@ -161,7 +161,7 @@
                                     <h4 class="card-amount sold-amount">
                                         ₹{{ number_format($roomStats['Shops Expected Amount']['soldShopAmount'], 2) }}
                                     </h4>
-                                @if ($roomStats['Shops Expected Amount']['allShopsSold'])
+                                @if ($roomStats['Shops Expected Amount'])
                                     <div class="sold-expected-info">
                                         <div class="info-header">Sold / Expected</div>
                                         <div class="info-content">
@@ -197,7 +197,7 @@
                                         ₹{{ number_format($roomStats['Table space Expected Amount']['soldTableAmount'], 2) }}
                                     </h4>
 
-                                @if ($roomStats['Table space Expected Amount']['allTableSold'])
+                                @if ($roomStats['Table space Expected Amount'])
                                     <div class="sold-expected-info">
                                         <div class="info-header">Sold / Expected</div>
                                         <div class="info-content">
@@ -235,7 +235,7 @@
                                     </h4>
 
 
-                                    @if ($roomStats['Kiosk Expected Amount']['allKioskSold'])
+                                    @if ($roomStats['Kiosk Expected Amount'])
                                     <div class="sold-expected-info">
                                         <div class="info-header">Sold / Expected</div>
                                         <div class="info-content">
@@ -270,7 +270,7 @@
                                         ₹{{ number_format($roomStats['Chair space Expected Amount']['soldChairAmount'], 2) }}
                                     </h4>
 
-                                    @if ($roomStats['Chair space Expected Amount']['allChairSold'])
+                                    @if ($roomStats['Chair space Expected Amount'])
                                     <div class="sold-expected-info">
                                         <div class="info-header">Sold / Expected</div>
                                         <div class="info-content">
@@ -292,24 +292,45 @@
                 </div>
             @endforeach
 
-            <!-- Add the total expected amount card -->
-            @if ($roomStats['Chair space Expected Amount']['count'] > 0)
-                <div class="col-xl-3 col-lg-4 col-sm-5 col-7 mb-4">
-                    <a href="{{ route('admin.chair-spaces.index', ['building_id' => $building->id]) }}" class="link-blue">
-                        <div class="card">
-                            <div class="card-body">
-                                <div class="card-title d-flex align-items-start justify-content-between">
-                                    <div class="avatar flex-shrink-0">
-                                        <img src="{{ asset('img/wallet.png') }}" alt="Total Expected Amount" class="rounded">
-                                    </div>
-                                </div>
-                                <span class="card-heading">Total Expected Amount</span>
-                                <h4 class="card-amount">₹{{ number_format($totalExpectedAmount, 2) }}</h4>
+            
+            <div class="col-xl-3 col-lg-4 col-sm-5 col-7 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="card-title d-flex align-items-start justify-content-between">
+                            <div class="avatar flex-shrink-0">
+                                <img src="{{ asset('img/wallet.png') }}" alt="Total Overview" class="rounded">
                             </div>
                         </div>
-                    </a>
+            
+                        <h4 class="card-heading">Total Expected Amount</h4>
+                        <h4 class="card-amount total-expected-amount">
+                            ₹{{ number_format($totalExpectedAmount, 2) }}
+                        </h4>
+            
+                        <h4 class="card-heading">Total Build-Up Area</h4>
+                        <h4 class="card-amount total-build-up-area">
+                            {{ number_format($allTotalBuildUpArea, 2) }} sq ft
+                        </h4>
+            
+                        <h4 class="card-heading">Total Sold Build-Up Area</h4>
+                        <h4 class="card-amount sold-build-up-area">
+                            {{ number_format($totalSoldBuildUpArea, 2) }} sq ft
+                        </h4>
+            
+                        <h4 class="card-heading">Total Balance Build-Up Area</h4>
+                        <h4 class="card-amount balance-build-up-area">
+                            {{ number_format($totalBalanceBuildUpArea, 2) }} sq ft
+                        </h4>
+            
+                        <h4 class="card-heading">Total Sold Amount</h4>
+                        <h4 class="card-amount sold-amount">
+                            ₹{{ number_format($totalSoldAmount, 2) }}
+                        </h4>
+                    </div>
                 </div>
-            @endif
+            </div>
+            
+                  
         </div>
 
         <!-- Charts -->
@@ -337,7 +358,7 @@
                 <!-- Time Series Chart -->
                 <div class="col-sm-12 col-md-12 col-xl-12 mb-4">
                     <div class="bg-light rounded h-100 p-4">
-                        <h6 class="mb-4">Expected vs Sold Amount Over Time</h6>
+                        <h6 class="mb-4">Total Overview</h6>
                         <canvas id="time-series-chart" width="1000" height="400"></canvas>
                     </div>
                 </div>
@@ -391,11 +412,7 @@
             var myBarChart = new Chart(ctxBar, {
                 type: 'bar',
                 data: {
-                    labels: [
-                        @foreach ($buildings as $building)
-                            '{{ strtoupper($building->building_name) }}',
-                        @endforeach
-                    ],
+                 
                     datasets: [
                         {
                             label: 'Sold Amount',
@@ -427,23 +444,24 @@
                 }
             });
         });
-
         var ctxTimeSeries = document.getElementById('time-series-chart').getContext('2d');
 var timeSeriesChart = new Chart(ctxTimeSeries, {
     type: 'line',
     data: {
-        labels: @json(array_column($flatTimeSeries, 'time')),
+        labels: @json(array_column($flatTimeSeries, 'time')), // Assuming 'time' is a valid label
         datasets: [
             {
-                label: 'Flat Expected Amount',
-                data: @json(array_column($flatTimeSeries, 'expected')),
-                borderColor: 'rgba(75, 192, 192, 1)',
+                label: 'Total Expected Amount',
+                data: Array(@json(array_column($flatTimeSeries, 'time')).length).fill(@json($totalExpectedAmount)),
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderDash: [10, 5],
                 fill: false,
             },
             {
-                label: 'Flat Sold Amount',
-                data: @json(array_column($flatTimeSeries, 'sold')),
-                borderColor: 'rgba(255, 99, 132, 1)',
+                label: 'Total Sold Amount',
+                data: Array(@json(array_column($flatTimeSeries, 'time')).length).fill(@json($totalSoldAmount)),
+                borderColor: 'rgba(255, 159, 64, 1)',
+                borderDash: [10, 5],
                 fill: false,
             },
         ]
@@ -451,15 +469,14 @@ var timeSeriesChart = new Chart(ctxTimeSeries, {
     options: {
         scales: {
             x: {
-                stacked: true,
+                stacked: false, // Adjust if necessary
             },
             y: {
-                stacked: true,
+                stacked: false, // Adjust if necessary
                 beginAtZero: true
             }
         }
     }
 });
-
     </script>
 @endsection

@@ -87,6 +87,14 @@
                         <input name="carpet_area" type="text" class="form-control" required>
                       </div>
                     </div>
+
+                    <div class="col-md-6">
+                      <div class="form-group mb-4">
+                        <label class="form-label">Parking Amount</label>
+                        <input name="parking_amount" type="text" class="form-control" required>
+                      </div>
+                    </div>
+                    
                     
                     <div class="col-md-12">
                       <div class="form-group">
