@@ -206,38 +206,43 @@
         const remainingBalanceDisplay = modalElement.querySelector('#remaining_balance');
 
         function calculateTotalAmount() {
-            let saleAmount = parseFloat(saleAmountInput.value) || 0;
-            let discountPercent = parseFloat(discountPercentInput.value) || 0;
-            let gstPercent = parseFloat(gstPercentInput.value) || 0;
-            let parkingAmount = 0;
+    let saleAmount = parseFloat(saleAmountInput.value) || 0;
+    let discountPercent = parseFloat(discountPercentInput.value) || 0;
+    let gstPercent = parseFloat(gstPercentInput.value) || 0;
+    let parkingAmount = 0;
 
-            if (areaCalculationTypeSelect.value === 'built_up_area_rate') {
-                saleAmount *= parseFloat(flatBuildUpAreaInput.value) || 0;
-            } else if (areaCalculationTypeSelect.value === 'carpet_area_rate') {
-                saleAmount *= parseFloat(flatCarpetAreaInput.value) || 0;
-            }
+    if (areaCalculationTypeSelect.value === 'built_up_area_rate') {
+        saleAmount *= parseFloat(flatBuildUpAreaInput.value) || 0;
+    } else if (areaCalculationTypeSelect.value === 'carpet_area_rate') {
+        saleAmount *= parseFloat(flatCarpetAreaInput.value) || 0;
+    }
 
-            if (calculationTypeSelect.value === 'rate_per_sq_ft') {
-                parkingAmount = (parseFloat(parkingRatePerSqFtInput.value) || 0) * (parseFloat(totalSqFtForParkingInput.value) || 0);
-            }
+    if (calculationTypeSelect.value === 'rate_per_sq_ft') {
+        parkingAmount = (parseFloat(parkingRatePerSqFtInput.value) || 0) * (parseFloat(totalSqFtForParkingInput.value) || 0);
+    }
 
-            let totalAmountBeforeDiscount = saleAmount + parkingAmount;
-            let discountAmount = (totalAmountBeforeDiscount * discountPercent) / 100;
-            let totalAmountAfterDiscount = totalAmountBeforeDiscount - discountAmount;
-            let gstAmount = (totalAmountAfterDiscount * gstPercent) / 100;
-            let totalAmount = totalAmountAfterDiscount + gstAmount;
+    let totalAmountBeforeDiscount = saleAmount + parkingAmount;
+    let discountAmount = (totalAmountBeforeDiscount * discountPercent) / 100;
+    let totalAmountAfterDiscount = totalAmountBeforeDiscount - discountAmount;
 
-            gstAmountDisplay.textContent = gstAmount.toFixed(2);
-            totalAmountDisplay.textContent = totalAmount.toFixed(2);
+    // Subtract cash in hand amount
+    const inHandPercent = parseFloat(inHandPercentInput.value) || 0;
+    const cashInHandAmount = (totalAmountAfterDiscount * inHandPercent) / 100;
+    const remainingAmount = totalAmountAfterDiscount - cashInHandAmount;
 
-            const inHandPercent = parseFloat(inHandPercentInput.value) || 0;
-            const inHandAmount = (totalAmount * inHandPercent) / 100;
-            inHandAmountInput.value = inHandAmount.toFixed(2);
+    // Calculate GST
+    let gstAmount = (remainingAmount * gstPercent) / 100;
+    let totalAmount = totalAmountAfterDiscount + gstAmount;
 
-            const advanceAmount = parseFloat(modalElement.querySelector('#advance_amount').value) || 0;
-            const remainingBalance = totalAmount - advanceAmount;
-            remainingBalanceDisplay.textContent = remainingBalance.toFixed(2);
-        }
+    gstAmountDisplay.textContent = gstAmount.toFixed(2);
+    totalAmountDisplay.textContent = totalAmount.toFixed(2);
+
+    inHandAmountInput.value = cashInHandAmount.toFixed(2);
+
+    const advanceAmount = parseFloat(modalElement.querySelector('#advance_amount').value) || 0;
+    const remainingBalance = totalAmount - advanceAmount;
+    remainingBalanceDisplay.textContent = remainingBalance.toFixed(2);
+}
 
         function toggleAdvancePaymentFields() {
             const advancePaymentSelect = modalElement.querySelector('#advance_payment');
