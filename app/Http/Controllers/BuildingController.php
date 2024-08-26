@@ -36,11 +36,10 @@ class BuildingController extends Controller
 }
 
 
-    public function index($id)
+    public function index()
     {
         $buildings = Building::all(); 
-        $building = Building::find($id);  
-        return view('pages.buildingdashboard', compact('buildings','building'));
+        return view('pages.buildingdashboard', compact('buildings'));
     }
     public function create()
     {

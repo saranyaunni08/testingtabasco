@@ -107,7 +107,7 @@ Route::controller(AuthController::class)->group(function () {
         Route::get('/shops/{building_id}', [RoomController::class, 'showShops'])->name('shops.index');
         Route::get('/buildings/{building_id}/chair-spaces', [RoomController::class, 'chairSpaces'])->name('chair-spaces.index');
 
-        Route::get('/buildingdashboard/{building_id}', [BuildingController::class, 'index'])->name('buildingdashboard');
+        Route::get('/buildingdashboard', [BuildingController::class, 'index'])->name('buildingdashboard');
 
 
         Route::post('/installments/{sale}/mark-paid', [SaleController::class, 'markInstallmentPaid'])->name('installments.markPaid');

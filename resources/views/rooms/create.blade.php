@@ -60,12 +60,7 @@
                                         <!-- Shops Fields -->
                                         <div class="col-md-6 mb-4" id="shopsFields" style="display: {{ $room_type == 'Shops' ? 'block' : 'none' }};">
                                             <label for="shop_type" class="form-label">Shop Type</label>
-                                            <select name="shop_type" class="form-select" style="text-transform: uppercase;">
-                                                <option value="" disabled selected>Select Shop Type</option>
-                                                <option value="Retail">Retail Shop</option>
-                                                <option value="Restaurant">Restaurant</option>
-                                                <option value="Office">Office</option>
-                                            </select>
+                                            <input type="text" name="shop_type" class="form-control" style="text-transform: uppercase;">
                                             <label for="build_up_area" class="form-label mt-3">Super Build-up Area (sq ft)</label>
                                             <input type="text" name="build_up_area" class="form-control" style="text-transform: uppercase;">
                                             <label for="super_build_up_price" class="form-label mt-3">Super Build up Area Rate</label>
@@ -97,15 +92,10 @@
                                             <label for="kiosk_name" class="form-label">Kiosk Name</label>
                                             <input type="text" name="kiosk_name" class="form-control" style="text-transform: uppercase;">
                                             <label for="kiosk_type" class="form-label mt-3">Kiosk Type</label>
-                                            <select name="kiosk_type" class="form-select" style="text-transform: uppercase;">
-                                                <option value="" disabled selected>Select Kiosk Type</option>
-                                                <option value="Food Kiosk">Food Kiosk</option>
-                                                <option value="Retail Kiosk">Retail Kiosk</option>
-                                                <option value="Information Kiosk">Information Kiosk</option>
-                                            </select>
+                                            <input type="text" name="kiosk_type" class="form-control" style="text-transform: uppercase;">
                                             <label for="kiosk_area" class="form-label mt-3">Kiosk Area (sq ft)</label>
                                             <input type="text" name="kiosk_area" class="form-control" style="text-transform: uppercase;">
-                                            <label for="kiosk_rate" class="form-label mt-3">Kiosk Rate</label>
+                                            <label for="kiosk_rate" class="form-label mt-3">Kiosk Rate (sq ft)</label>
                                             <input type="text" name="kiosk_rate" class="form-control" style="text-transform: uppercase;">
                                         </div>
 

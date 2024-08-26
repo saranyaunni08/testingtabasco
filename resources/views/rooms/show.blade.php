@@ -81,7 +81,6 @@
 
     <div class="container-fluid py-4">
         <div class="row">
-            <!-- Room Stats Cards -->
             @foreach ($roomStats as $type => $stats)
                 <div class="col-xl-3 col-lg-4 col-sm-5 col-7 mb-4">
                     <a href="
@@ -282,10 +281,7 @@
                                         </div>
                                     </div>
                                 @endif
-                                @endif
-
-                                
-                                    
+                                @endif       
                             </div>
                         </div>
                     </a>

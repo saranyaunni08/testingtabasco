@@ -496,22 +496,22 @@ class RoomController extends Controller
         return redirect()->back()->with('success', 'Room updated successfully!');
     }
     
-   public function sell($id)
-{
-    // Find the room by ID or fail with a 404 error if not found
-    $room = Room::findOrFail($id);
-    
-    // Mark the room as sold
-    $room->status = 'sold';
-    $room->save();
-    
-    // Find the building that the room belongs to
-    $buildingId = $room->building_id;
+    public function sell($id)
+    {
+        // Find the room by ID or fail with a 404 error if not found
+        $room = Room::findOrFail($id);
+        
+        // Mark the room as sold
+        $room->status = 'sold';
+        $room->save();
+        
+        // Find the building that the room belongs to
+        $buildingId = $room->building_id;
 
-    // Redirect to the flats.index route for the building where the room is located
-    return redirect()->route('flats.index', ['building_id' => $buildingId])
-                     ->with('success', 'Room marked as sold.');
-}
+        // Redirect to the flats.index route for the building where the room is located
+        return redirect()->route('flats.index', ['building_id' => $buildingId])
+                        ->with('success', 'Room marked as sold.');
+    }
 
     public function showSellForm($id)
     {
@@ -623,11 +623,11 @@ class RoomController extends Controller
     public function showChairSpaces($building_id)
     {
         $building = Building::findOrFail($building_id);
-    
+
         $chairSpaces = Room::where('building_id', $building_id)
             ->where('room_type', 'Chair Space')
             ->get();
-    
+
         // Prepare data for the view
         $chairSpacesData = $chairSpaces->map(function($room) {
             $totalAmount = $room->sales->sum('total_amount');
@@ -636,7 +636,7 @@ class RoomController extends Controller
             $difference = $totalAmount - $expectedAmount;
             $isPositive = $difference > 0;
             $showDifference = empty($room->status);
-    
+
             return [
                 'room' => $room,
                 'expected_amount' => $expectedAmount,
@@ -648,7 +648,7 @@ class RoomController extends Controller
                 'status' => $room->status
             ];
         });
-    
+
         return view('rooms.chair-space', [
             'building' => $building,
             'chairSpacesData' => $chairSpacesData,
@@ -657,8 +657,8 @@ class RoomController extends Controller
             'building_id' => $building_id,
         ]);
     }
-    
-    
+
+        
     
    public function difference($id)
    {
