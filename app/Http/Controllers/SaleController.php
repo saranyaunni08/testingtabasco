@@ -192,63 +192,58 @@ class SaleController extends Controller
         $sales = $salesQuery->paginate(10);
         return view('customers.index', compact('customerNames', 'sales', 'search'));
     }
-    public function showCustomer($customerName)
+    public function showCustomer($saleId)
     {
-        // Fetch customer by name
-        $customer = Sale::where('customer_name', $customerName)->first();
-    
-        if (!$customer) {
+        // Fetch the sale by ID
+        $sale = Sale::find($saleId);
+        
+        if (!$sale) {
             abort(404);
         }
-    
+        
         // Fetch related sales records for the customer
-        $sales = Sale::where('customer_name', $customerName)->get();
-    
+        $sales = Sale::where('id', $sale->id)->get(); // Use customer_id instead of customer_name
+        
         if ($sales->isEmpty()) {
             abort(404);
         }
-    
-        $room = $sales->first()->room;
-        $building = $room ? $room->building : null; // Fetch the building if the room is not null
-    
+        $room = $sale->room;
         // Fetch related installments
         $installments = Installment::whereIn('sale_id', $sales->pluck('id'))->get();
-    
+        
         // Calculate total paid installments
         $totalPaidInstallments = $installments->where('status', 'paid')->sum('installment_amount');
-    
+        
         // Calculate remaining balance after installments
-        $remainingBalanceAfterInstallments = $customer->remaining_balance - $totalPaidInstallments;
-    
+        $remainingBalanceAfterInstallments = $sale->remaining_balance - $totalPaidInstallments;
+        
         // Calculate EMI Amount
         $emi_amount = $installments->sum('installment_amount');
-    
+        
         // Calculate tenure (months)
         $tenure_months = $installments->count();
-    
+        
         // Get first and last installment dates
-        $emi_start_date = $installments->first()->installment_date;
-        $emi_end_date = $installments->last()->installment_date;
-    
+        $emi_start_date = $installments->first()->installment_date ?? null;
+        $emi_end_date = $installments->last()->installment_date ?? null;
+        
         // Set page variable
         $page = 'customer';
-    
+        
         return view('customers.show', compact(
-            'customer', 
-            'sales', 
-            'installments', 
-            'page', 
-            'remainingBalanceAfterInstallments', 
-            'room', 
-            'emi_amount', 
-            'tenure_months', 
-            'emi_start_date', 
-            'emi_end_date',
-            'building' // Pass the building variable to the view
+            'sale',
+            'sales',
+            'room',
+            'installments',
+            'page',
+            'remainingBalanceAfterInstallments',
+            'emi_amount',
+            'tenure_months',
+            'emi_start_date',
+            'emi_end_date'
         ));
     }
     
-
     public function getCalculationType(Request $request) 
     {
         $roomId = $request->input('room_id');

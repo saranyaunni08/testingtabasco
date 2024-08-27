@@ -75,23 +75,24 @@
                         
                                             @if ($room->status === 'available')
                                             <a href="{{ route('admin.rooms.sell', ['room' => $room->id, 'buildingId' => $room->building_id]) }}" class="btn btn-primary">Sell Room</a>
-                                            @elseif ($room->status === 'sold')
-                                                @if ($room->sale && $room->sale->customer_name)
-                                                    <a href="{{ route('admin.customers.show', ['customerName' => $room->sale->customer_name]) }}"
-                                                        style="color: #28a745; font-weight: bold; font-size: 1.2em; border: 2px solid #28a745;
-                                                        padding: 5px 10px; border-radius: 5px; background-color: #e9f7ef; text-decoration:none;">View
-                                                    </a>
-                                                @else
-                                                    <button type="button" class="btn btn-secondary btn-sm me-2" disabled>
-                                                        No Sale Info
-                                                    </button>
-                                                @endif
+                                        
+                                        @elseif ($room->status === 'sold')
+                                            @if ($room->sale)
+                                                <a href="{{ route('admin.customers.show', ['saleId' => $room->sale->id]) }}"
+                                                   style="color: #28a745; font-weight: bold; font-size: 1.2em; border: 2px solid #28a745; padding: 5px 10px; border-radius: 5px; background-color: #e9f7ef; text-decoration:none;">
+                                                   View
+                                                </a>
                                             @else
                                                 <button type="button" class="btn btn-secondary btn-sm me-2" disabled>
-                                                    Not Available
+                                                    No Sale Info
                                                 </button>
                                             @endif
-
+                                        
+                                        @else
+                                            <button type="button" class="btn btn-secondary btn-sm me-2" disabled>
+                                                Not Available
+                                            </button>
+                                        @endif
                                             <!-- Authentication Modal for Edit -->
                                             <div class="modal fade" id="authModal{{ $room->id }}" tabindex="-1" aria-labelledby="authModalLabel{{ $room->id }}" aria-hidden="true">
                                                 <div class="modal-dialog">

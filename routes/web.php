@@ -91,7 +91,8 @@ Route::controller(AuthController::class)->group(function () {
 
 
         
-        Route::get('/customers/{customerName}', [SaleController::class, 'showCustomer'])->name('customers.show');
+        Route::get('/customers/sales/{saleId}', [SaleController::class, 'showCustomer'])->name('customers.show');
+
 
 
 

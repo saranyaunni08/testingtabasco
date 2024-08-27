@@ -42,19 +42,59 @@
                 </div>
             </div>
             @if($room->room_type == 'Flat')
-            <div class="col-6">
-                <div class="form-group">
-                    <label class="font-weight-bold" for="flat_build_up_area">Super Build-Up Area</label>
-                    <input type="text" class="form-control" id="flat_build_up_area" name="flat_build_up_area" value="{{ $room->flat_build_up_area }}" readonly>
+                <div class="col-6">
+                    <div class="form-group">
+                        <label class="font-weight-bold" for="flat_build_up_area">Super Build-Up Area</label>
+                        <input type="text" class="form-control" id="flat_build_up_area" name="flat_build_up_area" value="{{ $room->flat_build_up_area }}" readonly>
+                    </div>
                 </div>
-            </div>
-            <div class="col-6">
-                <div class="form-group">
-                    <label class="font-weight-bold" for="flat_carpet_area">Carpet Area</label>
-                    <input type="text" class="form-control" id="flat_carpet_area" name="flat_carpet_area" value="{{ $room->flat_carpet_area }}" readonly>
+                <div class="col-6">
+                    <div class="form-group">
+                        <label class="font-weight-bold" for="flat_carpet_area">Carpet Area</label>
+                        <input type="text" class="form-control" id="flat_carpet_area" name="flat_carpet_area" value="{{ $room->flat_carpet_area }}" readonly>
+                    </div>
                 </div>
-            </div>
             @endif  
+
+            @if($room->room_type == 'Shops')
+            <div class="col-6">
+                <div class="form-group">
+                    <label class="font-weight-bold" for="build_up_area">Super Build-Up Area</label>
+                    <input type="text" class="form-control" id="build_up_area" name="build_up_area" value="{{ $room->build_up_area }}" readonly>
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="form-group">
+                    <label class="font-weight-bold" for="carpet_area">Carpet Area</label>
+                    <input type="text" class="form-control" id="carpet_area" name="carpet_area" value="{{ $room->carpet_area }}" readonly>
+                </div>
+            </div>
+        @endif  
+            @if($room->room_type == 'Table space')
+            <div class="col-6">
+                <div class="form-group">
+                    <label class="font-weight-bold" for="space_area">Super Build-Up Area</label>
+                    <input type="text" class="form-control" id="space_area" name="space_area" value="{{ $room->space_area }}" readonly>
+                </div>
+            </div>
+        @endif  
+            @if($room->room_type == 'Chair space')
+            <div class="col-6">
+                <div class="form-group">
+                    <label class="font-weight-bold" for="chair_space_in_sq">Super Build-Up Area</label>
+                    <input type="text" class="form-control" id="chair_space_in_sq" name="chair_space_in_sq" value="{{ $room->chair_space_in_sq }}" readonly>
+                </div>
+            </div>
+        @endif  
+            @if($room->room_type == 'Kiosk')
+            <div class="col-6">
+                <div class="form-group">
+                    <label class="font-weight-bold" for="kiosk_area">Super Build-Up Area</label>
+                    <input type="text" class="form-control" id="kiosk_area" name="kiosk_area" value="{{ $room->kiosk_area }}" readonly>
+                </div>
+            </div>
+        @endif  
+
             <div class="col-6">
                 <div class="form-group">
                     <label class="font-weight-bold" for="calculation_type">Calculation Type for Parking</label>
@@ -172,9 +212,7 @@
             <div class="col-12">
                 <h4>Total amount: ₹<span id="total"></span></h4>
             </div>
-            <div class="col-12">
-                <h4>Remaining Balance: ₹<span id="remaining_balance"></span></h4>
-            </div>
+            
             <div class="col-12">
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-primary">Sell Room</button>
@@ -196,8 +234,24 @@
         const discountPercentInput = modalElement.querySelector('#discount_percent');
         const gstPercentInput = modalElement.querySelector('#gst_percent');
         const saleAmountInput = modalElement.querySelector('#sale_amount');
+
         const flatBuildUpAreaInput = modalElement.querySelector('#flat_build_up_area');
         const flatCarpetAreaInput = modalElement.querySelector('#flat_carpet_area');
+
+        const BuildUpAreaInput = modalElement.querySelector('#build_up_area');
+        const CarpetAreaInput = modalElement.querySelector('#carpet_area');
+
+        const TableBuildUpAreaInput = modalElement.querySelector('#space_area');
+        const TableCarpetAreaInput = modalElement.querySelector('#space_area');
+        
+        const KioskBuildUpAreaInput = modalElement.querySelector('#kiosk_area');
+        const KioskCarpetAreaInput = modalElement.querySelector('#kiosk_area');
+
+        const ChairBuildUpAreaInput = modalElement.querySelector('#chair_space_in_sq');
+        const ChairCarpetAreaInput = modalElement.querySelector('#chair_space_in_sq');
+
+        
+
         const inHandPercentInput = modalElement.querySelector(`#cash_in_hand_percent${roomId}`);
         const inHandAmountInput = modalElement.querySelector(`#in_hand_amount${roomId}`);
         const gstAmountDisplay = modalElement.querySelector('#gst_amount');
@@ -205,43 +259,57 @@
         const remainingBalanceDisplay = modalElement.querySelector('#remaining_balance');
 
         function calculateTotalAmount() {
-    let saleAmount = parseFloat(saleAmountInput.value) || 0;
-    let discountPercent = parseFloat(discountPercentInput.value) || 0;
-    let gstPercent = parseFloat(gstPercentInput.value) || 0;
-    let parkingAmount = 0;
+            let saleAmount = parseFloat(saleAmountInput.value) || 0;
+            let gstPercent = parseFloat(gstPercentInput.value) || 0;
+            let discountPercent = parseFloat(discountPercentInput.value) || 0;
+            let inHandPercent = parseFloat(inHandPercentInput.value) || 0;
 
-    if (areaCalculationTypeSelect.value === 'built_up_area_rate') {
-        saleAmount *= parseFloat(flatBuildUpAreaInput.value) || 0;
-    } else if (areaCalculationTypeSelect.value === 'carpet_area_rate') {
-        saleAmount *= parseFloat(flatCarpetAreaInput.value) || 0;
-    }
+            // Calculate area based on room type and area calculation type
+            let totalRate;
+            if (areaCalculationTypeSelect.value === 'carpet_area_rate') {
+                if ('{{ $room->room_type }}' === 'Flat') {
+                    totalRate = saleAmount * (parseFloat(flatCarpetAreaInput.value) || 0);
+                } else if ('{{ $room->room_type }}' === 'Shops') {
+                    totalRate = saleAmount * (parseFloat(CarpetAreaInput.value) || 0);
+                } else if ('{{ $room->room_type }}' === 'Table space') {
+                    totalRate = saleAmount * (parseFloat(TableCarpetAreaInput.value) || 0);
+                } else if ('{{ $room->room_type }}' === 'Kiosk') {
+                    totalRate = saleAmount * (parseFloat(KioskCarpetAreaInput.value) || 0);
+                } else if ('{{ $room->room_type }}' === 'Chair space') {
+                    totalRate = saleAmount * (parseFloat(ChairCarpetAreaInput.value) || 0);
+                }
+            } else if (areaCalculationTypeSelect.value === 'built_up_area_rate') {
+                if ('{{ $room->room_type }}' === 'Flat') {
+                    totalRate = saleAmount * (parseFloat(flatBuildUpAreaInput.value) || 0);
+                } else if ('{{ $room->room_type }}' === 'Shops') {
+                    totalRate = saleAmount * (parseFloat(BuildUpAreaInput.value) || 0);
+                } else if ('{{ $room->room_type }}' === 'Table space') {
+                    totalRate = saleAmount * (parseFloat(TableBuildUpAreaInput.value) || 0);
+                } else if ('{{ $room->room_type }}' === 'Kiosk') {
+                    totalRate = saleAmount * (parseFloat(KioskBuildUpAreaInput.value) || 0);
+                } else if ('{{ $room->room_type }}' === 'Chair space') {
+                    totalRate = saleAmount * (parseFloat(ChairBuildUpAreaInput.value) || 0);
+                }
+            }
 
-    if (calculationTypeSelect.value === 'rate_per_sq_ft') {
-        parkingAmount = (parseFloat(parkingRatePerSqFtInput.value) || 0) * (parseFloat(totalSqFtForParkingInput.value) || 0);
-    }
+            // Apply discount
+            totalRate = totalRate - (totalRate * (discountPercent / 100));
 
-    let totalAmountBeforeDiscount = saleAmount + parkingAmount;
-    let discountAmount = (totalAmountBeforeDiscount * discountPercent) / 100;
-    let totalAmountAfterDiscount = totalAmountBeforeDiscount - discountAmount;
+            // Calculate GST
+            let gstAmount = totalRate * (gstPercent / 100);
+            gstAmountDisplay.textContent = gstAmount.toFixed(2);
 
-    // Subtract cash in hand amount
-    const inHandPercent = parseFloat(inHandPercentInput.value) || 0;
-    const cashInHandAmount = (totalAmountAfterDiscount * inHandPercent) / 100;
-    const remainingAmount = totalAmountAfterDiscount - cashInHandAmount;
+            // Calculate in-hand amount
+            let inHandAmount = totalRate * (inHandPercent / 100);
+            inHandAmountInput.value = inHandAmount.toFixed(2);
 
-    // Calculate GST
-    let gstAmount = (remainingAmount * gstPercent) / 100;
-    let totalAmount = totalAmountAfterDiscount + gstAmount;
+            // Calculate total amount and remaining balance
+            let totalAmount = totalRate + gstAmount;
+            totalAmountDisplay.textContent = totalAmount.toFixed(2);
 
-    gstAmountDisplay.textContent = gstAmount.toFixed(2);
-    totalAmountDisplay.textContent = totalAmount.toFixed(2);
-
-    inHandAmountInput.value = cashInHandAmount.toFixed(2);
-
-    const advanceAmount = parseFloat(modalElement.querySelector('#advance_amount').value) || 0;
-    const remainingBalance = totalAmount - advanceAmount;
-    remainingBalanceDisplay.textContent = remainingBalance.toFixed(2);
-}
+            let remainingBalance = totalAmount - inHandAmount;
+            remainingBalanceDisplay.textContent = remainingBalance.toFixed(2);
+        }
 
         function toggleAdvancePaymentFields() {
             const advancePaymentSelect = modalElement.querySelector('#advance_payment');

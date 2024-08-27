@@ -337,15 +337,15 @@
                                                                                                     <tbody>
                                                                                                         <tr>
                                                                                                             <th>Loan No</th>
-                                                                                                            <td>{{ $customer->id }}</td>
+                                                                                                            <td>{{ $sale->id }}</td>
                                                                                                         </tr>
                                                                                                         <tr>
                                                                                                             <th>Disb Date</th>
-                                                                                                            <td>{{ $customer->created_at->format('d/m/Y') }}</td>
+                                                                                                            <td>{{ $sale->created_at->format('d/m/Y') }}</td>
                                                                                                         </tr>
                                                                                                         <tr>
                                                                                                             <th>Cost of Asset</th>
-                                                                                                            <td>{{ $customer->total_with_discount }}</td>
+                                                                                                            <td>{{ $sale->total_with_discount }}</td>
                                                                                                         </tr>
                                                                                                         <tr>
                                                                                                             <th>EMI Start Date</th>
@@ -369,7 +369,7 @@
                                                                                                         </tr>
                                                                                                         <tr>
                                                                                                             <th>Loan Amount</th>
-                                                                                                            <td>{{ $customer->remaining_balance }}</td>
+                                                                                                            <td>{{ $sale->remaining_balance }}</td>
                                                                                                         </tr>
                                                                                                         <tr>
                                                                                                             <th>Current EMI OS</th>
@@ -382,10 +382,10 @@
                                                                                         
                                                                                         <h5 class="mt-4">Installment Details</h5>
                                                                                         <div class="d-flex justify-content-end mt-3">
-                                                                                            <a href="{{ route('admin.customers.download', ['customerName' => $customer->customer_name]) }}" class="btn btn-outline-primary me-2">
+                                                                                            <a href="{{ route('admin.customers.download', ['customerName' => $sale->customer_name]) }}" class="btn btn-outline-primary me-2">
                                                                                                 <i class="fas fa-download"></i> CSV
                                                                                             </a>
-                                                                                            <a href="{{ route('admin.customers.downloadPdf', ['customerName' => $customer->customer_name]) }}" class="btn btn-outline-danger">
+                                                                                            <a href="{{ route('admin.customers.downloadPdf', ['customerName' => $sale->customer_name]) }}" class="btn btn-outline-danger">
                                                                                                 <i class="fas fa-download"></i> PDF
                                                                                             </a>
                                                                                         </div>

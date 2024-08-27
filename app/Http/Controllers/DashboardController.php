@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Building;
 use App\Models\Sale;
 use App\Models\Room;
+use App\Models\Installment;
 
 class DashboardController extends Controller
 {
@@ -52,6 +53,12 @@ class DashboardController extends Controller
                         + $kiosk_expected_price 
                         + $chair_space_expected_rate;
 
+        // Calculate the total EMI payments received
+        $totalEmiReceived = Installment::where('status', 'paid')->sum('installment_amount');
+
+        $totalAdvanceAmount = Sale::sum('advance_amount');
+
+
         return view('pages.dashboard', [
             'buildings' => $buildings,
             'totalCustomers' => Sale::distinct('customer_name')->count(),
@@ -66,6 +73,8 @@ class DashboardController extends Controller
             'ExpectedPrice' => $expectedPrice,
             'expectedAmountByBuilding' => $expectedAmountByBuilding,
             'soldAmountData' => $soldAmountData,
+            'totalEmiReceived' => $totalEmiReceived, // Pass the EMI total to the view
+            'totalAdvanceAmount' => $totalAdvanceAmount, 
             'page' => 'dashboard',
         ]);
     }
