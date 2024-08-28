@@ -50,15 +50,15 @@
                                         <td>
                                             @php
                                                 $sale = $room->sales->first();
-                                                $isPaid = $sale && $installments->where('sale_id', $sale->id)->where('status', 'sold')->isNotEmpty();
+                                                $isPaid = $sale && $installments->where('sale_id', $sale->id)->where('status', 'paid')->isNotEmpty();
                                             @endphp
                         
                                             @if($room->status == 'available')
                                                 <span class="badge badge-info">Available</span>
                                             @elseif($isPaid)
-                                                <span class="badge badge-success">Paid</span>
+                                                <span class="badge badge-success">Sold</span>
                                             @else
-                                                <span class="badge badge-danger">Booking</span>
+                                                <span class="badge badge-warning">Booking</span>
                                             @endif
                                         </td>
                                         <td class="d-flex">
@@ -178,200 +178,7 @@
                                                 </div>
                                             </div>
 
-                                            <div class="modal fade" id="sellModal{{ $room->id }}" tabindex="-1" aria-labelledby="sellModalLabel{{ $room->id }}" aria-hidden="true">
-                                                <div class="modal-dialog modal-lg"> 
-                                                    <div class="modal-content">
-                                                        <div class="modal-header">
-                                                            <h5 class="modal-title" id="sellModalLabel{{ $room->id }}">Sell Room {{ $room->name }}</h5>
-                                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                                <span aria-hidden="true">&times;</span>
-                                                            </button>
-                                                        </div>
-                                                        <div class="modal-body">
-                                                            <form action="{{ route('admin.sales.store') }}" method="POST">
-                                                                @csrf
-                                                                <input type="hidden" name="room_id" value="{{ $room->id }}">
-                                                                <div class="row">
-                                                                    <div class="col-6">
-                                                                        <div class="form-group">
-                                                                            <label class="font-weight-bold" for="customer_name">Customer Name</label>
-                                                                            <input type="text" class="form-control" id="customer_name" name="customer_name" required>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="col-6">
-                                                                        <div class="form-group">
-                                                                            <label class="font-weight-bold" for="customer_email">Customer Email</label>
-                                                                            <input type="email" class="form-control" id="customer_email" name="customer_email" required>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="col-6">
-                                                                        <div class="form-group">
-                                                                            <label class="font-weight-bold" for="customer_contact">Customer Contact</label>
-                                                                            <input type="text" class="form-control" id="customer_contact" name="customer_contact" required>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="col-6">
-                                                                        <div class="form-group">
-                                                                            <label class="font-weight-bold" for="sale_amount">Sale Amount in sq</label>
-                                                                            <input type="number" class="form-control" id="sale_amount" name="sale_amount" required>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="col-6">
-                                                                        <div class="form-group">
-                                                                            <label class="font-weight-bold" for="area_calculation_type">Area Calculation Type</label>
-                                                                            <select class="form-control" id="area_calculation_type" name="area_calculation_type" required>
-                                                                                <option value="" selected disabled>Select</option>
-                                                                                <option value="carpet_area_rate">Carpet Area Rate</option>
-                                                                                <option value="built_up_area_rate">Super Built-up Area Rate</option>
-                                                                            </select>
-                                                                        </div>
-                                                                    </div>
-                                                                    @if($room->room_type == 'Flat')
-                                                                    <div class="col-6">
-                                                                        <div class="form-group">
-                                                                            <label class="font-weight-bold" for="flat_build_up_area">Super Build-Up Area</label>
-                                                                            <input type="text" class="form-control" id="flat_build_up_area" name="flat_build_up_area" value="{{ $room->flat_build_up_area }}" readonly>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="col-6">
-                                                                        <div class="form-group">
-                                                                            <label class="font-weight-bold" for="flat_carpet_area">Carpet Area</label>
-                                                                            <input type="text" class="form-control" id="flat_carpet_area" name="flat_carpet_area" value="{{ $room->flat_carpet_area }}" readonly>
-                                                                        </div>
-                                                                    </div>
-                                                                    @endif  
-                                                                    <div class="col-6">
-                                                                        <div class="form-group">
-                                                                            <label class="font-weight-bold" for="calculation_type">Calculation Type for Parking</label>
-                                                                            <select class="form-control" id="calculation_type" name="calculation_type" required>
-                                                                                <option value="fixed_amount">Unparked</option>
-                                                                                <option value="rate_per_sq_ft">Rate per sq ft</option>
-                                                                            </select>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="col-6">
-                                                                        <div class="form-group d-none" id="parking_rate_per_sq_ft_group{{ $room->id }}">
-                                                                            <label class="font-weight-bold" for="parking_rate_per_sq_ft">Parking Rate (per sq ft)</label>
-                                                                            <input type="number" class="form-control" id="parking_rate_per_sq_ft" name="parking_rate_per_sq_ft">
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="col-6">
-                                                                        <div class="form-group d-none" id="total_sq_ft_group{{ $room->id }}">
-                                                                            <label class="font-weight-bold" for="total_sq_ft_for_parking">Total Square Feet</label>
-                                                                            <input type="number" class="form-control" id="total_sq_ft_for_parking" name="total_sq_ft_for_parking">
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="col-6">
-                                                                        <div class="form-group">
-                                                                            <label class="font-weight-bold" for="discount_percent">Discount (%)</label>
-                                                                            <input type="number" step="0.01" class="form-control" id="discount_percent" name="discount_percent">
-                                                                        </div>
-                                                                    </div>
-                                                                
-                                                                    <div class="col-6">
-                                                                        <div class="form-group">
-                                                                            <label class="font-weight-bold" for="cash_in_hand_percent">Cash in Hand %</label>
-                                                                            <input type="number" step="0.01" class="form-control" id="cash_in_hand_percent{{ $room->id }}" name="cash_in_hand_percent" oninput="calculateInHandAmount({{ $room->id }})">
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="col-6">
-                                                                        <div class="form-group">
-                                                                            <label class="font-weight-bold" for="in_hand_amount">In Hand Amount</label>
-                                                                            <input type="number" step="0.01" class="form-control" id="in_hand_amount{{ $room->id }}" name="in_hand_amount" readonly>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="col-6">
-                                                                        <div class="form-group">
-                                                                            <label class="font-weight-bold" for="gst_percent">GST Percent</label>
-                                                                            <input type="number" step="0.01" class="form-control" id="gst_percent" name="gst_percent" required>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="col-6">
-                                                                        <div class="form-group">
-                                                                            <label class="font-weight-bold" for="advance_payment">Total Advance Payment</label>
-                                                                            <select class="form-control" id="advance_payment" name="advance_payment" required>
-                                                                                <option value="now">Paying Now</option>
-                                                                                <option value="later">Paying Later</option>
-                                                                            </select>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="col-6">
-                                                                        <div class="form-group d-none" id="advance_amount_group">
-                                                                            <label class="font-weight-bold" for="advance_amount">Advance Amount</label>
-                                                                            <input type="number" class="form-control" id="advance_amount" name="advance_amount">
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="col-6">
-                                                                        <div class="form-group">
-                                                                            <label class="font-weight-bold" for="partner_name">Partner Name</label>
-                                                                            <input type="text" class="form-control" id="partner_name" name="partner_name" required>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="col-6">
-                                                                        <div class="form-group d-none" id="last_date_group">
-                                                                            <label class="font-weight-bold" for="last_date">Last Date for Advance Payment</label>
-                                                                            <input type="date" class="form-control" id="last_date" name="last_date">
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="col-6">
-                                                                        <div class="form-group">
-                                                                            <label class="font-weight-bold" for="installments">Number of Installments</label>
-                                                                            <input type="number" class="form-control" id="installments" name="installments" required>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="col-6">
-                                                                        <div class="form-group">
-                                                                            <label class="font-weight-bold" for="installment_date">Installment Date</label>
-                                                                            <input type="date" class="form-control" id="installment_date" name="installment_date">
-                                                                        </div>
-                                                                    </div>
-                                                                
-                                                                    <div class="col-6">
-                                                                        <div class="form-group d-none" id="payment_method_group">
-                                                                            <label class="font-weight-bold" for="payment_method">Payment Method</label>
-                                                                            <select class="form-control" id="payment_method" name="payment_method">
-                                                                                <option value="cash">Cash</option>
-                                                                                <option value="bank_transfer">Bank Transfer</option>
-                                                                                <option value="cheque">Cheque</option>
-                                                                            </select>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="col-6">
-                                                                        <div class="form-group d-none" id="transfer_id_group">
-                                                                            <label class="font-weight-bold" for="transfer_id">Bank Transfer ID</label>
-                                                                            <input type="text" class="form-control" id="transfer_id" name="transfer_id">
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="col-6">
-                                                                        <div class="form-group d-none" id="cheque_id_group">
-                                                                            <label class="font-weight-bold" for="cheque_id">Cheque ID</label>
-                                                                            <input type="text" class="form-control" id="cheque_id" name="cheque_id">
-                                                                        </div>
-                                                                    </div>
-
-                                                                    <div  id="gst_amount_group" class="col-12">
-                                                                        <h4 for="gst_amount">GST Amount :₹<span id="gst_amount"></span> </h4>
-                                                                    </div>
-                                                                    
-                                                                    
-                                                                    <div class="col-12">
-                                                                        <h4>Total amount: ₹<span id="total"></span></h4>
-                                                                    </div>
-                                                                    <div class="col-12">
-                                                                        <h4>Remaining Balance: ₹<span id="remaining_balance"></span></h4>
-                                                                    </div>
-                                                                    <div class="col-12">
-                                                                        <div class="modal-footer">
-                                                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                                                            <button type="submit" class="btn btn-primary">Sell Room</button>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            </form>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
+                                      </div>
                                         </td>
                                     </tr>
                                 @empty

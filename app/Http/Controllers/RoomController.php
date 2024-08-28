@@ -386,9 +386,22 @@ class RoomController extends Controller
     
     public function update(Request $request, $id)
     {
+        // Fetch the room and associated building
+        $room = Room::findOrFail($id);
+        $building = Building::findOrFail($room->building_id);
+    
+        // Get the maximum number of floors from the building
+        $maxFloors = $building->no_of_floors;
+    
+        // Validation rules including custom rule for room_floor
         $validatedData = $request->validate([
             'room_number' => 'required|string',
-            'room_floor' => 'nullable|string',
+            'room_floor' => [
+                'nullable',
+                'string',
+                'numeric',
+                'max:' . $maxFloors,
+            ],
             'room_type' => 'required|string',
             'flat_build_up_area' => 'nullable|numeric',
             'flat_carpet_area' => 'nullable|numeric',
@@ -428,59 +441,40 @@ class RoomController extends Controller
             'chair_space_in_sq' => 'nullable|string',
             'chair_space_rate' => 'nullable|string',
             'chair_space_expected_rate' => 'nullable|string',
+        ], [
+            'room_floor.max' => 'The room floor cannot be higher than the building\'s maximum floor of ' . $maxFloors,
         ]);
     
-        $room = Room::findOrFail($id);
+        // Calculate expected prices
+        $expected_carpet_area_price = $validatedData['carpet_area'] && $validatedData['carpet_area_price']
+            ? $validatedData['carpet_area_price'] * $validatedData['carpet_area']
+            : null;
     
-        if ($validatedData['carpet_area'] && $validatedData['carpet_area_price']) {
-            $expected_carpet_area_price = $validatedData['carpet_area_price'] * $validatedData['carpet_area'];
-        } else {
-            $expected_carpet_area_price = null;
-        }
+        $expected_super_buildup_area_price = $validatedData['build_up_area'] && $validatedData['super_build_up_price']
+            ? $validatedData['build_up_area'] * $validatedData['super_build_up_price']
+            : null;
     
-        if ($validatedData['build_up_area'] && $validatedData['super_build_up_price']) {
-            $expected_super_buildup_area_price = $validatedData['build_up_area'] * $validatedData['super_build_up_price'];
-        } else {
-            $expected_super_buildup_area_price = null;
-        }
+        $flat_expected_carpet_area_price = $validatedData['flat_carpet_area'] && $validatedData['flat_carpet_area_price']
+            ? $validatedData['flat_carpet_area_price'] * $validatedData['flat_carpet_area']
+            : null;
     
-        if ($validatedData['flat_carpet_area'] && $validatedData['flat_carpet_area_price']) {
-            $flat_expected_carpet_area_price = $validatedData['flat_carpet_area'] * $validatedData['flat_carpet_area_price'];
-        } else {
-            $flat_expected_carpet_area_price = null;
-        }
+        $flat_expected_super_buildup_area_price = $validatedData['flat_build_up_area'] && $validatedData['flat_super_build_up_price']
+            ? $validatedData['flat_build_up_area'] * $validatedData['flat_super_build_up_price']
+            : null;
     
-        if ($validatedData['flat_build_up_area'] && $validatedData['flat_super_build_up_price']) {
-            $flat_expected_super_buildup_area_price = $validatedData['flat_build_up_area'] * $validatedData['flat_super_build_up_price'];
-        } else {
-            $flat_expected_super_buildup_area_price = null;
-        }
+        $space_expected_price = $validatedData['space_area'] && $validatedData['space_rate']
+            ? $validatedData['space_area'] * $validatedData['space_rate']
+            : null;
     
-        Log::info('Updating room', [
-            'room_id' => $id,
-            'flat_build_up_area' => $validatedData['flat_build_up_area'],
-            'flat_super_build_up_price' => $validatedData['flat_super_build_up_price'],
-            'flat_expected_super_buildup_area_price' => $flat_expected_super_buildup_area_price,
-        ]);
+        $kiosk_expected_price = $validatedData['kiosk_area'] && $validatedData['kiosk_rate']
+            ? $validatedData['kiosk_area'] * $validatedData['kiosk_rate']
+            : null;
     
-        if ($validatedData['space_area'] && $validatedData['space_rate']) {
-            $space_expected_price = $validatedData['space_area'] * $validatedData['space_rate'];
-        } else {
-            $space_expected_price = null;
-        }
+        $chair_space_expected_rate = $validatedData['chair_space_in_sq'] && $validatedData['chair_space_rate']
+            ? $validatedData['chair_space_in_sq'] * $validatedData['chair_space_rate']
+            : null;
     
-        if ($validatedData['kiosk_area'] && $validatedData['kiosk_rate']) {
-            $kiosk_expected_price = $validatedData['kiosk_area'] * $validatedData['kiosk_rate'];
-        } else {
-            $kiosk_expected_price = null;
-        }
-    
-        if ($validatedData['chair_space_in_sq'] && $validatedData['chair_space_rate']) {
-            $chair_space_expected_rate = $validatedData['chair_space_in_sq'] * $validatedData['chair_space_rate'];
-        } else {
-            $chair_space_expected_rate = null;
-        }
-    
+        // Update the room with validated data
         $room->fill($validatedData);
     
         $room->expected_carpet_area_price = $expected_carpet_area_price;
@@ -566,8 +560,7 @@ class RoomController extends Controller
                      ->with('sale')  // Eager load the sale relationship
                      ->get();
     
-        $installments = Installment::whereIn('sale_id', $rooms->pluck('id'))->get();
-
+                     $installments = Installment::all();
         // Passing the necessary data to the view
         $page = 'flats';
     
@@ -603,63 +596,51 @@ class RoomController extends Controller
     
     
     public function showTableSpaces($building_id)
-    {
-        $building = Building::find($building_id);
-        $rooms = Room::where('building_id', $building_id)->where('room_type', 'table space')->get();
-        $page = 'table-spaces'; 
+{
+    $building = Building::find($building_id);
+    $rooms = Room::where('building_id', $building_id)
+                 ->where('room_type', 'table space')
+                 ->with('sales.installments') // Eager load sales and installments
+                 ->get();
     
-        return view('rooms.table-spaces', compact('rooms', 'building', 'page','building_id'));
-    }
+    // Assuming you want to get all installments related to the building's rooms
+    $installments = Installment::whereIn('sale_id', $rooms->pluck('sales.id')->flatten())->get();
+
+    $page = 'table-spaces'; 
+    
+    return view('rooms.table-spaces', compact('rooms', 'building', 'page', 'building_id', 'installments'));
+}
+
     
     public function showKiosks($building_id)
     {
         $building = Building::find($building_id);
         $rooms = Room::where('building_id', $building_id)
                      ->where('room_type', 'Kiosk')
+                     ->with('sales.installments')
+
                      ->get();
         $page = 'Kiosks'; 
-        return view('rooms.kiosk', compact('building', 'rooms', 'page','building_id'));
+        $installments = Installment::whereIn('sale_id', $rooms->pluck('sales.id')->flatten())->get();
+
+        return view('rooms.kiosk', compact('building', 'rooms', 'page','building_id','installments'));
     }
+
+
     public function showChairSpaces($building_id)
-    {
-        $building = Building::findOrFail($building_id);
+{
+    $building = Building::find($building_id);
+    $rooms = Room::where('building_id', $building_id)
+                 ->where('room_type', 'Chair space')
+                 ->with('sales.installments')
 
-        $chairSpaces = Room::where('building_id', $building_id)
-            ->where('room_type', 'Chair Space')
-            ->get();
+                 ->get();
+    $page = 'Kiosks'; 
+    $installments = Installment::whereIn('sale_id', $rooms->pluck('sales.id')->flatten())->get();
 
-        // Prepare data for the view
-        $chairSpacesData = $chairSpaces->map(function($room) {
-            $totalAmount = $room->sales->sum('total_amount');
-            $saleAmount = $room->sales->sum('sale_amount');
-            $expectedAmount = $room->chair_space_expected_rate * $room->chair_space_area;
-            $difference = $totalAmount - $expectedAmount;
-            $isPositive = $difference > 0;
-            $showDifference = empty($room->status);
+    return view('rooms.chair-space', compact('building', 'rooms', 'page','building_id','installments'));
+}
 
-            return [
-                'room' => $room,
-                'expected_amount' => $expectedAmount,
-                'total_amount' => $totalAmount,
-                'sale_amount' => $saleAmount,
-                'difference' => $difference,
-                'is_positive' => $isPositive,
-                'show_difference' => $showDifference,
-                'status' => $room->status
-            ];
-        });
-
-        return view('rooms.chair-space', [
-            'building' => $building,
-            'chairSpacesData' => $chairSpacesData,
-            'type' => 'Chair Space',
-            'page' => 'chair-spaces',
-            'building_id' => $building_id,
-        ]);
-    }
-
-        
-    
    public function difference($id)
    {
        $building = Building::find($id);

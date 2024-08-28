@@ -34,7 +34,7 @@ Route::controller(AuthController::class)->group(function () {
     Route::get('/forgot_password', 'sendResetLinkEmail')->name('forgot_password');
 });
 
-        Route::middleware('auth:admin')->prefix('admin')->group(function () {
+    Route::middleware('auth:admin')->prefix('admin')->group(function () {
         Route::name('admin.')->group(function () {
         Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
         Route::resource('rooms', RoomController::class);
@@ -173,7 +173,6 @@ Route::controller(AuthController::class)->group(function () {
         Route::get('/table-space/difference/{building_id}', [RoomController::class, 'showTableSpaceDifference'])->name('table_spaces.difference');
 
         Route::get('/rooms/sell/{room}/{buildingId}', [RoomController::class, 'showSellForm'])->name('rooms.sell');
-        // Route::get('/rooms/sell/{room}', [RoomController::class, 'sell'])->name('rooms.sell');
 
 
     });

@@ -1,4 +1,4 @@
-@extends('layouts.default', ['title' => 'Rooms'])
+@extends('layouts.default', ['title' => 'Room Statistics'])
 
 @section('content')
     <style>
@@ -128,7 +128,6 @@
                                     </h4>
 
                                     @if ($roomStats['Flat Expected Amount'])
-                                        <div class="sold-expected-info">
                                             <div class="info-header">Sold / Expected</div>
                                             <div class="info-content">
                                                 <span class="amount-sold">₹{{ number_format($roomStats['Flat Expected Amount']['soldAmount'], 2) }}</span> /
@@ -137,7 +136,6 @@
                                             <div class="profit-loss" style="color: {{ $roomStats['Flat Expected Amount']['profitOrLossColor'] }}">
                                                 ({{ abs($roomStats['Flat Expected Amount']['profitOrLoss']) }} {{ $roomStats['Flat Expected Amount']['profitOrLossText'] }})
                                             </div>
-                                        </div>
                                     @endif
 
                                     @elseif ($type == 'Shops Expected Amount')
@@ -161,7 +159,6 @@
                                         ₹{{ number_format($roomStats['Shops Expected Amount']['soldShopAmount'], 2) }}
                                     </h4>
                                 @if ($roomStats['Shops Expected Amount'])
-                                    <div class="sold-expected-info">
                                         <div class="info-header">Sold / Expected</div>
                                         <div class="info-content">
                                             <span class="amount-sold">₹{{ number_format($roomStats['Shops Expected Amount']['soldShopAmount'], 2) }}</span> /
@@ -170,7 +167,6 @@
                                         <div class="profit-loss" style="color: {{ $roomStats['Shops Expected Amount']['profitOrLossColorShop'] }}">
                                             ({{ abs($roomStats['Shops Expected Amount']['profitOrLossShop']) }} {{ $roomStats['Shops Expected Amount']['profitOrLossTextShop'] }})
                                         </div>
-                                    </div>
                                 @endif
 
 
@@ -197,7 +193,6 @@
                                     </h4>
 
                                 @if ($roomStats['Table space Expected Amount'])
-                                    <div class="sold-expected-info">
                                         <div class="info-header">Sold / Expected</div>
                                         <div class="info-content">
                                             <span class="amount-sold">₹{{ number_format($roomStats['Table space Expected Amount']['soldTableAmount'], 2) }}</span> /
@@ -206,7 +201,6 @@
                                         <div class="profit-loss" style="color: {{ $roomStats['Table space Expected Amount']['profitOrLossColorTable'] }}">
                                             ({{ abs($roomStats['Table space Expected Amount']['profitOrLossTable']) }} {{ $roomStats['Table space Expected Amount']['profitOrLossTextTable'] }})
                                         </div>
-                                    </div>
                                 @endif
 
 
@@ -235,7 +229,6 @@
 
 
                                     @if ($roomStats['Kiosk Expected Amount'])
-                                    <div class="sold-expected-info">
                                         <div class="info-header">Sold / Expected</div>
                                         <div class="info-content">
                                             <span class="amount-sold">₹{{ number_format($roomStats['Kiosk Expected Amount']['soldKioskAmount'], 2) }}</span> /
@@ -244,7 +237,6 @@
                                         <div class="profit-loss" style="color: {{ $roomStats['Kiosk Expected Amount']['profitOrLossColorKiosk'] }}">
                                             ({{ abs($roomStats['Kiosk Expected Amount']['profitOrLossKiosk']) }} {{ $roomStats['Kiosk Expected Amount']['profitOrLossTextKiosk'] }})
                                         </div>
-                                    </div>
                                 @endif
 
                                 @elseif ($type == 'Chair space Expected Amount')
@@ -270,7 +262,6 @@
                                     </h4>
 
                                     @if ($roomStats['Chair space Expected Amount'])
-                                    <div class="sold-expected-info">
                                         <div class="info-header">Sold / Expected</div>
                                         <div class="info-content">
                                             <span class="amount-sold">₹{{ number_format($roomStats['Chair space Expected Amount']['soldChairAmount'], 2) }}</span> /
@@ -278,7 +269,6 @@
                                         </div>
                                         <div class="profit-loss" style="color: {{ $roomStats['Chair space Expected Amount']['profitOrLossColorChair'] }}">
                                             ({{ abs($roomStats['Chair space Expected Amount']['profitOrLossChair']) }} {{ $roomStats['Chair space Expected Amount']['profitOrLossTextChair'] }})
-                                        </div>
                                     </div>
                                 @endif
                                 @endif       

@@ -15,7 +15,7 @@
                 </div>
             </div>
     <div class="card">
-        <h5 class="card-header">Shops Table</h5>
+        <h5 class="card-header">Shops</h5>
         <div class="card-body">
             <div class="table-responsive">
                 <table id="shopsTable" class="table table-bordered" style="width:100%">
@@ -23,6 +23,7 @@
                         <tr>
                             <th>Room Floor</th>
                             <th>Room Type</th>
+                            <th>Shop Type </th>
                             <th>Build Up Area</th>
                             <th>Build Up Area Price</th>
                             <th>Expected Super Build Area Price</th>
@@ -38,6 +39,7 @@
                         <tr>
                             <td>{{ $room->room_floor }}</td>
                             <td>{{ $room->room_type }}</td>
+                            <td>{{ $room->shop_type }}</td>
                             <td>{{ $room->build_up_area }} sq ft</td>
                             <td>{{ $room->super_build_up_price }} sq ft</td>
                             <td>₹{{ number_format($room->expected_super_buildup_area_price, 2) }}</td>

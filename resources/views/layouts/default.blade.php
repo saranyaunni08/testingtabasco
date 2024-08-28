@@ -187,7 +187,7 @@
     </div>
     <div class="sidenav-footer position-absolute w-100 bottom-0">
       <div class="mx-3">
-        <a class="btn bg-gradient-danger w-100" href="#" type="button">Logout</a>
+        <a class="btn bg-gradient-danger w-100" href="{{ route('login') }}" type="button">Logout</a>
       </div>
     </div>
   </aside>

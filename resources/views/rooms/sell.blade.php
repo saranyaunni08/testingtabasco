@@ -44,13 +44,13 @@
             @if($room->room_type == 'Flat')
                 <div class="col-6">
                     <div class="form-group">
-                        <label class="font-weight-bold" for="flat_build_up_area">Super Build-Up Area</label>
+                        <label class="font-weight-bold" for="flat_build_up_area">Super Build-Up Area in sq</label>
                         <input type="text" class="form-control" id="flat_build_up_area" name="flat_build_up_area" value="{{ $room->flat_build_up_area }}" readonly>
                     </div>
                 </div>
                 <div class="col-6">
                     <div class="form-group">
-                        <label class="font-weight-bold" for="flat_carpet_area">Carpet Area</label>
+                        <label class="font-weight-bold" for="flat_carpet_area">Carpet Area in sq</label>
                         <input type="text" class="form-control" id="flat_carpet_area" name="flat_carpet_area" value="{{ $room->flat_carpet_area }}" readonly>
                     </div>
                 </div>
@@ -65,7 +65,7 @@
             </div>
             <div class="col-6">
                 <div class="form-group">
-                    <label class="font-weight-bold" for="carpet_area">Carpet Area</label>
+                    <label class="font-weight-bold" for="carpet_area">Carpet Area in sq</label>
                     <input type="text" class="form-control" id="carpet_area" name="carpet_area" value="{{ $room->carpet_area }}" readonly>
                 </div>
             </div>
@@ -73,7 +73,7 @@
             @if($room->room_type == 'Table space')
             <div class="col-6">
                 <div class="form-group">
-                    <label class="font-weight-bold" for="space_area">Super Build-Up Area</label>
+                    <label class="font-weight-bold" for="space_area">Super Build-Up Area in sq</label>
                     <input type="text" class="form-control" id="space_area" name="space_area" value="{{ $room->space_area }}" readonly>
                 </div>
             </div>
@@ -81,7 +81,7 @@
             @if($room->room_type == 'Chair space')
             <div class="col-6">
                 <div class="form-group">
-                    <label class="font-weight-bold" for="chair_space_in_sq">Super Build-Up Area</label>
+                    <label class="font-weight-bold" for="chair_space_in_sq">Super Build-Up Area in sq</label>
                     <input type="text" class="form-control" id="chair_space_in_sq" name="chair_space_in_sq" value="{{ $room->chair_space_in_sq }}" readonly>
                 </div>
             </div>
@@ -89,7 +89,7 @@
             @if($room->room_type == 'Kiosk')
             <div class="col-6">
                 <div class="form-group">
-                    <label class="font-weight-bold" for="kiosk_area">Super Build-Up Area</label>
+                    <label class="font-weight-bold" for="kiosk_area">Super Build-Up Area in sq</label>
                     <input type="text" class="form-control" id="kiosk_area" name="kiosk_area" value="{{ $room->kiosk_area }}" readonly>
                 </div>
             </div>
@@ -145,6 +145,7 @@
                 <div class="form-group">
                     <label class="font-weight-bold" for="advance_payment">Total Advance Payment</label>
                     <select class="form-control" id="advance_payment" name="advance_payment" required>
+                        <option disabled selected >select</option>
                         <option value="now">Paying Now</option>
                         <option value="later">Paying Later</option>
                     </select>
@@ -334,15 +335,19 @@
             const transferIdGroup = modalElement.querySelector('#transfer_id_group');
             const chequeIdGroup = modalElement.querySelector('#cheque_id_group');
 
-            if (paymentMethodSelect.value === 'bank_transfer') {
-                transferIdGroup.classList.remove('d-none');
-                chequeIdGroup.classList.add('d-none');
-            } else if (paymentMethodSelect.value === 'cheque') {
-                transferIdGroup.classList.add('d-none');
-                chequeIdGroup.classList.remove('d-none');
-            } else {
-                transferIdGroup.classList.add('d-none');
-                chequeIdGroup.classList.add('d-none');
+            switch(paymentMethodSelect.value) {
+                case 'bank_transfer':
+                    transferIdGroup.classList.remove('d-none');
+                    chequeIdGroup.classList.add('d-none');
+                    break;
+                case 'cheque':
+                    transferIdGroup.classList.add('d-none');
+                    chequeIdGroup.classList.remove('d-none');
+                    break;
+                default:
+                    transferIdGroup.classList.add('d-none');
+                    chequeIdGroup.classList.add('d-none');
+                    break;
             }
         }
 
@@ -373,6 +378,22 @@
         modalElement.querySelector('#advance_payment').addEventListener('change', toggleAdvancePaymentFields);
         modalElement.querySelector('#payment_method').addEventListener('change', togglePaymentMethodFields);
         calculationTypeSelect.addEventListener('change', toggleCalculationFields);
+
+        calculationTypeSelect.addEventListener('change', () => {
+            if (calculationTypeSelect.value === 'rate_per_sq_ft') {
+                document.querySelector(`#parking_rate_per_sq_ft_group${roomId}`).classList.remove('d-none');
+                document.querySelector(`#total_sq_ft_for_parking_group${roomId}`).classList.remove('d-none');
+            } else {
+                document.querySelector(`#parking_rate_per_sq_ft_group${roomId}`).classList.add('d-none');
+                document.querySelector(`#total_sq_ft_for_parking_group${roomId}`).classList.add('d-none');
+            }
+            calculateTotalAmount();
+        });
+
+        document.querySelector('#advance_payment').addEventListener('change', toggleAdvancePaymentFields);
+        document.querySelector('#payment_method').addEventListener('change', togglePaymentMethodFields);
+
+
 
         // Initialize the fields based on the current values
         calculateTotalAmount();
