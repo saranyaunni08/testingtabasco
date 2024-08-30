@@ -23,13 +23,19 @@ class Sale extends Model
         'cash_in_hand_paid_amount',
     ];
 
-    public function installments()
-    {
-        return $this->hasMany(Installment::class);
-    }
+    // public function installments()
+    // {
+    //     return $this->hasMany(Installment::class);
+    // }
     public function room()
     {
         return $this->belongsTo(Room::class);
     }
+    // In Sale.php Model
+public function installments()
+{
+    return $this->hasMany(Installment::class, 'sale_id');
+}
+
 }
     

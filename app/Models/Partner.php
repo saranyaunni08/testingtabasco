@@ -23,4 +23,9 @@ class Partner extends Model
     ];
 
     // Other model properties and methods...
+
+    public function sales()
+    {
+        return $this->hasMany(Sale::class);
+    }
 }

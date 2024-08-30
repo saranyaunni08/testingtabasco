@@ -145,22 +145,22 @@
                 </select>
             </div>
 
-                    <!-- Additional fields, hidden initially -->
-                    <div id="paymentDetails" style="display: none;">
-                        <div class="form-group">
-                            <label for="paidAmount">Paid Amount</label>
-                            <input type="number" id="paidAmount" name="paid_amount" class="form-control" placeholder="Enter the paid amount">
-                        </div>
-                    
-                        <div class="form-group">
-                            <label for="partner">Partner Who Received Payment</label>
-                            <select id="partner" name="partner_id" class="form-control">
-                                @foreach($partners as $partner)
-                                    <option value="{{ $partner->id }}">{{ $partner->first_name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
+              <!-- Additional fields, hidden initially -->
+<div id="paymentDetails" style="display: none;">
+    <div class="form-group">
+        <label for="paidAmount">Paid Amount</label>
+        <input type="number" id="paidAmount" name="cash_in_hand_paid_amount" class="form-control" placeholder="Enter the paid amount">
+    </div>
+
+    <div class="form-group">
+        <label for="partner">Partner Who Received Payment</label>
+        <select id="partner" name="cash_in_hand_partner_name" class="form-control">
+            @foreach($partners as $partner)
+                <option value="{{ $partner->id }}">{{ $partner->first_name }}</option>
+            @endforeach
+        </select>
+    </div>
+</div>
 
             </div>
             <div class="col-6">

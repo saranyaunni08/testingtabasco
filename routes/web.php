@@ -180,6 +180,11 @@ Route::controller(AuthController::class)->group(function () {
         Route::get('/partners/create', [PartnerController::class, 'create'])->name('partners.create');
         Route::post('/partners', [PartnerController::class, 'store'])->name('partners.store');
 
+        // In routes/web.php
+        Route::get('/partners/cash-in-hand', [PartnerController::class, 'cashInHand'])->name('partners.cash_in_hand');
+
+        // New route for marking as paid
+        Route::put('/partners/{partner}/mark-paid', [PartnerController::class, 'markAsPaid'])->name('partners.mark_paid');
 
     });
 });
