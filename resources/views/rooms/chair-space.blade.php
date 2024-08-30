@@ -71,7 +71,7 @@
                                             
                                             <button type="button" class="btn btn-danger btn-sm me-2" data-toggle="modal" data-target="#deleteModal{{ $room->id }}" data-building-id="{{ $room->building_id }}" data-room-id="{{ $room->id }}" data-action="delete">
                                                 <i class="fas fa-trash-alt bx-sm"></i>
-                                            </button> 
+                                            </button>
                                             @endif
                         
                                             @if ($room->status === 'available')
@@ -94,8 +94,7 @@
                                                 Not Available
                                             </button>
                                         @endif
-                                       
-
+                                        
     <!-- Authentication Modal for Edit -->
     <div class="modal fade" id="authModal{{ $room->id }}" tabindex="-1" aria-labelledby="authModalLabel{{ $room->id }}" aria-hidden="true">
         <div class="modal-dialog">

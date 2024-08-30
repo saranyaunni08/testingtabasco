@@ -1,3 +1,4 @@
+
 @extends('layouts.default')
 
 @section('content')
@@ -135,6 +136,33 @@
                     <input type="number" step="0.01" class="form-control" id="in_hand_amount{{ $room->id }}" name="in_hand_amount" readonly>
                 </div>
             </div>
+            <div class="form-group">
+                <label for="cashInHandPayment">Pay Now or Later</label>
+                <select id="cashInHandPayment" class="form-control">
+                    <option disabled selected>Select</option>
+                    <option value="now">Now</option>
+                    <option value="later">Later</option>
+                </select>
+            </div>
+
+                    <!-- Additional fields, hidden initially -->
+                    <div id="paymentDetails" style="display: none;">
+                        <div class="form-group">
+                            <label for="paidAmount">Paid Amount</label>
+                            <input type="number" id="paidAmount" name="paid_amount" class="form-control" placeholder="Enter the paid amount">
+                        </div>
+                    
+                        <div class="form-group">
+                            <label for="partner">Partner Who Received Payment</label>
+                            <select id="partner" name="partner_id" class="form-control">
+                                @foreach($partners as $partner)
+                                    <option value="{{ $partner->id }}">{{ $partner->first_name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+
+            </div>
             <div class="col-6">
                 <div class="form-group">
                     <label class="font-weight-bold" for="gst_percent">GST Percent</label>
@@ -223,96 +251,116 @@
     </form>
 </div>
 <script>
- document.addEventListener('DOMContentLoaded', () => {
-    const modalElements = document.querySelectorAll('[id^="sellModal"]');
+    document.addEventListener('DOMContentLoaded', () => {
+        const modalElements = document.querySelectorAll('[id^="sellModal"]');
+    
+        modalElements.forEach((modalElement) => {
+            const roomId = modalElement.id.replace('sellModal', '');
+            const areaCalculationTypeSelect = modalElement.querySelector('#area_calculation_type');
+            const calculationTypeSelect = modalElement.querySelector('#calculation_type');
+            const parkingRatePerSqFtInput = modalElement.querySelector('#parking_rate_per_sq_ft');
+            const totalSqFtForParkingInput = modalElement.querySelector('#total_sq_ft_for_parking');
+            const discountPercentInput = modalElement.querySelector('#discount_percent');
+            const gstPercentInput = modalElement.querySelector('#gst_percent');
+            const saleAmountInput = modalElement.querySelector('#sale_amount');
+            const flatBuildUpAreaInput = modalElement.querySelector('#flat_build_up_area');
+            const flatCarpetAreaInput = modalElement.querySelector('#flat_carpet_area');
+            const buildUpAreaInput = modalElement.querySelector('#build_up_area');
+            const carpetAreaInput = modalElement.querySelector('#carpet_area');
+            const tableBuildUpAreaInput = modalElement.querySelector('#space_area');
+            const kioskBuildUpAreaInput = modalElement.querySelector('#kiosk_area');
+            const chairBuildUpAreaInput = modalElement.querySelector('#chair_space_in_sq');
+            const inHandPercentInput = modalElement.querySelector(`#cash_in_hand_percent${roomId}`);
+            const inHandAmountInput = modalElement.querySelector(`#in_hand_amount${roomId}`);
+            const gstAmountDisplay = modalElement.querySelector('#gst_amount');
+            const totalAmountDisplay = modalElement.querySelector('#total');
+            const remainingBalanceDisplay = modalElement.querySelector('#remaining_balance');
+    
 
-    modalElements.forEach((modalElement) => {
-        const roomId = modalElement.id.replace('sellModal', '');
-        const areaCalculationTypeSelect = modalElement.querySelector('#area_calculation_type');
-        const calculationTypeSelect = modalElement.querySelector('#calculation_type');
-        const parkingRatePerSqFtInput = modalElement.querySelector('#parking_rate_per_sq_ft');
-        const totalSqFtForParkingInput = modalElement.querySelector('#total_sq_ft_for_parking');
-        const discountPercentInput = modalElement.querySelector('#discount_percent');
-        const gstPercentInput = modalElement.querySelector('#gst_percent');
-        const saleAmountInput = modalElement.querySelector('#sale_amount');
+              
+            function toggleAdvancePaymentFields() {
+            const advancePaymentSelect = modalElement.querySelector('#advance_payment');
+            const advanceAmountGroup = modalElement.querySelector('#advance_amount_group');
+            const paymentMethodGroup = modalElement.querySelector('#payment_method_group');
+            const transferIdGroup = modalElement.querySelector('#transfer_id_group');
+            const chequeIdGroup = modalElement.querySelector('#cheque_id_group');
 
-        const flatBuildUpAreaInput = modalElement.querySelector('#flat_build_up_area');
-        const flatCarpetAreaInput = modalElement.querySelector('#flat_carpet_area');
-
-        const BuildUpAreaInput = modalElement.querySelector('#build_up_area');
-        const CarpetAreaInput = modalElement.querySelector('#carpet_area');
-
-        const TableBuildUpAreaInput = modalElement.querySelector('#space_area');
-        const TableCarpetAreaInput = modalElement.querySelector('#space_area');
-        
-        const KioskBuildUpAreaInput = modalElement.querySelector('#kiosk_area');
-        const KioskCarpetAreaInput = modalElement.querySelector('#kiosk_area');
-
-        const ChairBuildUpAreaInput = modalElement.querySelector('#chair_space_in_sq');
-        const ChairCarpetAreaInput = modalElement.querySelector('#chair_space_in_sq');
-
-        
-
-        const inHandPercentInput = modalElement.querySelector(`#cash_in_hand_percent${roomId}`);
-        const inHandAmountInput = modalElement.querySelector(`#in_hand_amount${roomId}`);
-        const gstAmountDisplay = modalElement.querySelector('#gst_amount');
-        const totalAmountDisplay = modalElement.querySelector('#total');
-        const remainingBalanceDisplay = modalElement.querySelector('#remaining_balance');
-
-        function calculateTotalAmount() {
-            let saleAmount = parseFloat(saleAmountInput.value) || 0;
-            let gstPercent = parseFloat(gstPercentInput.value) || 0;
-            let discountPercent = parseFloat(discountPercentInput.value) || 0;
-            let inHandPercent = parseFloat(inHandPercentInput.value) || 0;
-
-            // Calculate area based on room type and area calculation type
-            let totalRate;
-            if (areaCalculationTypeSelect.value === 'carpet_area_rate') {
-                if ('{{ $room->room_type }}' === 'Flat') {
-                    totalRate = saleAmount * (parseFloat(flatCarpetAreaInput.value) || 0);
-                } else if ('{{ $room->room_type }}' === 'Shops') {
-                    totalRate = saleAmount * (parseFloat(CarpetAreaInput.value) || 0);
-                } else if ('{{ $room->room_type }}' === 'Table space') {
-                    totalRate = saleAmount * (parseFloat(TableCarpetAreaInput.value) || 0);
-                } else if ('{{ $room->room_type }}' === 'Kiosk') {
-                    totalRate = saleAmount * (parseFloat(KioskCarpetAreaInput.value) || 0);
-                } else if ('{{ $room->room_type }}' === 'Chair space') {
-                    totalRate = saleAmount * (parseFloat(ChairCarpetAreaInput.value) || 0);
-                }
-            } else if (areaCalculationTypeSelect.value === 'built_up_area_rate') {
-                if ('{{ $room->room_type }}' === 'Flat') {
-                    totalRate = saleAmount * (parseFloat(flatBuildUpAreaInput.value) || 0);
-                } else if ('{{ $room->room_type }}' === 'Shops') {
-                    totalRate = saleAmount * (parseFloat(BuildUpAreaInput.value) || 0);
-                } else if ('{{ $room->room_type }}' === 'Table space') {
-                    totalRate = saleAmount * (parseFloat(TableBuildUpAreaInput.value) || 0);
-                } else if ('{{ $room->room_type }}' === 'Kiosk') {
-                    totalRate = saleAmount * (parseFloat(KioskBuildUpAreaInput.value) || 0);
-                } else if ('{{ $room->room_type }}' === 'Chair space') {
-                    totalRate = saleAmount * (parseFloat(ChairBuildUpAreaInput.value) || 0);
-                }
+            if (advancePaymentSelect.value === 'now') {
+                advanceAmountGroup.classList.remove('d-none');
+                paymentMethodGroup.classList.remove('d-none');
+            } else {
+                advanceAmountGroup.classList.add('d-none');
+                paymentMethodGroup.classList.add('d-none');
+                transferIdGroup.classList.add('d-none');
+                chequeIdGroup.classList.add('d-none');
             }
-
-            // Apply discount
-            totalRate = totalRate - (totalRate * (discountPercent / 100));
-
-            // Calculate GST
-            let gstAmount = totalRate * (gstPercent / 100);
-            gstAmountDisplay.textContent = gstAmount.toFixed(2);
-
-            // Calculate in-hand amount
-            let inHandAmount = totalRate * (inHandPercent / 100);
-            inHandAmountInput.value = inHandAmount.toFixed(2);
-
-            // Calculate total amount and remaining balance
-            let totalAmount = totalRate + gstAmount;
-            totalAmountDisplay.textContent = totalAmount.toFixed(2);
-
-            let remainingBalance = totalAmount - inHandAmount;
-            remainingBalanceDisplay.textContent = remainingBalance.toFixed(2);
         }
 
-        function toggleAdvancePaymentFields() {
+            function calculateTotalAmount() {
+                let saleAmount = parseFloat(saleAmountInput.value) || 0;
+                let gstPercent = parseFloat(gstPercentInput.value) || 0;
+                let discountPercent = parseFloat(discountPercentInput.value) || 0;
+                let inHandPercent = parseFloat(inHandPercentInput.value) || 0;
+    
+                // Calculate area based on room type and area calculation type
+                let totalRate;
+                const roomType = '{{ $room->room_type }}';
+    
+                if (areaCalculationTypeSelect.value === 'carpet_area_rate') {
+                    switch (roomType) {
+                        case 'Flat':
+                            totalRate = saleAmount * (parseFloat(flatCarpetAreaInput.value) || 0);
+                            break;
+                        case 'Shops':
+                            totalRate = saleAmount * (parseFloat(carpetAreaInput.value) || 0);
+                            break;
+                        case 'Table space':
+                            totalRate = saleAmount * (parseFloat(tableBuildUpAreaInput.value) || 0);
+                            break;
+                        case 'Kiosk':
+                            totalRate = saleAmount * (parseFloat(kioskBuildUpAreaInput.value) || 0);
+                            break;
+                        case 'Chair space':
+                            totalRate = saleAmount * (parseFloat(chairBuildUpAreaInput.value) || 0);
+                            break;
+                    }
+                } else if (areaCalculationTypeSelect.value === 'built_up_area_rate') {
+                    switch (roomType) {
+                        case 'Flat':
+                            totalRate = saleAmount * (parseFloat(flatBuildUpAreaInput.value) || 0);
+                            break;
+                        case 'Shops':
+                            totalRate = saleAmount * (parseFloat(buildUpAreaInput.value) || 0);
+                            break;
+                        case 'Table space':
+                            totalRate = saleAmount * (parseFloat(tableBuildUpAreaInput.value) || 0);
+                            break;
+                        case 'Kiosk':
+                            totalRate = saleAmount * (parseFloat(kioskBuildUpAreaInput.value) || 0);
+                            break;
+                        case 'Chair space':
+                            totalRate = saleAmount * (parseFloat(chairBuildUpAreaInput.value) || 0);
+                            break;
+                    }
+                }
+    
+                // Apply discount
+                totalRate = totalRate - (totalRate * (discountPercent / 100));
+    
+                // Calculate GST
+                let gstAmount = totalRate * (gstPercent / 100);
+                gstAmountDisplay.textContent = gstAmount.toFixed(2);
+    
+                // Calculate in-hand amount
+                let inHandAmount = totalRate * (inHandPercent / 100);
+                inHandAmountInput.value = inHandAmount.toFixed(2);
+    
+                // Calculate total amount
+                let totalAmount = totalRate + gstAmount;
+                totalAmountDisplay.textContent = totalAmount.toFixed(2);
+            }
+    
+            function toggleAdvancePaymentFields() {
             const advancePaymentSelect = modalElement.querySelector('#advance_payment');
             const advanceAmountGroup = modalElement.querySelector('#advance_amount_group');
             const paymentMethodGroup = modalElement.querySelector('#payment_method_group');
@@ -400,8 +448,77 @@
         toggleAdvancePaymentFields();
         togglePaymentMethodFields();
         toggleCalculationFields();
+        });
     });
-});
-
-</script>    
+    </script>
+    
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const modalElements = document.querySelectorAll('[id^="sellModal"]');
+    
+        modalElements.forEach((modalElement) => {
+            const roomId = modalElement.id.replace('sellModal', '');
+            const cashInHandPaymentSelect = modalElement.querySelector('#cashInHandPayment');
+            const paymentDetailsDiv = modalElement.querySelector('#paymentDetails');
+            const advanceAmountGroupDiv = modalElement.querySelector('#advance_amount_group');
+            const lastDateGroupDiv = modalElement.querySelector('#last_date_group');
+            const paymentMethodGroupDiv = modalElement.querySelector('#payment_method_group');
+            const transferIdGroupDiv = modalElement.querySelector('#transfer_id_group');
+            const chequeIdGroupDiv = modalElement.querySelector('#cheque_id_group');
+            const advancePaymentSelect = modalElement.querySelector('#advance_payment');
+    
+            function updateVisibility() {
+                // Handle "Pay Now or Later" selection
+                const cashInHandPaymentValue = cashInHandPaymentSelect.value;
+                if (cashInHandPaymentValue === 'now') {
+                    paymentDetailsDiv.style.display = 'block';
+                    advanceAmountGroupDiv.style.display = 'block'; // Show advance amount field
+                    lastDateGroupDiv.style.display = 'none'; // Hide last date field
+                } else if (cashInHandPaymentValue === 'later') {
+                    paymentDetailsDiv.style.display = 'none';
+                    advanceAmountGroupDiv.style.display = 'none'; // Hide advance amount field
+                    lastDateGroupDiv.style.display = 'block'; // Show last date field
+                } else {
+                    paymentDetailsDiv.style.display = 'none';
+                    advanceAmountGroupDiv.style.display = 'none';
+                    lastDateGroupDiv.style.display = 'none';
+                }
+    
+                // Handle "Advance Payment" selection
+                const advancePaymentValue = advancePaymentSelect.value;
+                if (advancePaymentValue === 'now') {
+                    advanceAmountGroupDiv.style.display = 'block'; // Show advance amount field
+                } else if (advancePaymentValue === 'later') {
+                    advanceAmountGroupDiv.style.display = 'none'; // Hide advance amount field
+                } else {
+                    advanceAmountGroupDiv.style.display = 'none';
+                }
+    
+                // Handle Payment Method and related fields visibility
+                const paymentMethodSelect = modalElement.querySelector('#payment_method');
+                const paymentMethodValue = paymentMethodSelect.value;
+                if (paymentMethodValue === 'bank_transfer') {
+                    transferIdGroupDiv.style.display = 'block'; // Show bank transfer ID field
+                    chequeIdGroupDiv.style.display = 'none'; // Hide cheque ID field
+                } else if (paymentMethodValue === 'cheque') {
+                    transferIdGroupDiv.style.display = 'none';
+                    chequeIdGroupDiv.style.display = 'block'; // Show cheque ID field
+                } else {
+                    transferIdGroupDiv.style.display = 'none';
+                    chequeIdGroupDiv.style.display = 'none';
+                }
+            }
+    
+            // Attach event listeners
+            cashInHandPaymentSelect.addEventListener('change', updateVisibility);
+            advancePaymentSelect.addEventListener('change', updateVisibility);
+            const paymentMethodSelect = modalElement.querySelector('#payment_method');
+            paymentMethodSelect.addEventListener('change', updateVisibility);
+    
+            // Initial call to set visibility based on default values
+            updateVisibility();
+        });
+    });
+    </script>
+    
 @endsection

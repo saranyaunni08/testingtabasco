@@ -12,6 +12,8 @@ use App\Http\Controllers\EditDeleteAuthController;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Illuminate\Support\Facades\Log;
 use Barryvdh\DomPDF\Facade\Pdf;
+use App\Http\Controllers\PartnerController;
+
 
 
 
@@ -173,6 +175,10 @@ Route::controller(AuthController::class)->group(function () {
         Route::get('/table-space/difference/{building_id}', [RoomController::class, 'showTableSpaceDifference'])->name('table_spaces.difference');
 
         Route::get('/rooms/sell/{room}/{buildingId}', [RoomController::class, 'showSellForm'])->name('rooms.sell');
+
+        //partners
+        Route::get('/partners/create', [PartnerController::class, 'create'])->name('partners.create');
+        Route::post('/partners', [PartnerController::class, 'store'])->name('partners.store');
 
 
     });

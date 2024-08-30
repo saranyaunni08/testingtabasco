@@ -43,15 +43,15 @@
                             <td>
                                 @php
                                     $sale = $room->sales->first();
-                                    $isPaid = $sale && $installments->where('sale_id', $sale->id)->where('status', 'sold')->isNotEmpty();
+                                    $isPaid = $sale && $installments->where('sale_id', $sale->id)->where('status', 'paid')->isNotEmpty();
                                 @endphp
             
                                 @if($room->status == 'available')
                                     <span class="badge badge-info">Available</span>
                                 @elseif($isPaid)
-                                    <span class="badge badge-success">Paid</span>
+                                    <span class="badge badge-success">Sold</span>
                                 @else
-                                    <span class="badge badge-danger">Booking</span>
+                                    <span class="badge badge-warning">Booking</span>
                                 @endif
                             </td>
                             <td class="d-flex">
@@ -64,12 +64,6 @@
                                 <button type="button" class="btn btn-danger btn-sm me-2" data-toggle="modal" data-target="#deleteModal{{ $room->id }}" data-building-id="{{ $room->building_id }}" data-room-id="{{ $room->id }}" data-action="delete">
                                     <i class="fas fa-trash-alt bx-sm"></i>
                                 </button>
-                                
-                                
-                                
-                                
-                                
-                                
                                 @endif
             
                                 @if ($room->status === 'available')
@@ -92,7 +86,7 @@
                                     Not Available
                                 </button>
                             @endif
-
+                            
                                 
 <!-- Authentication Modal for Edit -->
 <div class="modal fade" id="authModal{{ $room->id }}" tabindex="-1" aria-labelledby="authModalLabel{{ $room->id }}" aria-hidden="true">

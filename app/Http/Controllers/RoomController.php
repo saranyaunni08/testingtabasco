@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Redirect;
 use App\Models\Building;
 use App\Models\Sale;
 use App\Models\Installment;
+use App\Models\partner;
 use Illuminate\Support\Facades\Log;
 
 
@@ -507,16 +508,23 @@ class RoomController extends Controller
                         ->with('success', 'Room marked as sold.');
     }
 
-    public function showSellForm($id)
+       
+    public function showSellForm($id, $buildingId)
     {
         $room = Room::findOrFail($id);
+        $building = Building::findOrFail($buildingId);
+        $partners = Partner::all();
+
         return view('rooms.sell', [
             'room' => $room,
             'page' => 'rooms',
-            'title' => 'Sell Room'  // Add this line
+            'title' => 'Sell Room',
+            'building' => $building,
+            'partners' => $partners, // Remove quotes around $partners
         ]);
     }
-    
+
+        
 
     public function processSell(Request $request, $id)
     {
@@ -604,8 +612,7 @@ class RoomController extends Controller
                  ->get();
     
     // Assuming you want to get all installments related to the building's rooms
-    $installments = Installment::whereIn('sale_id', $rooms->pluck('sales.id')->flatten())->get();
-
+    $installments = Installment::all();
     $page = 'table-spaces'; 
     
     return view('rooms.table-spaces', compact('rooms', 'building', 'page', 'building_id', 'installments'));
@@ -621,7 +628,7 @@ class RoomController extends Controller
 
                      ->get();
         $page = 'Kiosks'; 
-        $installments = Installment::whereIn('sale_id', $rooms->pluck('sales.id')->flatten())->get();
+        $installments = Installment::all();
 
         return view('rooms.kiosk', compact('building', 'rooms', 'page','building_id','installments'));
     }
@@ -635,8 +642,8 @@ class RoomController extends Controller
                  ->with('sales.installments')
 
                  ->get();
-    $page = 'Kiosks'; 
-    $installments = Installment::whereIn('sale_id', $rooms->pluck('sales.id')->flatten())->get();
+    $page = 'Chair space'; 
+    $installments = Installment::all();
 
     return view('rooms.chair-space', compact('building', 'rooms', 'page','building_id','installments'));
 }

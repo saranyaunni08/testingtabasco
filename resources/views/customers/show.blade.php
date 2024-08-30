@@ -349,12 +349,13 @@
                                                                                                         </tr>
                                                                                                         <tr>
                                                                                                             <th>EMI Start Date</th>
-                                                                                                            <td>{{ $emi_start_date->format('d/m/Y') }}</td>
+                                                                                                            <td>{{ $emi_start_date ? $emi_start_date->format('d/m/Y') : 'N/A' }}</td>
                                                                                                         </tr>
                                                                                                         <tr>
                                                                                                             <th>EMI End Date</th>
-                                                                                                            <td>{{ $emi_end_date->format('d/m/Y') }}</td>
+                                                                                                            <td>{{ $emi_end_date ? $emi_end_date->format('d/m/Y') : 'N/A' }}</td>
                                                                                                         </tr>
+                                                                                                        
                                                                                                         <tr>
                                                                                                             <th>EMI Amount</th>
                                                                                                             <td>{{ $emi_amount }}</td>
