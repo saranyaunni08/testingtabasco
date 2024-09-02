@@ -259,15 +259,39 @@ class RoomController extends Controller
 
     ));
 }
-
     public function create(Request $request)
     {
         $building_id = $request->building_id; 
         $room_type = $request->room_type;
         $building = Building::findOrFail($building_id);
 
-        return view('rooms.create', compact('building_id', 'building', 'room_type'));
+        // Initialize variables
+        $build_up_area = $request->input('build_up_area', 0);
+        $flat_super_build_up_area = $request->input('flat_super_build_up_area', 0);
+        $space_area = $request->input('space_area', 0);
+        $kiosk_area = $request->input('kiosk_area', 0);
+        $chair_space_in_sq = $request->input('chair_space_in_sq', 0);
+
+        $total_area_price = $flat_super_build_up_area + $build_up_area + $space_area + $kiosk_area + $chair_space_in_sq;
+        $super_build_up_area =  $building->super_built_up_area;
+        $result = $building->super_built_up_area - $total_area_price ;
+
+
+
+        $carpet_area = $request->input('carpet_area', 0);
+        $flat_carpet_area = $request->input('flat_carpet_area', 0);
+        
+        $total_carpet_area = $flat_carpet_area + $carpet_area + $space_area + $kiosk_area + $chair_space_in_sq;
+        $building_carpet_area =  $building->carpet_area;
+        $result_carpet = $building_carpet_area - $total_carpet_area ;
+       
+
+       
+        return view('rooms.create', compact('building_id', 'building', 'room_type', 'result','result_carpet'));
     }
+
+
+
     public function store(Request $request)
     {
         $validatedData = $request->validate([

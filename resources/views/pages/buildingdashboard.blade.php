@@ -46,6 +46,14 @@
                                             <div class="card-body">
                                                 <h4 class="card-title text-black" style="text-transform: capitalize">{{ $building->building_name }}</h4>
 
+                                                <!-- Building Details -->
+                                                <p><strong>Address:</strong> {{ $building->building_address }}</p>
+                                                <p><strong>Super Build-up Area:</strong> {{ $building->super_built_up_area }} sq.ft</p>
+                                                <p><strong>Carpet Area:</strong> {{ $building->carpet_area }} sq.ft</p>
+                                                <p><strong>Amenities:</strong> {{ $building->formatted_amenities }}</p>
+
+                                                
+                                                <!-- Chart -->
                                                 <canvas id="buildingChart_{{ $building->id }}" style="width: 100%; height: 200px;"></canvas>
 
                                                 <hr>

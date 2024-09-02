@@ -48,7 +48,6 @@ Route::controller(AuthController::class)->group(function () {
 
         Route::get('/building', [BuildingController::class, 'index'])->name('building.index');
 
-
         Route::delete('/buildings/{id}', [BuildingController::class, 'destroy'])->name('building.delete');
 
         Route::get('/buildings/{id}', [BuildingController::class, 'show'])->name('buildings.show');
@@ -62,52 +61,46 @@ Route::controller(AuthController::class)->group(function () {
 
         Route::get('/rooms', [RoomController::class, 'showRooms'])->name('rooms.index');
 
-
         Route::get('rooms/create/{building_id}', [RoomController::class, 'create'])->name('rooms.create');
         // Route::get('/rooms/create/{building_id}', [RoomController::class, 'create'])->name('rooms.create');
-
-
 
         Route::post('admin/rooms', [RoomController::class, 'store'])->name('rooms.store');
 
         Route::get('rooms', [RoomController::class, 'index'])->name('rooms.index');
       
         Route::put('rooms/{room}', [RoomController::class, 'update'])->name('rooms.update');
-
         
         Route::get('/shops/{id}/edit', [RoomController::class, 'edit'])->name('shops.edit');
+
         Route::put('/shops/{id}', [RoomController::class, 'update'])->name('shops.update');
+
         // Route::delete('/shops/{id}', [RoomController::class, 'destroy'])->name('shops.destroy');
         Route::post('/admin/rooms/store', [RoomController::class, 'store'])->name('admin.rooms.store');
         // Route::put('rooms/{id}/sell', [RoomController::class, 'processSell'])->name('rooms.sell');
         Route::get('/rooms/{room}/sell', [SaleController::class, 'create'])->name('sales.create');
 
         Route::get('/sales', [SaleController::class, 'showSales'])->name('sales.index');
+
         Route::get('/buildings/{building_id}/rooms', [RoomController::class, 'showRooms'])->name('buildings.rooms');
 
         Route::delete('sales/{id}/soft-delete', [SaleController::class, 'softDelete'])->name('sales.soft-delete');
 
-
         Route::post('/sales/store', [SaleController::class, 'store'])->name('sales.store');
+
         Route::post('/sales/cac-type', [SaleController::class, 'getCalculationType'])->name('sales.caltype');
 
-
-        
         Route::get('/customers/sales/{saleId}', [SaleController::class, 'showCustomer'])->name('customers.show');
-
-
-
 
         Route::get('/room-dashboard', [RoomController::class, 'dashboard'])->name('room-dashboard');
 
         Route::get('/room-dashboard/{building_id}', [RoomController::class, 'showBuildingRooms'])->name('building-room-dashboard');
 
-
-  
         Route::get('/get-gst-percentages', [MasterSettingsController::class, 'getGstPercentages'])->name('getGstPercentages');
 
         Route::get('/flats/{building_id}', [RoomController::class, 'showFlats'])->name('flats.index');
+
         Route::get('/shops/{building_id}', [RoomController::class, 'showShops'])->name('shops.index');
+
         Route::get('/buildings/{building_id}/chair-spaces', [RoomController::class, 'chairSpaces'])->name('chair-spaces.index');
 
         Route::get('/buildingdashboard', [BuildingController::class, 'index'])->name('buildingdashboard');

@@ -13,34 +13,56 @@ class BuildingController extends Controller
 {
     public function showRooms($building_id, Request $request)
 {
-    // Retrieve the specified building
+
     $building = Building::findOrFail($building_id);
     
-    // Retrieve rooms belonging to the specified building
+
     $rooms = Room::where('building_id', $building_id)->get();
     
-    // Check if a customer_id is provided in the request
+
     if ($request->has('customer_id')) {
         $customer_id = $request->input('customer_id');
-        // Retrieve customer names associated with the rooms in the specified building
+
         $customerNames = Sale::whereIn('room_id', $rooms->pluck('id'))
                             ->where('customer_id', $customer_id)
                             ->pluck('customer_name');
     } else {
-        // If no customer_id provided, set customerNames to null
+
         $customerNames = null;
     }
 
-    // Pass the building, rooms, and customerNames to the view
+
     return view('rooms.show', compact('building', 'rooms', 'customerNames'));
 }
 
+public function index()
+{
+    $buildings = Building::all(); 
 
-    public function index()
-    {
-        $buildings = Building::all(); 
-        return view('pages.buildingdashboard', compact('buildings'));
-    }
+    $buildings = $buildings->map(function($building) {
+        // Decode JSON string into an array
+        $amenities = json_decode($building->amenities, true);
+
+        // Ensure amenities is an array before formatting
+        if (!is_array($amenities)) {
+            $amenities = [];
+        }
+
+        // Format amenities
+        $formattedAmenities = array_map(function($amenity) {
+            return $amenity['name'] . ' (' . $amenity['type'] . ')';
+        }, $amenities);
+        
+        // Add formatted amenities to the building model
+        $building->formatted_amenities = implode(', ', $formattedAmenities);
+
+        return $building;
+    });
+
+    return view('pages.buildingdashboard', compact('buildings'));
+}
+
+
     public function create()
     {
         return view('pages.addbuilding');
@@ -59,11 +81,19 @@ class BuildingController extends Controller
             'country' => 'required|string',
             'super_built_up_area' => 'required|integer',
             'carpet_area' => 'required|integer',
-            'parking_amount' => 'required|integer',
         ]);
-
-        $checkboxAmenities = implode(',', $request->input('building_amenities', []));
-
+    
+        // Process the amenities
+        $amenities = [];
+        if ($request->has('amenities')) {
+            foreach ($request->input('amenities') as $amenity) {
+                $amenities[] = [
+                    'name' => $amenity['name'],
+                    'type' => $amenity['type'],
+                ];
+            }
+        }
+    
         DB::table('buildings')->insert([
             'building_name' => $validatedData['building_name'],
             'no_of_floors' => $validatedData['no_of_floors'],
@@ -75,16 +105,15 @@ class BuildingController extends Controller
             'country' => $validatedData['country'],
             'super_built_up_area' => $validatedData['super_built_up_area'],
             'carpet_area' => $validatedData['carpet_area'],
-            'parking_amount' => $validatedData['parking_amount'],
-            'building_amenities' => $checkboxAmenities,
-            'additional_amenities' => $request->input('additional_amenities'),
+            'amenities' => json_encode($amenities), // Store the amenities as JSON
             'created_at' => now(),
             'updated_at' => now(),
         ]);
-
+    
         return redirect()->route('admin.dashboard')->with('success', 'Building created successfully.');
     }
-
+    
+    
     public function edit($id)
     {
         $building = DB::table('buildings')->where('id', $id)->first();
@@ -158,6 +187,16 @@ public function show($id)
 {
     // Fetch the building by ID
     $building = Building::findOrFail($id);
+
+    $amenities = json_decode($building->amenities, true);
+    
+    // Format amenities
+    $formattedAmenities = array_map(function($amenity) {
+        return $amenity['name'] . ' (' . $amenity['type'] . ')';
+    }, $amenities);
+    
+    // Add formatted amenities to the building model
+    $building->formatted_amenities = implode(', ', $formattedAmenities);
 
     // Fetch rooms related to the building
     $rooms = $building->rooms;

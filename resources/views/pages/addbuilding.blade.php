@@ -17,6 +17,7 @@
               <div class="row justify-content-center">
                 <div class="col-lg-8">
                   <div class="row">
+                    <!-- Existing form fields -->
                     <div class="col-md-6">
                       <div class="form-group mb-4">
                         <label class="form-label">Building Name</label>
@@ -88,38 +89,19 @@
                       </div>
                     </div>
 
-                    <div class="col-md-6">
-                      <div class="form-group mb-4">
-                        <label class="form-label">Parking Amount</label>
-                        <input name="parking_amount" type="text" class="form-control" required>
-                      </div>
-                    </div>
-                    
-                    
                     <div class="col-md-12">
                       <div class="form-group">
-                        <label class="form-label">Amenities</label><br>
-                        <div class="form-check form-check-inline">
-                          <input class="form-check-input" type="checkbox" id="amenity1" name="building_amenities[]" value="Swimming Pool" required>
-                          <label class="form-check-label" for="amenity1">Swimming Pool</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                          <input class="form-check-input" type="checkbox" id="amenity2" name="building_amenities[]" value="Gym">
-                          <label class="form-check-label" for="amenity2">Gym</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                          <input class="form-check-input" type="checkbox" id="amenity3" name="building_amenities[]" value="Parking">
-                          <label class="form-check-label" for="amenity3">Parking</label>
-                        </div>
+                        <label class="form-label">Number of Amenities</label>
+                        <input type="number" id="amenitiesCount" class="form-control" min="1" onchange="generateAmenitiesFields(this.value)">
                       </div>
                     </div>
+                    
+                    <div id="amenitiesFields" class="col-md-12">
+                      <!-- Amenities fields will be generated here -->
+                    </div>
+                    
 
-                    <div class="col-md-12">
-                      <div class="form-group mb-4">
-                        <label class="form-label">Additional Amenities</label>
-                        <input name="additional_amenities" type="text" class="form-control">
-                      </div>
-                    </div>
+                    
                   </div>
                 </div>
               </div>
@@ -134,5 +116,25 @@
     </div>
   </div>
 </div>
+
+<script>
+  function generateAmenitiesFields(count) {
+    const amenitiesFields = document.getElementById('amenitiesFields');
+    amenitiesFields.innerHTML = '';
+
+    for (let i = 1; i <= count; i++) {
+      const field = `
+        <div class="form-group mb-2">
+          <label for="amenityName${i}">Amenity ${i} Name</label>
+          <input type="text" id="amenityName${i}" name="amenities[${i}][name]" class="form-control" placeholder="Amenity Name" required>
+
+          <label for="amenityType${i}" class="mt-2">Amenity ${i} Type</label>
+          <input type="text" id="amenityType${i}" name="amenities[${i}][type]" class="form-control" placeholder="Amenity Type (e.g., Underground, Multi-equipped Gymnasium)" required>
+        </div>
+      `;
+      amenitiesFields.insertAdjacentHTML('beforeend', field);
+    }
+  }
+</script>
 
 @endsection
