@@ -28,7 +28,6 @@ class SaleController extends Controller
             'area_calculation_type' => 'required|string',
             'sale_amount' => 'required|numeric',
             'calculation_type' => 'nullable|string',
-            'parking_rate_per_sq_ft' => 'nullable|numeric',
             'total_sq_ft_for_parking' => 'nullable|numeric',
             'gst_percent' => 'required|numeric',
             'advance_payment' => 'required|string',
@@ -45,6 +44,8 @@ class SaleController extends Controller
             'cash_in_hand_paid_amount' => 'nullable|numeric',
             'cash_in_hand_status' => 'nullable|string',
             'cash_in_hand_partner_name' => 'nullable|string|max:255',
+            'parking_calculation_type' => 'required|string',
+            'parking_amount' => 'required|numeric',
         ]);
     
         $room = Room::find($validatedData['room_id']);
@@ -74,7 +75,8 @@ class SaleController extends Controller
         $sale->fill($validatedData);
         $sale->room_rate = $roomRate;
         $sale->total_amount = $totalAmount;
-        $sale->parking_amount = $parkingAmount;
+        $sale->parking_calculation_type = $validatedData['parking_calculation_type'];
+        $sale->parking_amount = $validatedData['parking_amount'];
         $sale->gst_amount = $gstAmount;
         $sale->total_with_gst = $totalWithGst;
         $sale->total_with_discount = $totalWithDiscount;

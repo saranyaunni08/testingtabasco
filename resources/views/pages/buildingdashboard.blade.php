@@ -1,6 +1,20 @@
 @extends('layouts.default', ['title' => 'Dashboard', 'page' => 'dashboard'])
 
 @section('content')
+<style>
+    a {
+        text-decoration: none;
+    }
+
+    .card a {
+        text-decoration: none;
+    }
+
+    .card a:hover {
+        text-decoration: none;
+    }
+</style>
+
 <div class="container-fluid py-4">
     <div class="row">
         <div class="col-12">

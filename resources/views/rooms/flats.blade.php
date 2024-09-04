@@ -8,7 +8,7 @@
                 <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
                     <div class="bg-gradient-info shadow-info border-radius-lg pt-4 pb-3 d-flex justify-content-between align-items-center">
                         <h6 class="text-white text-capitalize ps-3">Room Details</h6>
-                        <a href="{{ route('admin.rooms.create', ['building_id' => $building_id, 'room_type' => 'Flats']) }}" 
+                        <a href="{{ route('admin.rooms.create', ['building_id' => $building_id, 'room_type' => 'Flat']) }}" 
                            class="btn btn-outline-light float-end" 
                            style="background-color: #ffffff; border-color: #007bff; color: #007bff; font-weight: bold;" 
                            onmouseover="this.style.backgroundColor='#007bff'; this.style.color='#ffffff'" 

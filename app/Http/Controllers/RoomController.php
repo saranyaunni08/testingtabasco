@@ -342,6 +342,7 @@ class RoomController extends Controller
             'chair_space_rate' => 'nullable|string',
             'chair_space_expected_rate' => 'nullable|string',
             
+            
         ]);
 
         if ($validatedData['carpet_area'] && $validatedData['carpet_area_price']) {
@@ -579,13 +580,29 @@ class RoomController extends Controller
 
     public function showRooms($building_id)
     {
+        // Fetch rooms based on the building_id
         $rooms = Room::where('building_id', $building_id)->get();
-
-        return view('rooms.index', [
+    
+        // Define room type labels and data (this is just an example)
+        $roomTypeLabels = ['Flat', 'Shops', 'Table Space', 'Kiosk', 'Chair Space'];
+        $roomTypeData = [
+            // Example data, replace with actual data from your database
+            'Flat' => $rooms->where('room_type', 'flat')->count(),
+            'Shops' => $rooms->where('room_type', 'shop')->count(),
+            'Table Space' => $rooms->where('room_type', 'table_space')->count(),
+            'Kiosk' => $rooms->where('room_type', 'kiosk')->count(),
+            'Chair Space' => $rooms->where('room_type', 'chair_space')->count(),
+        ];
+    
+        // Pass the data to the view
+        return view('rooms.show', [
             'rooms' => $rooms,
-            'building_id' => $building_id, 
+            'building_id' => $building_id,
+            'roomTypeLabels' => $roomTypeLabels,
+            'roomTypeData' => $roomTypeData,
         ]);
     }
+    
     public function showFlats($building_id)
     {
         // Fetch the building
@@ -792,21 +809,5 @@ class RoomController extends Controller
         ]);
     }
     
-    // public function showSellPage($buildingId)
-    // {
-    //     Log::info('Building ID:', ['id' => $buildingId]);
-        
-    //     $building = Building::find($buildingId);
-    
-    //     if (!$building) {
-    //         abort(404, 'Building not found');
-    //     }
-    
-    //     $rooms = Room::where('building_id', $buildingId)->get();
-    //     $title = "Sell Room - " . $buildingId;
-    //     $page = "rooms";
-    
-    //     return view('rooms.sell', compact('building', 'rooms', 'title', 'page'));
-    // }
     
 }    
