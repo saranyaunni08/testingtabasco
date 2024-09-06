@@ -5,8 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Partner;
 use App\Models\Installment;
-Use Illuminate\Support\Facades\Log;
-
+use Illuminate\Support\Facades\Log;
 use App\Models\Sale;
 
 class PartnerController extends Controller
@@ -14,7 +13,6 @@ class PartnerController extends Controller
     public function create()
     {
         $title = 'Add New Partner';
-
         return view('partners.create', compact('title'));
     }
 
@@ -36,9 +34,9 @@ class PartnerController extends Controller
 
         return redirect()->route('admin.partners.create')->with('success', 'Partner added successfully!');
     }
+
     public function cashInHand()
     {
-        // Fetch all partners and their associated sales data
         $partners = Partner::select('partners.id', 'partners.first_name', 'partners.last_name')
             ->leftJoin('sales', 'partners.id', '=', 'sales.cash_in_hand_partner_name')
             ->selectRaw('
@@ -50,36 +48,63 @@ class PartnerController extends Controller
             ')
             ->groupBy('partners.id', 'partners.first_name', 'partners.last_name')
             ->get();
-    
-        // Define the title
+
+        $data = [];
+
+        foreach ($partners as $partner) {
+            $sales = Sale::where('cash_in_hand_partner_name', $partner->id)
+                ->whereNull('deleted_at')
+                ->get();
+
+            $partnersData = [];
+
+            foreach ($sales as $sale) {
+                $amountReceived = ($sale->in_hand_amount * $sale->cash_in_hand_percent) / 100;
+
+                $partnersData[] = [
+                    'sale_id' => $sale->id,
+                    'partner_name' => $partner->first_name . ' ' . $partner->last_name,
+                    'phone_number' => $partner->phone_number,
+                    'address' => $partner->address,
+                    'customer_name' => $sale->customer_name,
+                    'room_rate' => $sale->room_rate,
+                    'cash_in_hand_percent' => $sale->cash_in_hand_percent,
+                    'in_hand_amount' => $sale->in_hand_amount,
+                    'loan_type' => $sale->loan_type,
+                    'percentage' => $sale->cash_in_hand_percent,
+                    'amount_received' => $amountReceived
+                ];
+            }
+
+            $data[] = [
+                'partner_id' => $partner->id,
+                'partners' => $partnersData
+            ];
+        }
+
         $title = 'Cash In Hand';
-    
-        // Pass the partners and title to the view
-        return view('partners.cash_in_hand', compact('partners', 'title'));
+
+        return view('partners.cash_in_hand', compact('data', 'title'));
     }
-    
+
     public function markAsPaid(Request $request, Partner $partner)
     {
-        // Validate the request
         $validated = $request->validate([
             'payment_date' => 'required|date',
             'payment_amount' => 'required|numeric|min:0',
         ]);
 
-        // Find the latest sale related to this partner
         $sale = Sale::where('cash_in_hand_partner_name', $partner->id)
                     ->whereNull('deleted_at')
                     ->orderBy('created_at', 'desc')
                     ->first();
 
         if ($sale) {
-            // Update the sale with the payment amount and date
             $sale->cash_in_hand_paid_amount = $validated['payment_amount'];
             $sale->updated_at = $validated['payment_date'];
             $sale->save();
         }
 
-        // Redirect with success message
         return redirect()->route('admin.partners.cash_in_hand')->with('success', 'Payment marked successfully!');
     }
 
@@ -90,31 +115,28 @@ class PartnerController extends Controller
             $installmentDates = $request->input('installment_dates');
             $transactionDetails = $request->input('transaction_details');
             $bankDetails = $request->input('bank_details');
-    
-            // Validate that installments is an array
+
             if (is_array($installments)) {
                 foreach ($installments as $installmentId) {
                     $installment = Installment::find($installmentId);
-    
+
                     if ($installment) {
-                        // Update installment details
                         $installment->status = 'paid';
                         $installment->installment_date = $installmentDates[$installmentId] ?? $installment->installment_date;
                         $installment->transaction_details = $transactionDetails[$installmentId] ?? $installment->transaction_details;
                         $installment->bank_details = $bankDetails[$installmentId] ?? $installment->bank_details;
                         $installment->save();
                     } else {
-                        // Log or handle the case where 'id' is missing
                         Log::warning('Installment data missing or invalid', ['id' => $installmentId]);
                     }
                 }
-    
+
                 return redirect()->back()->with('success', 'Selected installments marked as paid.');
             }
         } catch (\Exception $e) {
             Log::error('Error marking installments as paid: ' . $e->getMessage());
         }
-    
+
         return redirect()->back()->with('error', 'No installments selected.');
     }
 }

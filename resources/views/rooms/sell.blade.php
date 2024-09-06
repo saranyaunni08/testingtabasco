@@ -235,13 +235,16 @@
                 </div>
 
                 <!-- Loan Type Dropdown -->
+                <div class="form-group">
+
                 <div id="loan_type_group">
                     <label for="loan_type">Loan Type:</label>
-                    <select id="loan_type" name="loan_type">
+                    <select class="form-control" id="loan_type" name="loan_type">
                         <option value="">Select Loan Type</option>
                         <option value="personal_loan">Personal Loan</option>
                         <option value="bank_loan">Bank Loan</option>
                     </select>
+                </div>
                 </div>
             
                 <div id="installment_fields" class="d-none">
