@@ -38,11 +38,11 @@
                                             <label for="room_type" class="form-label">Room Type</label>
                                             <select id="room_type" name="room_type" class="form-select" style="text-transform: uppercase;" required>
                                                 <option value="" disabled selected>Select Room Type</option>
-                                                <option value="Flat" {{ $room_type == 'Flat' ? 'selected' : '' }}>Flat</option>
-                                                <option value="Shops" {{ $room_type == 'Shops' ? 'selected' : '' }}>Shops</option>
-                                                <option value="Table space" {{ $room_type == 'Table space' ? 'selected' : '' }}>Table space</option>
-                                                <option value="Chair space" {{ $room_type == 'Chair space' ? 'selected' : '' }}>Chair space</option>
-                                                <option value="Kiosk" {{ $room_type == 'Kiosk' ? 'selected' : '' }}>Kiosk</option>
+                                                @foreach ($roomTypes as $type)
+                                                    <option value="{{ $type->name }}" {{ old('room_type') == $type->name ? 'selected' : '' }}>
+                                                        {{ $type->name }}
+                                                    </option>
+                                                @endforeach
                                             </select>
                                         </div>
 
@@ -138,6 +138,20 @@
                                         
                                             <label for="chair_rate" class="form-label mt-3">Chair Rate (sq ft)</label>
                                             <input type="text" name="chair_rate" class="form-control" style="text-transform: uppercase;">
+                                        </div>
+
+                                        <div class="col-md-6 mb-4" id="customFields" style="display: {{ !in_array($room_type, ['Flat', 'Shops', 'Table space', 'Kiosk', 'Chair space']) ? 'block' : 'none' }};">
+                                            <label for="custom_name" class="form-label">Custom Room Type Name</label>
+                                            <input type="text" name="custom_name" class="form-control" style="text-transform: uppercase;">
+                                        
+                                            <label for="custom_type" class="form-label mt-3">Custom Type</label>
+                                            <input type="text" name="custom_type" class="form-control" style="text-transform: uppercase;">
+                                        
+                                            <label for="custom_area" class="form-label mt-3">Custom Area (sq ft)</label>
+                                            <input type="text" name="custom_area" class="form-control" style="text-transform: uppercase;">
+                                        
+                                            <label for="custom_rate" class="form-label mt-3">Custom Rate (sq ft)</label>
+                                            <input type="text" name="custom_rate" class="form-control" style="text-transform: uppercase;">
                                         </div>
                                         
                                     </div>
@@ -326,5 +340,26 @@
         });
     });
 </script>
-
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const roomTypeSelect = document.querySelector('select[name="room_type"]');
+        const predefinedFields = document.querySelectorAll('#flatFields, #shopsFields, #tableSpaceFields, #kioskFields, #chairSpaceFields');
+        const customFields = document.querySelector('#customFields');
+        
+        roomTypeSelect.addEventListener('change', function() {
+            const selectedRoomType = this.value;
+    
+            // Hide predefined fields and show custom fields if the selected type is not in the predefined list
+            let isCustomType = true;
+            predefinedFields.forEach(field => {
+                const shouldShow = field.id === (selectedRoomType.toLowerCase().replace(' ', '') + 'Fields');
+                field.style.display = shouldShow ? 'block' : 'none';
+                if (shouldShow) isCustomType = false;
+            });
+    
+            customFields.style.display = isCustomType ? 'block' : 'none';
+        });
+    });
+    </script>
+    
 @endsection

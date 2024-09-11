@@ -9,7 +9,10 @@ use App\Models\Building;
 use App\Models\Sale;
 use App\Models\Installment;
 use App\Models\partner;
+use App\Models\RoomType;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
+
 
 
 
@@ -266,6 +269,9 @@ class RoomController extends Controller
         $room_type = $request->room_type;
         $building = Building::findOrFail($building_id);
 
+        // Fetch room types from the database
+        $roomTypes = RoomType::all();
+
         // Sum the relevant fields from the rooms table for the specified building
         $roomSums = Room::where('building_id', $building_id)
                         ->selectRaw('SUM(build_up_area) as total_build_up_area')
@@ -294,9 +300,9 @@ class RoomController extends Controller
         $building_carpet_area = $building->carpet_area;
         $result_carpet = $building_carpet_area - $total_carpet_area;
 
-        return view('rooms.create', compact('building_id', 'building', 'room_type', 'result', 'result_carpet'));
+        // Pass room types to the view
+        return view('rooms.create', compact('building_id', 'building', 'room_type', 'result', 'result_carpet', 'roomTypes'));
     }
-
     public function store(Request $request)
     {
         $validatedData = $request->validate([
@@ -341,9 +347,19 @@ class RoomController extends Controller
             'chair_space_in_sq' => 'nullable|string',
             'chair_space_rate' => 'nullable|string',
             'chair_space_expected_rate' => 'nullable|string',
+            'custom_name' => 'nullable|string',
+            'custom_type' => 'nullable|string',
+            'custom_area' => 'nullable|numeric',
+            'custom_rate' => 'nullable|numeric',
             
             
         ]);
+
+
+        $expected_custom_rate = isset($validatedData['custom_area']) && isset($validatedData['custom_rate'])
+        ? $validatedData['custom_area'] * $validatedData['custom_rate']
+        : null;
+
 
         if ($validatedData['carpet_area'] && $validatedData['carpet_area_price']) {
             $expected_carpet_area_price = $validatedData['carpet_area_price'] * $validatedData['carpet_area'];
@@ -381,12 +397,12 @@ class RoomController extends Controller
             $kiosk_expected_price = null;
         }
 
-        if ($validatedData ['chair_space_in_sq'] && $validatedData ['chair_space_rate']) {
-            $chair_space_expected_rate = $validatedData ['chair_space_in_sq'] * $validatedData ['chair_space_rate'];
+        if ($validatedData['chair_space_in_sq'] && isset($validatedData['chair_rate'])) {
+            $chair_space_expected_rate = $validatedData['chair_space_in_sq'] * $validatedData['chair_rate'];
         } else {
             $chair_space_expected_rate = null;
         }
-
+        
         $room = new Room();
         $room->fill($validatedData);
 
@@ -398,6 +414,14 @@ class RoomController extends Controller
         $room-> kiosk_expected_price = $kiosk_expected_price;
         $room-> chair_space_expected_rate = $chair_space_expected_rate;
 
+        if (!in_array($validatedData['room_type'], ['Flat', 'Shops', 'Table space', 'Kiosk', 'Chair space'])) {
+            $room->custom_name = $validatedData['custom_name'];
+            $room->custom_type = $validatedData['custom_type'];
+            $room->custom_area = $validatedData['custom_area'];
+            $room->custom_rate = $validatedData['custom_rate'];
+            $room->expected_custom_rate = $expected_custom_rate;
+
+        }
 
         $room->save();
 
@@ -809,5 +833,23 @@ class RoomController extends Controller
         ]);
     }
     
+        
+    public function showCustomRooms($building_id)
+    {
+        $building = Building::find($building_id);
+    
+        $predefinedRoomTypes = ['Flat', 'Shops', 'Table Space', 'Chair Space', 'Kiosk'];
+    
+        // Use Eloquent model to fetch rooms
+        $rooms = Room::where('building_id', $building_id)
+            ->whereNotIn('room_type', $predefinedRoomTypes)
+            ->whereNull('deleted_at')
+            ->with('sales') // Ensure 'sales' relationship is eager-loaded
+            ->get();
+    
+        $page = 'custom-rooms'; // Or any other appropriate value
+    
+        return view('rooms.custom_rooms', compact('rooms', 'building_id', 'page', 'building'));
+    }
     
 }    

@@ -84,41 +84,50 @@
         </a>
       </li>
 
-        
-        
-    
+      <li class="nav-item">
+        <a class="nav-link text-white {{ $page == 'create-roomtype' ? 'active bg-gradient-info' : '' }}" 
+           href="{{ route('admin.room_types.create') }}">
+            <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+                <i class="material-icons opacity-10">add_box</i> <!-- Icon for adding a new room type -->
+            </div>
+            <span class="nav-link-text ms-1">Create Room Type</span>
+        </a>
+      </li>
+      
+      
+
         @if(isset($rooms))
       
         <!-- Single Rooms entry outside the loop -->
-<li class="nav-item">
-  <a class="nav-link text-white {{ $page == 'rooms' ? 'active bg-gradient-info' : '' }}"
-     href="{{ route('admin.rooms.index', ['building_id' => $building->id]) }}">
-      <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
-          <i class="material-icons opacity-10">location_city</i>
-      </div>
-      <span class="nav-link-text ms-1" style="text-transform: capitalize">Rooms</span>
-  </a>
-</li>
+      <li class="nav-item">
+        <a class="nav-link text-white {{ $page == 'rooms' ? 'active bg-gradient-info' : '' }}"
+          href="{{ route('admin.rooms.index', ['building_id' => $building->id]) }}">
+            <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+                <i class="material-icons opacity-10">location_city</i>
+            </div>
+            <span class="nav-link-text ms-1" style="text-transform: capitalize">Rooms</span>
+        </a>
+      </li>
 
-<li class="nav-item">
-  <a class="nav-link text-white {{ $page == 'flats' ? 'active bg-gradient-info' : '' }}"
-     href="{{ route('admin.flats.index', ['building_id' => $building->id]) }}">
-      <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
-          <i class="material-icons opacity-10">apartment</i>
-      </div>
-      <span class="nav-link-text ms-1">Flats</span>
-  </a>
-</li>
+    <li class="nav-item">
+      <a class="nav-link text-white {{ $page == 'flats' ? 'active bg-gradient-info' : '' }}"
+        href="{{ route('admin.flats.index', ['building_id' => $building->id]) }}">
+          <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+              <i class="material-icons opacity-10">apartment</i>
+          </div>
+          <span class="nav-link-text ms-1">Flats</span>
+      </a>
+    </li>
 
-<li class="nav-item">
-  <a class="nav-link text-white {{ $page == 'shops' ? 'active bg-gradient-info' : '' }}"
-     href="{{ route('admin.shops.index', ['building_id' => $building->id]) }}">
-      <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
-          <i class="material-icons opacity-10">store</i>
-      </div>
-      <span class="nav-link-text ms-1">Shops</span>
-  </a>
-</li>
+    <li class="nav-item">
+      <a class="nav-link text-white {{ $page == 'shops' ? 'active bg-gradient-info' : '' }}"
+        href="{{ route('admin.shops.index', ['building_id' => $building->id]) }}">
+          <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+              <i class="material-icons opacity-10">store</i>
+          </div>
+          <span class="nav-link-text ms-1">Shops</span>
+      </a>
+    </li>
 
       <li class="nav-item">
           <a class="nav-link text-white {{ $page == 'table-spaces' ? 'active bg-gradient-info' : '' }}"
@@ -146,7 +155,17 @@
             </div>
             <span class="nav-link-text ms-1">Chair Spaces</span>
         </a>
+      </li>
+
+      <li class="nav-item {{ $page == 'custom-rooms' ? 'active bg-gradient-info' : '' }}">
+        <a class="nav-link text-white" href="{{ route('admin.custom_rooms', ['building_id' => $building->id]) }}">
+            <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+                <i class="material-icons opacity-10">room_service</i>
+            </div>
+            <span class="nav-link-text ms-1">Custom Rooms</span>
+        </a>
     </li>
+    
     
     
 

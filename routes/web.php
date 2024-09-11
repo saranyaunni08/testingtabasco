@@ -13,6 +13,8 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 use Illuminate\Support\Facades\Log;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Http\Controllers\PartnerController;
+use App\Http\Controllers\RoomTypeController;
+
 
 
 
@@ -39,7 +41,6 @@ Route::controller(AuthController::class)->group(function () {
     Route::middleware('auth:admin')->prefix('admin')->group(function () {
         Route::name('admin.')->group(function () {
         Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
-        Route::resource('rooms', RoomController::class);
         Route::get('/buildings', [BuildingController::class, 'index'])->name('building');
         Route::get('/add-building', [BuildingController::class, 'create'])->name('addbuilding');
         Route::get('/edit-building/{id}', [BuildingController::class, 'edit'])->name('building.editbuilding');
@@ -178,6 +179,21 @@ Route::controller(AuthController::class)->group(function () {
 
         // New route for marking as paid
         Route::put('/partners/{partner}/mark-paid', [PartnerController::class, 'markAsPaid'])->name('partners.mark_paid');
+
+
+            // Route to display the form for adding a new room type
+        Route::get('/room-types/create', [RoomTypeController::class, 'create'])->name('room_types.create');
+
+        // Route to store the new room type
+        Route::post('/room-types', [RoomTypeController::class, 'store'])->name('room_types.store');
+
+        // Route to display the list of room types
+        Route::get('/room-types', [RoomTypeController::class, 'index'])->name('room_types.index');
+
+        // In web.php or your routes file
+
+        Route::get('/custom-rooms/{building_id}', action: [RoomController::class, 'showCustomRooms'])->name('custom_rooms');
+
 
     });
 });
