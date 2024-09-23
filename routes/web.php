@@ -194,6 +194,8 @@ Route::controller(AuthController::class)->group(function () {
 
         Route::get('/custom-rooms/{building_id}', action: [RoomController::class, 'showCustomRooms'])->name('custom_rooms');
 
+        Route::get('/rooms/other-types-difference/{building_id}', [RoomController::class, 'otherRoomTypesDifference'])->name('rooms.other_types_difference');
+
 
     });
 });

@@ -69,50 +69,56 @@ public function index()
     }
 
     public function store(Request $request)
-    {
-        $validatedData = $request->validate([
-            'building_name' => 'required|string',
-            'no_of_floors' => 'required|integer|min:1',
-            'building_address' => 'required|string',
-            'street' => 'required|string',
-            'city' => 'required|string',
-            'pin_code' => 'required|integer',
-            'state' => 'required|string',
-            'country' => 'required|string',
-            'super_built_up_area' => 'required|integer',
-            'carpet_area' => 'required|integer',
-        ]);
-    
-        // Process the amenities
-        $amenities = [];
-        if ($request->has('amenities')) {
-            foreach ($request->input('amenities') as $amenity) {
-                $amenities[] = [
-                    'name' => $amenity['name'],
-                    'type' => $amenity['type'],
-                ];
-            }
+{
+    // Validate the request data
+    $validatedData = $request->validate([
+        'building_name' => 'required|string',
+        'no_of_floors' => 'required|integer|min:1',
+        'building_address' => 'required|string',
+        'street' => 'required|string',
+        'city' => 'required|string',
+        'pin_code' => 'required|integer',
+        'state' => 'required|string',
+        'country' => 'required|string',
+        'super_built_up_area_sq_m' => 'required|numeric|min:0', // Super Buildup Area (sq m)
+        'carpet_area_sq_m' => 'required|numeric|min:0', // Carpet Area (sq m)
+        'super_built_up_area' => 'required|numeric|min:0', // Super Buildup Area (sq ft)
+        'carpet_area' => 'required|numeric|min:0', // Carpet Area (sq ft)
+    ]);
+
+    // Process the amenities
+    $amenities = [];
+    if ($request->has('amenities')) {
+        foreach ($request->input('amenities') as $amenity) {
+            $amenities[] = [
+                'name' => $amenity['name'],
+                'type' => $amenity['type'],
+            ];
         }
-    
-        DB::table('buildings')->insert([
-            'building_name' => $validatedData['building_name'],
-            'no_of_floors' => $validatedData['no_of_floors'],
-            'building_address' => $validatedData['building_address'],
-            'street' => $validatedData['street'],
-            'city' => $validatedData['city'],
-            'pin_code' => $validatedData['pin_code'],
-            'state' => $validatedData['state'],
-            'country' => $validatedData['country'],
-            'super_built_up_area' => $validatedData['super_built_up_area'],
-            'carpet_area' => $validatedData['carpet_area'],
-            'amenities' => json_encode($amenities), // Store the amenities as JSON
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-    
-        return redirect()->route('admin.dashboard')->with('success', 'Building created successfully.');
     }
-    
+
+    // Insert data into the buildings table
+    DB::table('buildings')->insert([
+        'building_name' => $validatedData['building_name'],
+        'no_of_floors' => $validatedData['no_of_floors'],
+        'building_address' => $validatedData['building_address'],
+        'street' => $validatedData['street'],
+        'city' => $validatedData['city'],
+        'pin_code' => $validatedData['pin_code'],
+        'state' => $validatedData['state'],
+        'country' => $validatedData['country'],
+        'super_built_up_area_sq_m' => $validatedData['super_built_up_area_sq_m'], // Super Buildup Area (sq m)
+        'carpet_area_sq_m' => $validatedData['carpet_area_sq_m'], // Carpet Area (sq m)
+        'super_built_up_area' => $validatedData['super_built_up_area'], // Super Buildup Area (sq ft)
+        'carpet_area' => $validatedData['carpet_area'], // Carpet Area (sq ft)
+        'amenities' => json_encode($amenities), // Store the amenities as JSON
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    return redirect()->route('admin.dashboard')->with('success', 'Building created successfully.');
+}
+
     
     public function edit($id)
     {

@@ -13,8 +13,10 @@ class PartnerController extends Controller
     public function create()
     {
         $title = 'Add New Partner';
-        return view('partners.create', compact('title'));
+        $page = 'create-partner'; // Define the page variable
+        return view('partners.create', compact('title', 'page'));
     }
+    
 
     public function store(Request $request)
     {
@@ -48,19 +50,19 @@ class PartnerController extends Controller
             ')
             ->groupBy('partners.id', 'partners.first_name', 'partners.last_name')
             ->get();
-
+    
         $data = [];
-
+    
         foreach ($partners as $partner) {
             $sales = Sale::where('cash_in_hand_partner_name', $partner->id)
                 ->whereNull('deleted_at')
                 ->get();
-
+    
             $partnersData = [];
-
+    
             foreach ($sales as $sale) {
                 $amountReceived = ($sale->in_hand_amount * $sale->cash_in_hand_percent) / 100;
-
+    
                 $partnersData[] = [
                     'sale_id' => $sale->id,
                     'partner_name' => $partner->first_name . ' ' . $partner->last_name,
@@ -75,18 +77,19 @@ class PartnerController extends Controller
                     'amount_received' => $amountReceived
                 ];
             }
-
+    
             $data[] = [
                 'partner_id' => $partner->id,
                 'partners' => $partnersData
             ];
         }
-
+    
         $title = 'Cash In Hand';
-
-        return view('partners.cash_in_hand', compact('data', 'title'));
+        $page = 'cash_in_hand';  // Define the current page
+    
+        return view('partners.cash_in_hand', compact('data', 'title', 'page'));
     }
-
+    
     public function markAsPaid(Request $request, Partner $partner)
     {
         $validated = $request->validate([

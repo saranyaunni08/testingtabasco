@@ -851,5 +851,32 @@ class RoomController extends Controller
     
         return view('rooms.custom_rooms', compact('rooms', 'building_id', 'page', 'building'));
     }
+
+        
+    public function otherRoomTypesDifference($buildingId)
+    {
+        // Predefined room types to exclude
+        $predefinedRoomTypes = ['Flat', 'Shops', 'Table Space', 'Chair Space', 'Kiosk'];
+
+        // Find the building
+        $building = Building::findOrFail($buildingId);
+
+        // Fetch rooms with room types that are NOT in the predefined list and group them by floor
+        $rooms = Room::where('building_id', $buildingId)
+            ->whereNotIn('room_type', $predefinedRoomTypes)
+            ->whereNull('deleted_at')
+            ->with('sales') // Eager-load the sales relationship
+            ->get()
+            ->groupBy('room_floor'); // Group rooms by floor
+        
+        // Pass data to the view
+        return view('rooms.other_types_difference', [
+            'title' => 'Other Room Types Difference',
+            'page' => 'other_room_types_difference',
+            'building' => $building,
+            'rooms' => $rooms,
+        ]);
+    }
+
     
 }    

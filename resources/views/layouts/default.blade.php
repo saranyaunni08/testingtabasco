@@ -165,6 +165,8 @@
             <span class="nav-link-text ms-1">Custom Rooms</span>
         </a>
     </li>
+
+   
     
     
     
@@ -207,6 +209,16 @@
           <span class="nav-link-text">Table Spaces Differences</span>
       </a>
   </li>
+
+  <li class="nav-item {{ $page == 'other-types' ? 'active bg-gradient-info' : '' }}">
+    <a class="nav-link text-white" href="{{ route('admin.rooms.other_types_difference', ['building_id' => $building->id ?? 0]) }}">
+        <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+            <i class="material-icons opacity-10">view_list</i> <!-- Icon for other types -->
+        </div>
+        <span class="nav-link-text ms-1">Custom Rooms Differences</span>
+    </a>
+</li>
+
 
   <li class="nav-item {{ $page == 'cancelled-sales' ? 'active bg-gradient-info' : '' }}">
     <a class="nav-link" href="{{ route('admin.sales.cancelled') }}">

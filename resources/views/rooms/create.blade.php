@@ -46,7 +46,6 @@
                                             </select>
                                         </div>
 
-                                        <!-- Flat Fields -->
                                         <div class="col-md-6 mb-4" id="flatFields" style="display: {{ $room_type == 'Flat' ? 'block' : 'none' }};">
                                             <label for="flat_model" class="form-label">Flat Model</label>
                                             <input type="text" name="flat_model" class="form-control" style="text-transform: uppercase;">
@@ -64,7 +63,6 @@
                                             <input type="text" name="flat_carpet_area_price" class="form-control" style="text-transform: uppercase;">
                                         </div>
 
-                                      <!-- Shops Fields -->
                                         <div class="col-md-6 mb-4" id="shopsFields" style="display: {{ $room_type == 'Shops' ? 'block' : 'none' }};">
                                             <label for="shop_type" class="form-label">Shop Type</label>
                                             <input type="text" name="shop_type" id="shop_type" class="form-control" style="text-transform: uppercase;">
@@ -122,35 +120,36 @@
                                         </div>
 
                                         
-                                        <!-- Chair Space Fields -->
-                                        <div class="col-md-6 mb-4" id="chairSpaceFields" style="display: {{ $room_type == 'Chair space' ? 'block' : 'none' }};">
+                                       <!-- Chair Space fields -->
+                                        <div class="col-md-6 mb-4" id="chairSpaceFields" style="display: none;">
                                             <label for="chair_name" class="form-label">Chair Name</label>
                                             <input type="text" name="chair_name" class="form-control" style="text-transform: uppercase;">
+                                            
                                             <label for="chair_type" class="form-label mt-3">Chair Type</label>
                                             <select name="chair_type" class="form-select" style="text-transform: uppercase;">
                                                 <option value="" disabled selected>Select Chair Type</option>
                                                 <option value="Executive Chair">Executive Chair</option>
                                                 <option value="Recliner Chair">Recliner Chair</option>
                                             </select>
+                                            
                                             <label for="chair_space_in_sq" class="form-label mt-3">Chair Space (sq ft)</label>
                                             <input type="text" name="chair_space_in_sq" class="form-control" style="text-transform: uppercase;">
-                                            <div id="chairSpaceError" style="color: red;"></div> <!-- Add this line -->
-                                        
+                                            <div id="chairSpaceError" style="color: red;"></div>
+
                                             <label for="chair_rate" class="form-label mt-3">Chair Rate (sq ft)</label>
                                             <input type="text" name="chair_rate" class="form-control" style="text-transform: uppercase;">
                                         </div>
-
                                         <div class="col-md-6 mb-4" id="customFields" style="display: {{ !in_array($room_type, ['Flat', 'Shops', 'Table space', 'Kiosk', 'Chair space']) ? 'block' : 'none' }};">
-                                            <label for="custom_name" class="form-label">Custom Room Type Name</label>
+                                            <label for="custom_name" class="form-label"> Room Type Name</label>
                                             <input type="text" name="custom_name" class="form-control" style="text-transform: uppercase;">
                                         
-                                            <label for="custom_type" class="form-label mt-3">Custom Type</label>
+                                            <label for="custom_type" class="form-label mt-3"> Type</label>
                                             <input type="text" name="custom_type" class="form-control" style="text-transform: uppercase;">
                                         
-                                            <label for="custom_area" class="form-label mt-3">Custom Area (sq ft)</label>
+                                            <label for="custom_area" class="form-label mt-3"> Area (sq ft)</label>
                                             <input type="text" name="custom_area" class="form-control" style="text-transform: uppercase;">
                                         
-                                            <label for="custom_rate" class="form-label mt-3">Custom Rate (sq ft)</label>
+                                            <label for="custom_rate" class="form-label mt-3"> Rate (sq ft)</label>
                                             <input type="text" name="custom_rate" class="form-control" style="text-transform: uppercase;">
                                         </div>
                                         
@@ -177,137 +176,80 @@
         const result = parseFloat(document.getElementById('result').value);
         const result_carpet = parseFloat(document.getElementById('result_carpet').value);
 
-        const floorError = document.getElementById('floorError');
-        const superBuildUpError = document.getElementById('superBuildUpError');
-        const CapertAreaError = document.getElementById('CapertAreaError');
-        const shopsSuperBuildUpError = document.getElementById('shopsSuperBuildUpError');
-        const shopsCapertAreaError = document.getElementById('shopsCapertAreaError');
-        const tableSpaceError = document.getElementById('tableSpaceError');
-        const kioskError = document.getElementById('kioskError');
-        const chairSpaceError = document.getElementById('chairSpaceError');
+        const errors = {
+            floor: document.getElementById('floorError'),
+            superBuildUp: document.getElementById('superBuildUpError'),
+            carpet: document.getElementById('CapertAreaError'),
+            shopsSuperBuildUp: document.getElementById('shopsSuperBuildUpError'),
+            shopsCarpet: document.getElementById('shopsCapertAreaError'),
+            tableSpace: document.getElementById('tableSpaceError'),
+            kiosk: document.getElementById('kioskError'),
+            chairSpace: document.getElementById('chairSpaceError'),
+        };
 
-        const flatFields = document.getElementById('flatFields');
-        const shopsFields = document.getElementById('shopsFields');
-        const tableSpaceFields = document.getElementById('tableSpaceFields');
-        const kioskFields = document.getElementById('kioskFields');
-        const chairSpaceFields = document.getElementById('chairSpaceFields');
+        const fields = {
+            flat: document.getElementById('flatFields'),
+            shops: document.getElementById('shopsFields'),
+            tableSpace: document.getElementById('tableSpaceFields'),
+            kiosk: document.getElementById('kioskFields'),
+            chairSpace: document.getElementById('chairSpaceFields'),
+        };
 
-        const flatSuperBuildUpPriceInput = document.querySelector('input[name="flat_super_build_up_price"]');
-        const flatBuildUpAreaInput = document.querySelector('input[name="flat_build_up_area"]');
-        const flatCarpetAreaInput = document.querySelector('input[name="flat_carpet_area"]');
-
-        const shopsBuildUpAreaInput = document.querySelector('input[name="build_up_area"]');
-        const shopsCarpetAreaInput = document.querySelector('input[name="carpet_area"]');
-        
-        const tableSpaceAreaInput = document.querySelector('input[name="space_area"]');
-        const tableSpaceRateInput = document.querySelector('input[name="space_rate"]');
-        
-        const kioskAreaInput = document.querySelector('input[name="kiosk_area"]');
-        const kioskRateInput = document.querySelector('input[name="kiosk_rate"]');
-        
-        const chairSpaceInput = document.querySelector('input[name="chair_space_in_sq"]');
-        const chairRateInput = document.querySelector('input[name="chair_rate"]');
+        const inputValues = {
+            flat: {
+                superBuildUp: document.querySelector('input[name="flat_super_build_up_area"]'),
+                carpet: document.querySelector('input[name="flat_carpet_area"]'),
+            },
+            shops: {
+                buildUp: document.querySelector('input[name="build_up_area"]'),
+                carpet: document.querySelector('input[name="carpet_area"]'),
+            },
+            tableSpace: {
+                area: document.querySelector('input[name="space_area"]'),
+            },
+            kiosk: {
+                area: document.querySelector('input[name="kiosk_area"]'),
+            },
+            chairSpace: {
+                area: document.querySelector('input[name="chair_space_in_sq"]'),
+            },
+        };
 
         function toggleFields(roomType) {
-            flatFields.style.display = roomType === 'Flat' ? 'block' : 'none';
-            shopsFields.style.display = roomType === 'Shops' ? 'block' : 'none';
-            tableSpaceFields.style.display = roomType === 'Table space' ? 'block' : 'none';
-            kioskFields.style.display = roomType === 'Kiosk' ? 'block' : 'none';
-            chairSpaceFields.style.display = roomType === 'Chair space' ? 'block' : 'none';
+            Object.values(fields).forEach(field => {
+                field.style.display = field.id === roomType + 'Fields' ? 'block' : 'none';
+            });
         }
 
-        function validateFloorNumber() {
-            const floorValue = parseInt(roomFloorInput.value);
-            if (floorValue > noOfFloors) {
-                floorError.textContent = `The floor number cannot be greater than ${noOfFloors}.`;
+        function validateField(value, limit, errorElement) {
+            if (!isNaN(value) && value > limit) {
+                errorElement.textContent = `Value out of range. It should not exceed ${limit}.`;
             } else {
-                floorError.textContent = '';
-            }
-        }
-
-        function validateSuperBuildUpArea() {
-            const flatBuildUpAreaValue = parseFloat(flatBuildUpAreaInput.value);
-            if (!isNaN(flatBuildUpAreaValue) && flatBuildUpAreaValue > result) {
-                superBuildUpError.textContent = `Value out of range. It should not exceed ${result}.`;
-            } else {
-                superBuildUpError.textContent = '';
-            }
-        }
-
-        function validateCarpetArea() {
-            const flatCarpetAreaValue = parseFloat(flatCarpetAreaInput.value);
-            if (!isNaN(flatCarpetAreaValue) && flatCarpetAreaValue > result_carpet) {
-                CapertAreaError.textContent = `Value out of range. It should not exceed ${result_carpet}.`;
-            } else {
-                CapertAreaError.textContent = '';
-            }
-        }
-
-        function validateShopsBuildUpArea() {
-            const shopsBuildUpAreaValue = parseFloat(shopsBuildUpAreaInput.value);
-            if (!isNaN(shopsBuildUpAreaValue) && shopsBuildUpAreaValue > result) {
-                shopsSuperBuildUpError.textContent = `Value out of range. It should not exceed ${result}.`;
-            } else {
-                shopsSuperBuildUpError.textContent = '';
-            }
-        }
-
-        function validateShopsCarpetArea() {
-            const shopsCarpetAreaValue = parseFloat(shopsCarpetAreaInput.value);
-            if (!isNaN(shopsCarpetAreaValue) && shopsCarpetAreaValue > result_carpet) {
-                shopsCapertAreaError.textContent = `Value out of range. It should not exceed ${result_carpet}.`;
-            } else {
-                shopsCapertAreaError.textContent = '';
-            }
-        }
-
-        function validateTableSpaceFields() {
-            const tableSpaceAreaValue = parseFloat(tableSpaceAreaInput.value);
-            if (!isNaN(tableSpaceAreaValue) && tableSpaceAreaValue > result) {
-                tableSpaceError.textContent = `Value out of range. It should not exceed ${result}.`;
-            } else {
-                tableSpaceError.textContent = '';
-            }
-        }
-
-        function validateKioskFields() {
-            const kioskAreaValue = parseFloat(kioskAreaInput.value);
-            if (!isNaN(kioskAreaValue) && kioskAreaValue > result) {
-                kioskError.textContent = `Value out of range. It should not exceed ${result}.`;
-            } else {
-                kioskError.textContent = '';
-            }
-        }
-
-        function validateChairSpaceFields() {
-            const chairSpaceValue = parseFloat(chairSpaceInput.value);
-            if (!isNaN(chairSpaceValue) && chairSpaceValue > result) {
-                chairSpaceError.textContent = `Value out of range. It should not exceed ${result}.`;
-            } else {
-                chairSpaceError.textContent = '';
+                errorElement.textContent = '';
             }
         }
 
         function validateFields() {
-            validateFloorNumber();
-            
+            const floorValue = parseInt(roomFloorInput.value);
+            errors.floor.textContent = floorValue > noOfFloors ? `The floor number cannot be greater than ${noOfFloors}.` : '';
+
             switch (roomTypeSelect.value) {
                 case 'Flat':
-                    validateSuperBuildUpArea();
-                    validateCarpetArea();
+                    validateField(parseFloat(inputValues.flat.superBuildUp.value), result, errors.superBuildUp);
+                    validateField(parseFloat(inputValues.flat.carpet.value), result_carpet, errors.carpet);
                     break;
                 case 'Shops':
-                    validateShopsBuildUpArea();
-                    validateShopsCarpetArea();
+                    validateField(parseFloat(inputValues.shops.buildUp.value), result, errors.shopsSuperBuildUp);
+                    validateField(parseFloat(inputValues.shops.carpet.value), result_carpet, errors.shopsCarpet);
                     break;
                 case 'Table space':
-                    validateTableSpaceFields();
+                    validateField(parseFloat(inputValues.tableSpace.area.value), result, errors.tableSpace);
                     break;
                 case 'Kiosk':
-                    validateKioskFields();
+                    validateField(parseFloat(inputValues.kiosk.area.value), result, errors.kiosk);
                     break;
                 case 'Chair space':
-                    validateChairSpaceFields();
+                    validateField(parseFloat(inputValues.chairSpace.area.value), result, errors.chairSpace);
                     break;
                 default:
                     break;
@@ -315,31 +257,26 @@
         }
 
         roomTypeSelect.addEventListener('change', function () {
-            toggleFields(roomTypeSelect.value);
-            validateFields(); // Validate when room type changes
+            toggleFields(this.value);
+            validateFields();
         });
 
-        roomFloorInput.addEventListener('input', validateFloorNumber);
+        roomFloorInput.addEventListener('input', validateFields);
 
-        flatBuildUpAreaInput.addEventListener('input', validateSuperBuildUpArea);
-        flatCarpetAreaInput.addEventListener('input', validateCarpetArea);
-        
-        shopsBuildUpAreaInput.addEventListener('input', validateShopsBuildUpArea);
-        shopsCarpetAreaInput.addEventListener('input', validateShopsCarpetArea);
-        
-        tableSpaceAreaInput.addEventListener('input', validateTableSpaceFields);
-        
-        kioskAreaInput.addEventListener('input', validateKioskFields);
-        
-        chairSpaceInput.addEventListener('input', validateChairSpaceFields);
+        Object.values(inputValues).forEach(room => {
+            Object.values(room).forEach(input => {
+                input.addEventListener('input', validateFields);
+            });
+        });
 
         document.getElementById('addRoomForm').addEventListener('submit', function(event) {
-            if (floorError.textContent || superBuildUpError.textContent || CapertAreaError.textContent || shopsSuperBuildUpError.textContent || shopsCapertAreaError.textContent || tableSpaceError.textContent || kioskError.textContent || chairSpaceError.textContent) {
-                event.preventDefault(); // Prevent form submission if there are validation errors
+            if (Object.values(errors).some(error => error.textContent)) {
+                event.preventDefault();
             }
         });
     });
 </script>
+
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const roomTypeSelect = document.querySelector('select[name="room_type"]');
@@ -360,6 +297,50 @@
             customFields.style.display = isCustomType ? 'block' : 'none';
         });
     });
+    </script>
+    <script>
+   document.addEventListener('DOMContentLoaded', function () {
+    const roomTypeSelect = document.getElementById('room_type');
+    const chairSpaceFields = document.getElementById('chairSpaceFields');
+    const tableSpaceFields = document.getElementById('tableSpaceFields');
+    const customFields = document.getElementById('customFields');
+
+    function toggleFields() {
+        const roomType = roomTypeSelect.value;
+
+        // Show Chair Space fields if 'Chair space' is selected
+        if (roomType === 'Chair space') {
+            chairSpaceFields.style.display = 'block';
+            tableSpaceFields.style.display = 'none';
+            customFields.style.display = 'none';
+        }
+        // Show Table Space fields if 'Table space' is selected
+        else if (roomType === 'Table space') {
+            tableSpaceFields.style.display = 'block';
+            chairSpaceFields.style.display = 'none';
+            customFields.style.display = 'none';
+        }
+        // Show custom fields for non-standard room types
+        else if (!['Flat', 'Shops', 'Table space', 'Kiosk', 'Chair space'].includes(roomType)) {
+            customFields.style.display = 'block';
+            chairSpaceFields.style.display = 'none';
+            tableSpaceFields.style.display = 'none';
+        }
+        // Hide all fields for other room types
+        else {
+            chairSpaceFields.style.display = 'none';
+            tableSpaceFields.style.display = 'none';
+            customFields.style.display = 'none';
+        }
+    }
+
+    // Call toggleFields when the page loads to ensure the correct initial state
+    toggleFields();
+
+    // Add event listener for room_type change
+    roomTypeSelect.addEventListener('change', toggleFields);
+});
+
     </script>
     
 @endsection

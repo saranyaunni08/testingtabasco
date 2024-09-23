@@ -59,7 +59,6 @@
                         <input name="pin_code" type="text" class="form-control" pattern="[0-9]*" required>
                       </div>
                     </div>
-                    
 
                     <div class="col-md-6">
                       <div class="form-group mb-4">
@@ -74,21 +73,38 @@
                         <input name="country" type="text" class="form-control" required>
                       </div>
                     </div>
-                    
+
+                    <!-- Super Buildup Area (sq m) and (sq ft) fields -->
                     <div class="col-md-6">
                       <div class="form-group mb-4">
-                        <label class="form-label">Super Buildup Area</label>
-                        <input name="super_built_up_area" type="text" class="form-control" required>
+                        <label class="form-label">Super Buildup Area (sq m)</label>
+                        <input name="super_built_up_area_sq_m" id="superBuildUpAreaSqM" type="text" class="form-control" oninput="convertSuperBuildUpAreaToSqFt()" required>
                       </div>
                     </div>
 
                     <div class="col-md-6">
                       <div class="form-group mb-4">
-                        <label class="form-label">Carpet Area</label>
-                        <input name="carpet_area" type="text" class="form-control" required>
+                        <label class="form-label">Super Buildup Area (sq ft)</label>
+                        <input name="super_built_up_area" id="superBuildUpAreaSqFt" type="text" class="form-control" readonly required>
                       </div>
                     </div>
 
+                    <!-- Carpet Area (sq m) and (sq ft) fields -->
+                    <div class="col-md-6">
+                      <div class="form-group mb-4">
+                        <label class="form-label">Carpet Area (sq m)</label>
+                        <input name="carpet_area_sq_m" id="carpetAreaSqM" type="text" class="form-control" oninput="convertCarpetAreaToSqFt()" required>
+                      </div>
+                    </div>
+
+                    <div class="col-md-6">
+                      <div class="form-group mb-4">
+                        <label class="form-label">Carpet Area (sq ft)</label>
+                        <input name="carpet_area" id="carpetAreaSqFt" type="text" class="form-control" readonly required>
+                      </div>
+                    </div>
+
+                    <!-- Number of Amenities field -->
                     <div class="col-md-12">
                       <div class="form-group">
                         <label class="form-label">Number of Amenities</label>
@@ -99,9 +115,7 @@
                     <div id="amenitiesFields" class="col-md-12">
                       <!-- Amenities fields will be generated here -->
                     </div>
-                    
 
-                    
                   </div>
                 </div>
               </div>
@@ -118,6 +132,24 @@
 </div>
 
 <script>
+  // Conversion factor for square meters to square feet
+  const SQ_METER_TO_SQ_FT = 10.7639;
+
+  // Function to convert Super Buildup Area from sq m to sq ft
+  function convertSuperBuildUpAreaToSqFt() {
+    const superBuildUpAreaSqM = document.getElementById('superBuildUpAreaSqM').value;
+    const superBuildUpAreaSqFt = superBuildUpAreaSqM * SQ_METER_TO_SQ_FT;
+    document.getElementById('superBuildUpAreaSqFt').value = superBuildUpAreaSqFt.toFixed(2); // Show result in 2 decimal places
+  }
+
+  // Function to convert Carpet Area from sq m to sq ft
+  function convertCarpetAreaToSqFt() {
+    const carpetAreaSqM = document.getElementById('carpetAreaSqM').value;
+    const carpetAreaSqFt = carpetAreaSqM * SQ_METER_TO_SQ_FT;
+    document.getElementById('carpetAreaSqFt').value = carpetAreaSqFt.toFixed(2); // Show result in 2 decimal places
+  }
+
+  // Function to dynamically generate amenities fields
   function generateAmenitiesFields(count) {
     const amenitiesFields = document.getElementById('amenitiesFields');
     amenitiesFields.innerHTML = '';

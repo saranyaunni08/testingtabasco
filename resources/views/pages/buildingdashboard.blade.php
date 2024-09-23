@@ -13,6 +13,12 @@
     .card a:hover {
         text-decoration: none;
     }
+    .violet-text {
+        color: #9966ff;
+    }
+    .blue-text {
+        color: #007bff;
+    }
 </style>
 
 <div class="container-fluid py-4">
@@ -21,8 +27,8 @@
             <div class="card my-4">
                 <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
                     <div class="bg-gradient-info shadow-info border-radius-lg pt-4 pb-3 d-flex justify-content-between align-items-center">
-                        <h6 class="text-white text-capitalize ps-3" style="text-transform: capitalize">Total Buildings</h6>
-                        <a href="{{ route('admin.addbuilding') }}" class="btn btn-light">Add Building</a>
+                        <h3 class="text-white text-capitalize ps-3" style="text-transform: capitalize">Total Buildings</h3>
+                        <a href="{{ route('admin.addbuilding') }}" class="btn btn-light">Add Building</a>   
                     </div>
                 </div>
 
@@ -58,13 +64,15 @@
                                     <div class="card shadow">
                                         <a href="{{ route('admin.rooms.index', ['building_id' => $building->id]) }}">
                                             <div class="card-body">
-                                                <h4 class="card-title text-black" style="text-transform: capitalize">{{ $building->building_name }}</h4>
+                                                <h4 class="card-title blue-text" style="text-transform: capitalize ">{{ $building->building_name }}</h4>
 
                                                 <!-- Building Details -->
-                                                <p><strong>Address:</strong> {{ $building->building_address }}</p>
-                                                <p><strong>Super Build-up Area:</strong> {{ $building->super_built_up_area }} sq.ft</p>
-                                                <p><strong>Carpet Area:</strong> {{ $building->carpet_area }} sq.ft</p>
-                                                <p><strong>Amenities:</strong> {{ $building->formatted_amenities }}</p>
+                                                <p class="violet-text"><strong >Address:</strong> {{ $building->building_address }}</p>
+                                                <p class="violet-text"><strong>Super Build-up Area(sq m):</strong> {{ $building->super_built_up_area_sq_m }} sq.ft</p>
+                                                <p class="violet-text"><strong>Super Build-up Area:</strong> {{ $building->super_built_up_area }} sq.ft</p>
+                                                <p class="violet-text"><strong>Carpet Area (sq m):</strong> {{ $building->carpet_area_sq_m }} sq.ft</p>
+                                                <p class="violet-text"><strong>Carpet Area:</strong> {{ $building->carpet_area }} sq.ft</p>
+                                                <p class="violet-text"><strong>Amenities:</strong> {{ $building->formatted_amenities }}</p>
 
                                                 
                                                 <!-- Chart -->

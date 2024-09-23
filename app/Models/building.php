@@ -20,8 +20,10 @@ class Building extends Model
         'pin_code',
         'state',
         'country',
-        'super_built_up_area',
-        'carpet_area',
+        'super_built_up_area',         // Super Built-Up Area (sq ft)
+        'carpet_area',                 // Carpet Area (sq ft)
+        'super_built_up_area_sq_m',    // Super Built-Up Area (sq m)
+        'carpet_area_sq_m',            // Carpet Area (sq m)
         'building_amenities',
         'additional_amenities',
     ];
@@ -30,5 +32,4 @@ class Building extends Model
     {
         return $this->hasMany(Room::class);
     }
-
 }
