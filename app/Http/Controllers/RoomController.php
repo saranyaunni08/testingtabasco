@@ -270,7 +270,7 @@ class RoomController extends Controller
         $building = Building::findOrFail($building_id);
 
         // Fetch room types from the database
-        $roomTypes = RoomType::all();
+        $roomTypes = ['Flat', 'Shops', 'Table space', 'Kiosk', 'Chair space']; // Example room types
 
         // Sum the relevant fields from the rooms table for the specified building
         $roomSums = Room::where('building_id', $building_id)
