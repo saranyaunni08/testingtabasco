@@ -137,7 +137,7 @@
                                             <div id="chairSpaceError" style="color: red;"></div>
 
                                             <label for="chair_rate" class="form-label mt-3">Chair Rate (sq ft)</label>
-                                            <input type="text" name="chair_rate" class="form-control" style="text-transform: uppercase;">
+                                            <input type="text" name="chair_space_rate" class="form-control" style="text-transform: uppercase;">
                                         </div>
 
 

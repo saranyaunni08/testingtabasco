@@ -270,7 +270,7 @@ class RoomController extends Controller
         $building = Building::findOrFail($building_id);
 
         // Fetch room types from the database
-        $roomTypes = ['Flat', 'Shops', 'Table space', 'Kiosk', 'Chair space']; // Example room types
+        $roomTypes =  RoomType::pluck('name')->toArray(); 
 
         // Sum the relevant fields from the rooms table for the specified building
         $roomSums = Room::where('building_id', $building_id)
@@ -397,8 +397,8 @@ class RoomController extends Controller
             $kiosk_expected_price = null;
         }
 
-        if ($validatedData['chair_space_in_sq'] && isset($validatedData['chair_rate'])) {
-            $chair_space_expected_rate = $validatedData['chair_space_in_sq'] * $validatedData['chair_rate'];
+        if ($validatedData['chair_space_in_sq'] && isset($validatedData['chair_space_rate'])) {
+            $chair_space_expected_rate = $validatedData['chair_space_in_sq'] * $validatedData['chair_space_rate'];
         } else {
             $chair_space_expected_rate = null;
         }
@@ -425,8 +425,20 @@ class RoomController extends Controller
 
         $room->save();
 
-        return redirect()->back()->with('success', 'Room added successfully!');
-    }
+        switch ($validatedData['room_type']) {
+            case 'Flat':
+                return redirect()->route('admin.flats.index', ['building_id' => $validatedData['building_id']])->with('success', 'Room added successfully!');
+                case 'Shops':
+                return redirect()->route('admin.shops.index', ['building_id' => $validatedData['building_id']])->with('success', 'Room added successfully!');
+            case 'Table space':
+                return redirect()->route('admin.table-spaces.index', ['building_id' => $validatedData['building_id']])->with('success', 'Room added successfully!');
+            case 'Kiosk':
+                return redirect()->route('admin.kiosks.index', ['building_id' => $validatedData['building_id']])->with('success', 'Room added successfully!');
+            case 'Chair space':
+                return redirect()->route('admin.chair-spaces.index', ['building_id' => $validatedData['building_id']])->with('success', 'Room added successfully!');
+            default:
+                return redirect()->route('admin.rooms.index', ['building_id' => $validatedData['building_id']])->with('success', 'Room added successfully!');
+        }    }
     
     public function destroy($building_id, $room_id)
     {

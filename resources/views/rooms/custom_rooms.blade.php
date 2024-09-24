@@ -8,28 +8,28 @@
             <div class="card my-4">
                 <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
                     <div class="bg-gradient-info shadow-info border-radius-lg pt-4 pb-3 d-flex justify-content-between align-items-center">
-                        <h6 class="text-white text-capitalize ps-3">Custom Room Details</h6>
+                        <h6 class="text-white text-capitalize ps-3">Room Details</h6>
                         <a href="{{ route('admin.rooms.create', ['building_id' => $building_id, 'room_type' => 'Custom']) }}" 
                             class="btn btn-outline-light float-end" style="background-color: #ffffff; border-color: #007bff;
                              color: #007bff; font-weight: bold;" onmouseover="this.style.backgroundColor='#007bff'; this.style.color='#ffffff'" 
-                             onmouseout="this.style.backgroundColor='#ffffff'; this.style.color='#007bff'">Add Custom Room</a>
+                             onmouseout="this.style.backgroundColor='#ffffff'; this.style.color='#007bff'">Add Room</a>
                     </div>
                 </div>
             </div>
 
             <div class="card">
-                <h5 class="card-header">Custom Rooms Table</h5>
+                <h5 class="card-header"> Rooms Table</h5>
                 <div class="card-body">
                     <div class="table-responsive">
                         <table id="customRoomsTable" class="table table-bordered" style="width:100%">
                             <thead class="thead-dark">
                                 <tr>
                                     <th>Room Floor</th>
-                                    <th>Custom Name</th>
-                                    <th>Custom Type</th>
-                                    <th>Custom Area</th>
-                                    <th>Custom Rate</th>
-                                    <th>Expected Custom Rate</th>
+                                    <th> Name</th>
+                                    <th> Type</th>
+                                    <th> Area</th>
+                                    <th> Rate</th>
+                                    <th>Expected  Rate</th>
                                     <th>Status</th>
                                     <th>Action</th>
                                 </tr>

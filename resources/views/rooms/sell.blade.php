@@ -2,221 +2,602 @@
 
 @section('content')
 <div class="container">
-    <h1>Sell Room</h1>
-
-    <form id="sellRoomForm" action="{{ route('admin.sales.store') }}" method="POST">
+    <h2>Sell Room</h2>
+    <form action="{{ route('admin.sales.store') }}" method="POST">
         @csrf
-        <input type="hidden" id="room_type" value="{{ $room->room_type }}">
-
-
-        <!-- Customer Information -->
+        <!-- Customer Name -->
         <div class="form-group">
-            <label for="customer_name">Customer Name</label>
+            <label class="font-weight-bold" for="customer_name">Customer Name</label>
             <input type="text" class="form-control" id="customer_name" name="customer_name" required>
         </div>
 
+        <!-- Customer Email -->
         <div class="form-group">
-            <label for="customer_email">Customer Email</label>
+            <label class="font-weight-bold" for="customer_email">Customer Email</label>
             <input type="email" class="form-control" id="customer_email" name="customer_email" required>
         </div>
 
+        <!-- Customer Contact -->
         <div class="form-group">
-            <label for="customer_contact">Customer Contact</label>
+            <label class="font-weight-bold" for="customer_contact">Customer Contact</label>
             <input type="text" class="form-control" id="customer_contact" name="customer_contact" required>
         </div>
 
-            <div class="form-group">
-                <label class="font-weight-bold" for="sale_amount">Sale Amount in sq</label>
-                <input type="number" class="form-control" id="sale_amount" name="sale_amount" oninput="calculateSoldAmount()" required>
-            </div>
+           <!-- Sale Amount -->
+           <div class="form-group">
+            <label class="font-weight-bold" for="sale_amount">Sale Amount (in sq ft)</label>
+            <input type="number" class="form-control" id="sale_amount" name="sale_amount" required>
+        </div>
 
-            <label for="calculation_type">Area Calculation Type</label>
+        <!-- Area Calculation Type -->
+        <div class="form-group">
+            <label class="font-weight-bold" for="area_calculation_type">Area Calculation Type</label>
             <select class="form-control" id="area_calculation_type" name="area_calculation_type" required>
-                <option value="" selected disabled>Select</option>
-                <option value="carpet_area_rate">Carpet Area</option>
-                <option value="built_up_area_rate">Super Built-up Area</option>
+                <option value="" disabled selected>Select Area Type</option>
+                <option value="super_build_up_area">Super Build-Up Area</option>
+                <option value="carpet_area">Carpet Area</option>
             </select>
-            
+        </div>
+
+        <!-- Read-only Fields for Super Build-Up and Carpet Area -->
         @if($room->room_type == 'Flat')
             <div class="form-group">
-                <label class="font-weight-bold" for="flat_build_up_area">Super Build-Up Area in sq</label>
+                <label class="font-weight-bold" for="flat_build_up_area">Super Build-Up Area (sq ft)</label>
                 <input type="text" class="form-control" id="flat_build_up_area" name="flat_build_up_area" value="{{ $room->flat_build_up_area }}" readonly>
             </div>
             <div class="form-group">
-                <label class="font-weight-bold" for="flat_carpet_area">Carpet Area in sq</label>
+                <label class="font-weight-bold" for="flat_carpet_area">Carpet Area (sq ft)</label>
                 <input type="text" class="form-control" id="flat_carpet_area" name="flat_carpet_area" value="{{ $room->flat_carpet_area }}" readonly>
             </div>
-    @endif  
+        @endif
 
-    @if($room->room_type == 'Shops')
+        <!-- Total Amount (Read-only) -->
         <div class="form-group">
-            <label class="font-weight-bold" for="build_up_area">Super Build-Up Area</label>
-            <input type="text" class="form-control" id="build_up_area" name="build_up_area" value="{{ $room->build_up_area }}" readonly>
-        </div>
-        <div class="form-group">
-            <label class="font-weight-bold" for="carpet_area">Carpet Area in sq</label>
-            <input type="text" class="form-control" id="carpet_area" name="carpet_area" value="{{ $room->carpet_area }}" readonly>
-    </div>
-@endif  
-    @if($room->room_type == 'Table space')
-        <div class="form-group">
-            <label class="font-weight-bold" for="space_area">Super Build-Up Area in sq</label>
-            <input type="text" class="form-control" id="space_area" name="space_area" value="{{ $room->space_area }}" readonly>
-        </div>
-@endif  
-    @if($room->room_type == 'Chair space')
-        <div class="form-group">
-            <label class="font-weight-bold" for="chair_space_in_sq">Super Build-Up Area in sq</label>
-            <input type="text" class="form-control" id="chair_space_in_sq" name="chair_space_in_sq" value="{{ $room->chair_space_in_sq }}" readonly>
-        </div>
-@endif  
-    @if($room->room_type == 'Kiosk')
-        <div class="form-group">
-            <label class="font-weight-bold" for="kiosk_area">Super Build-Up Area in sq</label>
-            <input type="text" class="form-control" id="kiosk_area" name="kiosk_area" value="{{ $room->kiosk_area }}" readonly>
-        </div>
-@endif  
-
-        <div class="form-group">
-            <label for="sold_amount">Sold Amount</label>
-            <input type="number" class="form-control" id="sold_amount" name="sold_amount" readonly>
+            <label class="font-weight-bold" for="total_amount">Total Amount</label>
+            <input type="text" class="form-control" id="total_amount" name="total_amount" readonly>
         </div>
 
-
-       
-        <!-- Parking Information -->
+        <!-- Discount Percentage -->
         <div class="form-group">
-            <label for="calculation_type">Calculation Type for Parking</label>
-            <select class="form-control" id="calculation_type" name="calculation_type" required>
-                <option value="no_parking">No Parking Needed</option>
-                <option value="fixed">Fixed Parking</option>
-            </select>
+            <label class="font-weight-bold" for="discount_percentage">Discount Percentage (%)</label>
+            <input type="number" class="form-control" id="discount_percentage" name="discount_percentage" min="0" max="100" step="0.01">
         </div>
 
-        <div class="form-group" id="fixed_parking_amount_container" style="display:none;">
-            <label for="fixed_parking_amount">Fixed Parking Amount</label>
-            <input type="number" class="form-control" id="fixed_parking_amount" name="fixed_parking_amount">
+        <!-- Discount Amount -->
+        <div class="form-group">
+            <label class="font-weight-bold" for="discount_amount">Discount Amount</label>
+            <input type="text" class="form-control" id="discount_amount" name="discount_amount">
         </div>
 
-        <!-- Discount -->
+        <!-- Final Amount (After Discount) -->
         <div class="form-group">
-            <label for="discount_percent">Discount (%)</label>
-            <input type="number" class="form-control" id="discount_percent" name="discount_percent" value="0" required>
+            <label class="font-weight-bold" for="final_amount">Final Amount (After Discount)</label>
+            <input type="text" class="form-control" id="final_amount" name="final_amount" readonly>
         </div>
 
+        <!-- Cash Value Percentage -->
         <div class="form-group">
-            <label for="discount_amount">Discount Amount</label>
-            <input type="number" class="form-control" id="discount_amount" name="discount_amount" readonly>
+            <label class="font-weight-bold" for="cash_value_percentage">Cash Value Percentage (%)</label>
+            <input type="number" class="form-control" id="cash_value_percentage" name="cash_value_percentage" min="0" max="100" step="0.01">
         </div>
 
-        <!-- Total Cash Information -->
+        <!-- Cash Value Amount -->
         <div class="form-group">
-            <label for="cash_value_percent">Total Cash Value (%)</label>
-            <input type="number" class="form-control" id="cash_value_percent" name="cash_value_percent" required>
+            <label class="font-weight-bold" for="cash_value_amount">Cash Value Amount</label>
+            <input type="text" class="form-control" id="cash_value_amount" name="cash_value_amount">
+        </div>
+        <!-- Additional Amount Section -->
+        <div class="form-group">
+            <label>Additional Amounts</label>
+            <div id="additional-amounts-container">
+                <!-- Additional fields will be appended here dynamically -->
+            </div>
+            <button type="button" id="add-more" class="btn btn-success mt-2">+ Add More</button>
         </div>
 
+        <!-- Total Cash Value (With Additional Amounts) -->
         <div class="form-group">
-            <label for="cash_value_amount">Total Cash Amount</label>
-            <input type="number" class="form-control" id="cash_value_amount" name="cash_value_amount" required>
+            <label for="total_cash_value">Total Cash Value (with Additional Amounts)</label>
+            <input type="text" class="form-control" id="total_cash_value" name="total_cash_value" readonly>
         </div>
-
-        <!-- Additional Cash Amounts -->
+         
         <div class="form-group">
-            <label for="add_other_amount">Add Other Amounts</label>
-            <button type="button" class="btn btn-primary" id="add_other_amount_button">+</button>
+            <label for="total_received_amount">Total Received Amount</label>
+            <input type="number" class="form-control" id="total_received_amount" name="total_received_amount" oninput="updatePartnerFields()">
         </div>
-
-        <div id="other_amounts_container"></div>
-
-        <!-- Received Cash Information -->
+        
+        <!-- Partner Selection (Checkboxes) -->
         <div class="form-group">
-            <label for="received_cash_amount">Received Cash Amount</label>
-            <input type="number" class="form-control" id="received_cash_amount" name="received_cash_amount" required>
-        </div>
-
-        <div class="form-group">
-            <label for="received_cash_percent">Received Cash Percentage (%)</label>
-            <input type="number" class="form-control" id="received_cash_percent" name="received_cash_percent" readonly>
-        </div>
-
-        <!-- Partner Distribution -->
-        <div class="form-group">
-            <label for="partners">Select Partners</label>
-            <div id="partners_container">
+            <label>Select Partners</label>
+            <div id="partner_checkbox_container">
                 @foreach($partners as $partner)
-                    <div class="form-check">
-                        <input type="checkbox" class="form-check-input" id="partner_{{ $partner->id }}" data-partner-id="{{ $partner->id }}">
-                        <label class="form-check-label" for="partner_{{ $partner->id }}">{{ $partner->first_name }}</label>
-                        <div class="form-group percentage-container" id="percentage_container_{{ $partner->id }}" style="display:none;">
-                            <label for="percentage_{{ $partner->id }}">Percentage</label>
-                            <input type="number" class="form-control" id="percentage_{{ $partner->id }}" data-partner-id="{{ $partner->id }}" name="percentage_{{ $partner->id }}">
-                            <label for="amount_{{ $partner->id }}">Amount</label>
-                            <input type="number" class="form-control" id="amount_{{ $partner->id }}" name="amount_{{ $partner->id }}" readonly>
-                        </div>
-                    </div>
+                <div class="form-check">
+                    <input class="form-check-input partner-checkbox" type="checkbox" value="{{ $partner->id }}" id="partner_{{ $partner->id }}" onchange="togglePartnerFields({{ $partner->id }})">
+                    <label class="form-check-label" for="partner_{{ $partner->id }}">
+                        {{ $partner->first_name }}
+                    </label>
+                </div>
                 @endforeach
             </div>
         </div>
 
+        <!-- Partner Amount Distribution -->
+        <div id="partner_distribution_container"></div>
+
+        <div id="total_percentage_error" style="color:red;"></div>
+
+
+        <div id="additional-expenses-container">
+            <h5>Other Expenses</h5>
+            <div class="row mb-2" id="additional-expense-0">
+                <div class="col-md-6">
+                    <input type="text" class="form-control" name="expense_descriptions[]" placeholder="Description">
+                </div>
+                <div class="col-md-4">
+                    <input type="number" class="form-control percentage-input" name="expense_percentages[]" placeholder="Percentage" step="0.01" oninput="calculateExpenseAmount(this); updateTotalPercentage()">
+                </div>
+                <div class="col-md-2">
+                    <input type="text" class="form-control amount-display" placeholder="Amount" oninput="calculatePercentage(this);" />
+                </div>
+            </div>
+            <button type="button" class="btn btn-primary" id="add-more-expenses">Add More Expenses</button>
+        </div>
+        
+        
+
+        <!-- Remaining Cash Value -->
+        <div class="form-group">
+            <label for="remaining_cash_value">Remaining Cash Value</label>
+            <input type="text" class="form-control" id="remaining_cash_value" name="remaining_cash_value" readonly>
+        </div>
+
+        <div class="form-group">
+            <label for="cheque_amount">Cheque Amount</label>
+            <input type="text" class="form-control" id="cheque_amount" name="cheque_amount" readonly>
+        </div>
+               
 
         <!-- Submit Button -->
-        <button type="submit" class="btn btn-primary">Submit</button>
+        <button type="submit" class="btn btn-primary">Submit Sale</button>
     </form>
 </div>
-@endsection
+   
 
-@section('scripts')
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const saleAmountInput = document.getElementById('sale_amount');
-        const areaCalculationTypeSelect = document.getElementById('area_calculation_type');
-        const soldAmountInput = document.getElementById('sold_amount');
+    document.getElementById('sale_amount').addEventListener('input', calculateTotalAmount);
+    document.getElementById('area_calculation_type').addEventListener('change', calculateTotalAmount);
+    document.getElementById('discount_percentage').addEventListener('input', calculateDiscountFromPercentage);
+    document.getElementById('discount_amount').addEventListener('input', calculateDiscountFromAmount);
+    document.getElementById('cash_value_percentage').addEventListener('input', calculateCashFromPercentage);
+    document.getElementById('cash_value_amount').addEventListener('input', calculateCashFromAmount);
 
-        const flatBuildUpAreaInput = document.getElementById('flat_build_up_area');
-        const flatCarpetAreaInput = document.getElementById('flat_carpet_area');
-        const buildUpAreaInput = document.getElementById('build_up_area');
-        const carpetAreaInput = document.getElementById('carpet_area');
-        const spaceAreaInput = document.getElementById('space_area');
-        const chairSpaceInSqInput = document.getElementById('chair_space_in_sq');
-        const kioskAreaInput = document.getElementById('kiosk_area');
+    function calculateTotalAmount() {
+        let saleAmount = parseFloat(document.getElementById('sale_amount').value);
+        let areaType = document.getElementById('area_calculation_type').value;
+        let totalAmount = 0;
 
-        const flatBuildUpArea = flatBuildUpAreaInput ? parseFloat(flatBuildUpAreaInput.value) : 0;
-        const flatCarpetArea = flatCarpetAreaInput ? parseFloat(flatCarpetAreaInput.value) : 0;
-        const buildUpArea = buildUpAreaInput ? parseFloat(buildUpAreaInput.value) : 0;
-        const carpetArea = carpetAreaInput ? parseFloat(carpetAreaInput.value) : 0;
-        const spaceArea = spaceAreaInput ? parseFloat(spaceAreaInput.value) : 0;
-        const chairSpaceInSq = chairSpaceInSqInput ? parseFloat(chairSpaceInSqInput.value) : 0;
-        const kioskArea = kioskAreaInput ? parseFloat(kioskAreaInput.value) : 0;
-
-        // Function to calculate the sold amount
-        function calculateSoldAmount() {
-            const saleAmount = parseFloat(saleAmountInput.value);
-            console.log('Sale Amount:', saleAmount); // Log the sale amount to the console
-            const areaType = areaCalculationTypeSelect.value;
-            let result = 0;
-
-            if (!isNaN(saleAmount)) {
-                if (areaType === 'carpet_area_rate') {
-                    if (flatCarpetArea) {
-                        result = saleAmount * flatCarpetArea;
-                    } else {
-                        result = saleAmount * carpetArea;
-                    }
-                } else if (areaType === 'built_up_area_rate') {
-                    if (flatBuildUpArea) {
-                        result = saleAmount * flatBuildUpArea;
-                    } else {
-                        result = saleAmount * (buildUpArea || spaceArea || chairSpaceInSq || kioskArea);
-                    }
-                }
+        if (saleAmount && areaType) {
+            if (areaType === 'super_build_up_area') {
+                totalAmount = saleAmount * parseFloat(document.getElementById('flat_build_up_area')?.value || 0);
+            } else if (areaType === 'carpet_area') {
+                totalAmount = saleAmount * parseFloat(document.getElementById('flat_carpet_area')?.value || 0);
             }
-
-            soldAmountInput.value = result.toFixed(2);
         }
 
-        // Attach event listeners for input changes
-        saleAmountInput.addEventListener('input', calculateSoldAmount);
-        areaCalculationTypeSelect.addEventListener('change', calculateSoldAmount);
+        document.getElementById('total_amount').value = totalAmount.toFixed(2);
+        calculateDiscountFromPercentage();
+    }
+
+    function calculateDiscountFromPercentage() {
+        let totalAmount = parseFloat(document.getElementById('total_amount').value);
+        let discountPercentage = parseFloat(document.getElementById('discount_percentage').value);
+        let discountAmount = 0;
+
+        if (totalAmount && discountPercentage) {
+            discountAmount = totalAmount * (discountPercentage / 100);
+            document.getElementById('discount_amount').value = discountAmount.toFixed(2);
+        }
+
+        calculateFinalAmount();
+    }
+
+    function calculateDiscountFromAmount() {
+        let totalAmount = parseFloat(document.getElementById('total_amount').value);
+        let discountAmount = parseFloat(document.getElementById('discount_amount').value);
+        let discountPercentage = 0;
+
+        if (totalAmount && discountAmount) {
+            discountPercentage = (discountAmount / totalAmount) * 100;
+            document.getElementById('discount_percentage').value = discountPercentage.toFixed(2);
+        }
+
+        calculateFinalAmount();
+    }
+
+    function calculateFinalAmount() {
+        let totalAmount = parseFloat(document.getElementById('total_amount').value);
+        let discountAmount = parseFloat(document.getElementById('discount_amount').value);
+        let finalAmount = totalAmount - (discountAmount || 0);
+
+        document.getElementById('final_amount').value = finalAmount.toFixed(2);
+        calculateCashFromPercentage();
+    }
+    function calculateCashFromPercentage() {
+        let finalAmount = parseFloat(document.getElementById('final_amount').value);
+        let cashPercentage = parseFloat(document.getElementById('cash_value_percentage').value);
+        let cashAmount = 0;
+
+        if (finalAmount && cashPercentage) {
+            cashAmount = finalAmount * (cashPercentage / 100);
+            document.getElementById('cash_value_amount').value = cashAmount.toFixed(2);
+        }
+    }
+
+    function calculateCashFromAmount() {
+        let finalAmount = parseFloat(document.getElementById('final_amount').value);
+        let cashAmount = parseFloat(document.getElementById('cash_value_amount').value);
+        let cashPercentage = 0;
+
+        if (finalAmount && cashAmount) {
+            cashPercentage = (cashAmount / finalAmount) * 100;
+            document.getElementById('cash_value_percentage').value = cashPercentage.toFixed(2);
+        }
+    }
+</script>
+<script>
+    let additionalAmountIndex = 0;
+
+    document.getElementById('cash_value_percentage').addEventListener('input', calculateCashFromPercentage);
+    document.getElementById('cash_value_amount').addEventListener('input', calculateCashFromAmount);
+    document.getElementById('add-more').addEventListener('click', addAdditionalAmountField);
+
+    function calculateCashFromPercentage() {
+        let finalAmount = parseFloat(document.getElementById('final_amount').value);
+        let cashPercentage = parseFloat(document.getElementById('cash_value_percentage').value);
+        let cashAmount = 0;
+
+        if (finalAmount && cashPercentage) {
+            cashAmount = finalAmount * (cashPercentage / 100);
+            document.getElementById('cash_value_amount').value = cashAmount.toFixed(2);
+        }
+        updateTotalCashValue();
+    }
+
+    function calculateCashFromAmount() {
+        let finalAmount = parseFloat(document.getElementById('final_amount').value);
+        let cashAmount = parseFloat(document.getElementById('cash_value_amount').value);
+        let cashPercentage = 0;
+
+        if (finalAmount && cashAmount) {
+            cashPercentage = (cashAmount / finalAmount) * 100;
+            document.getElementById('cash_value_percentage').value = cashPercentage.toFixed(2);
+        }
+        updateTotalCashValue();
+    }
+
+    function addAdditionalAmountField() {
+        additionalAmountIndex++;
+
+        const container = document.getElementById('additional-amounts-container');
+        const newField = `
+            <div class="row mb-2" id="additional-amount-${additionalAmountIndex}">
+                <div class="col-md-6">
+                    <input type="text" class="form-control" name="additional_descriptions[]" placeholder="Description">
+                </div>
+                <div class="col-md-4">
+                    <input type="number" class="form-control additional-amount" name="additional_amounts[]" placeholder="Amount" step="0.01" oninput="updateTotalCashValue()">
+                </div>
+                <div class="col-md-2">
+                    <button type="button" class="btn btn-danger" onclick="removeAdditionalAmountField(${additionalAmountIndex})">Remove</button>
+                </div>
+            </div>
+        `;
+        container.insertAdjacentHTML('beforeend', newField);
+    }
+
+    function removeAdditionalAmountField(index) {
+        const element = document.getElementById(`additional-amount-${index}`);
+        if (element) element.remove();
+        updateTotalCashValue();
+    }
+
+    function updateTotalCashValue() {
+        let baseCashValue = parseFloat(document.getElementById('cash_value_amount').value) || 0;
+        let additionalAmounts = document.querySelectorAll('.additional-amount');
+        let totalAdditionalAmount = 0;
+
+        additionalAmounts.forEach(amountField => {
+            totalAdditionalAmount += parseFloat(amountField.value) || 0;
+        });
+
+        let totalCashValue = baseCashValue + totalAdditionalAmount;
+        document.getElementById('total_cash_value').value = totalCashValue.toFixed(2);
+    }
+</script>
+<script>
+    document.getElementById('final_amount').addEventListener('input', updateChequeAmount);
+document.getElementById('cash_value_amount').addEventListener('input', updateTotalCashValue);
+document.querySelectorAll('.additional-amount').forEach(field => field.addEventListener('input', updateTotalCashValue));
+
+function updateTotalCashValue() {
+    let baseCashValue = parseFloat(document.getElementById('cash_value_amount').value) || 0;
+    let additionalAmounts = document.querySelectorAll('.additional-amount');
+    let totalAdditionalAmount = 0;
+
+    additionalAmounts.forEach(amountField => {
+        totalAdditionalAmount += parseFloat(amountField.value) || 0;
     });
+
+    let totalCashValue = baseCashValue + totalAdditionalAmount;
+    document.getElementById('total_cash_value').value = totalCashValue.toFixed(2);
+
+    // Update Cheque Amount
+    updateChequeAmount();
+}
+
+function updateChequeAmount() {
+    let finalAmount = parseFloat(document.getElementById('final_amount').value) || 0;
+    let totalCashValue = parseFloat(document.getElementById('total_cash_value').value) || 0;
+
+    let chequeAmount = finalAmount - totalCashValue;
+
+    // Set the cheque amount in the readonly field
+    if (!isNaN(chequeAmount)) {
+        document.getElementById('cheque_amount').value = chequeAmount.toFixed(2);
+    } else {
+        document.getElementById('cheque_amount').value = '';
+    }
+}
+
+document.getElementById('received_amount').addEventListener('input', updateRemainingCashValue);
+
+function updateRemainingCashValue() {
+    let totalCashValue = parseFloat(document.getElementById('total_cash_value').value) || 0;
+    let receivedAmount = parseFloat(document.getElementById('received_amount').value) || 0;
+
+    let remainingCashValue = totalCashValue - receivedAmount;
+
+    // Set the remaining cash value in the readonly field
+    document.getElementById('remaining_cash_value').value = remainingCashValue.toFixed(2);
+
+    
+
+   
+}
+
+
+
+</script>
+<script>
+   // Function to show or hide partner fields based on checkbox selection
+function togglePartnerFields(partnerId) {
+    let container = document.getElementById('partner_distribution_container');
+    let checkbox = document.getElementById('partner_' + partnerId);
+    
+    if (checkbox.checked) {
+        // If checked, add percentage and amount fields
+        let partnerDiv = document.createElement('div');
+        partnerDiv.className = 'partner-field';
+        partnerDiv.id = 'partner_field_' + partnerId;
+        partnerDiv.innerHTML = `
+            <h5>Partner: ${document.querySelector('label[for="partner_' + partnerId + '"]').textContent}</h5>
+            <div class="form-group">
+                <label for="partner_${partnerId}_percentage">Percentage</label>
+                <input type="number" class="form-control partner-percentage" data-partner-id="${partnerId}" id="partner_${partnerId}_percentage" min="0" max="100" oninput="updatePartnerAmount(${partnerId}); validateTotalPercentage();">
+            </div>
+            <div class="form-group">
+                <label for="partner_${partnerId}_amount">Amount</label>
+                <input type="number" class="form-control partner-amount" data-partner-id="${partnerId}" id="partner_${partnerId}_amount" oninput="updatePartnerPercentage(${partnerId}); validateTotalPercentage();">
+            </div>
+        `;
+        container.appendChild(partnerDiv);
+    } else {
+        // If unchecked, remove the fields
+        let partnerDiv = document.getElementById('partner_field_' + partnerId);
+        if (partnerDiv) {
+            container.removeChild(partnerDiv);
+        }
+        validateTotalPercentage(); // Re-validate total percentage after removing a partner
+    }
+}
+
+// Function to update partner amount based on percentage entered
+function updatePartnerAmount(partnerId) {
+    let totalReceivedAmount = parseFloat(document.getElementById('total_received_amount').value) || 0;
+    let percentageField = document.getElementById(`partner_${partnerId}_percentage`);
+    let amountField = document.getElementById(`partner_${partnerId}_amount`);
+    let percentage = parseFloat(percentageField.value) || 0;
+
+    // Calculate amount based on percentage
+    let amount = (percentage / 100) * totalReceivedAmount;
+    amountField.value = amount.toFixed(2);
+}
+
+// Function to update partner percentage based on amount entered
+function updatePartnerPercentage(partnerId) {
+    let totalReceivedAmount = parseFloat(document.getElementById('total_received_amount').value) || 0;
+    let amountField = document.getElementById(`partner_${partnerId}_amount`);
+    let percentageField = document.getElementById(`partner_${partnerId}_percentage`);
+    let amount = parseFloat(amountField.value) || 0;
+
+    // Calculate percentage based on amount
+    let percentage = (amount / totalReceivedAmount) * 100;
+    percentageField.value = percentage.toFixed(2);
+}
+
+// Function to validate that the total percentage does not exceed 100%
+function validateTotalPercentage() {
+    let totalPercentage = 0;
+    let percentageFields = document.querySelectorAll('.partner-percentage');
+    
+    percentageFields.forEach(function(field) {
+        totalPercentage += parseFloat(field.value) || 0;
+    });
+    
+    // Include "Others" percentage if available
+    let othersPercentage = parseFloat(document.getElementById('others_percentage').value) || 0;
+    totalPercentage += othersPercentage;
+
+    if (totalPercentage > 100) {
+        document.getElementById('total_percentage_error').textContent = "Total percentage exceeds 100%. Please adjust.";
+        disableSubmitButton();
+    } else {
+        document.getElementById('total_percentage_error').textContent = "";
+        enableSubmitButton();
+    }
+}
+
+// Disable the submit button if the validation fails
+function disableSubmitButton() {
+    document.getElementById('submit_button').disabled = true;
+}
+
+// Enable the submit button if the validation passes
+function enableSubmitButton() {
+    document.getElementById('submit_button').disabled = false;
+}
+
+// Function to update others amount based on percentage entered
+function updateOthersAmount() {
+    let totalReceivedAmount = parseFloat(document.getElementById('total_received_amount').value) || 0;
+    let othersPercentage = parseFloat(document.getElementById('others_percentage').value) || 0;
+
+    let othersAmount = (othersPercentage / 100) * totalReceivedAmount;
+    document.getElementById('others_amount').value = othersAmount.toFixed(2);
+
+    validateTotalPercentage(); // Revalidate after updating "Others" amount
+}
+
+</script>
+<script>
+let expenseCount = 1; // Initialize counter for additional expenses
+
+// Function to calculate total percentage and update error message
+function updateTotalPercentage() {
+    const partnerCheckboxes = document.querySelectorAll('.partner-checkbox:checked');
+    let totalPartnerPercentage = 0;
+
+    // Sum selected partner percentages
+    partnerCheckboxes.forEach(checkbox => {
+        const partnerId = checkbox.value;
+        const percentageInput = document.querySelector(`input[data-partner-id="${partnerId}"]`);
+        if (percentageInput) {
+            totalPartnerPercentage += parseFloat(percentageInput.value) || 0;
+        }
+    });
+
+    // Sum "Other Expenses" percentages
+    const expensePercentages = document.querySelectorAll('input[name="expense_percentages[]"]');
+    expensePercentages.forEach(input => {
+        totalPartnerPercentage += parseFloat(input.value) || 0;
+    });
+
+    // Check for total exceeding 100%
+    const errorDiv = document.getElementById('total_percentage_error');
+    if (totalPartnerPercentage > 100) {
+        errorDiv.innerText = 'Total percentage exceeds 100%. Please adjust the values.';
+    } else {
+        errorDiv.innerText = ''; // Clear the error message
+    }
+}
+
+// Function to calculate the expense amount based on the percentage input
+function calculateExpenseAmount(inputElement) {
+    const percentage = parseFloat(inputElement.value) || 0; // Get the percentage
+    const totalReceivedAmount = parseFloat(document.getElementById('total_received_amount').value) || 0; // Get total received amount
+    const amountDisplay = inputElement.closest('.row').querySelector('.amount-display'); // Get the corresponding amount display input
+
+    // Calculate the expense amount based on the percentage of the total received amount
+    const amount = (totalReceivedAmount * (percentage / 100)).toFixed(2);
+    amountDisplay.value = amount; // Update the amount display field
+
+    // Update total percentage on change
+    updateTotalPercentage();
+}
+
+// Function to calculate percentage based on the amount input
+function calculatePercentage(inputElement) {
+    const amount = parseFloat(inputElement.value) || 0; // Get the amount
+    const totalReceivedAmount = parseFloat(document.getElementById('total_received_amount').value) || 0; // Get total received amount
+    const percentageInput = inputElement.closest('.row').querySelector('.percentage-input'); // Get the corresponding percentage input
+
+    // Calculate the percentage based on the amount relative to the total received amount
+    const percentage = ((amount / totalReceivedAmount) * 100).toFixed(2);
+    percentageInput.value = percentage; // Update the percentage field
+
+    // Update total percentage on change
+    updateTotalPercentage();
+}
+
+// Function to add more expense fields
+document.getElementById('add-more-expenses').addEventListener('click', function() {
+    const container = document.getElementById('additional-expenses-container');
+    const newExpenseDiv = document.createElement('div');
+    newExpenseDiv.className = 'row mb-2';
+    newExpenseDiv.id = `additional-expense-${expenseCount}`;
+
+    // Create new expense fields
+    newExpenseDiv.innerHTML = `
+        <div class="col-md-6">
+            <input type="text" class="form-control" name="expense_descriptions[]" placeholder="Description">
+        </div>
+        <div class="col-md-4">
+            <input type="number" class="form-control percentage-input" name="expense_percentages[]" placeholder="Percentage" step="0.01" oninput="calculateExpenseAmount(this); updateTotalPercentage()">
+        </div>
+        <div class="col-md-2">
+            <input type="text" class="form-control amount-display" placeholder="Amount" oninput="calculatePercentage(this);" />
+        </div>
+    `;
+
+    // Append new expense fields to the container
+    container.appendChild(newExpenseDiv);
+    expenseCount++; // Increment the expense counter
+});
+
+// Add event listeners for partner checkboxes to update total percentage
+const partnerCheckboxes = document.querySelectorAll('.partner-checkbox');
+partnerCheckboxes.forEach(checkbox => {
+    checkbox.addEventListener('change', updateTotalPercentage);
+});
+
+</script>
+<script>
+    // Function to update the total cash value and remaining cash value
+function updateTotalCashValue() {
+    const cashValuePercentage = parseFloat(document.getElementById('cash_value_percentage').value) || 0; // Get cash value percentage
+    const cashValueAmount = parseFloat(document.getElementById('cash_value_amount').value) || 0; // Get cash value amount
+    const additionalAmounts = document.querySelectorAll('#additional-amounts-container input[type="text"]');
+    
+    // Calculate the total cash value (including additional amounts)
+    let totalCashValue = cashValueAmount; // Start with the cash value amount
+
+    // Add all additional amounts
+    additionalAmounts.forEach(input => {
+        const additionalAmount = parseFloat(input.value) || 0;
+        totalCashValue += additionalAmount; // Add to total cash value
+    });
+
+    // Update the Total Cash Value field
+    document.getElementById('total_cash_value').value = totalCashValue.toFixed(2); // Display total cash value
+
+    // Now calculate the Remaining Cash Value
+    const totalReceivedAmount = parseFloat(document.getElementById('total_received_amount').value) || 0; // Get total received amount
+    const remainingCashValue = totalCashValue - totalReceivedAmount; // Calculate remaining cash value
+    
+    // Update the Remaining Cash Value field
+    document.getElementById('remaining_cash_value').value = remainingCashValue.toFixed(2); // Display remaining cash value
+}
+
+// Add event listeners to update values on input change
+document.getElementById('cash_value_percentage').addEventListener('input', updateTotalCashValue);
+document.getElementById('cash_value_amount').addEventListener('input', updateTotalCashValue);
+document.getElementById('total_received_amount').addEventListener('input', updateTotalCashValue);
+
+// Also update the total cash value when additional amounts change
+const additionalAmountInputs = document.querySelectorAll('#additional-amounts-container input[type="text"]');
+additionalAmountInputs.forEach(input => {
+    input.addEventListener('input', updateTotalCashValue);
+});
+
 </script>
 @endsection
