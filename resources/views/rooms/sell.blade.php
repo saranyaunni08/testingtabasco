@@ -151,14 +151,29 @@
             <input type="text" class="form-control" id="remaining_cash_value" name="remaining_cash_value" readonly>
         </div>
 
+
         <div class="form-group">
             <label for="total_cheque_value">Total Cheque Value</label>
             <input type="text" id="total_cheque_value" class="form-control" readonly>
         </div>
         
 
+        <h3>Other Expenses</h3>
+        <div id="expense-container">
+            <div class="expense-entry">
+                <input type="text" placeholder="Expense Description" class="expense-description" />
+                <input type="number" placeholder="Expense Amount" class="expense-amount" />
+            </div>
+        </div><br>
+        <button id="add-expense">Add Expense</button>
+        <div class="form-group">
+            <label>Total Cheque Value (with Additional Amounts):</label>
+            <input type="text" id="total_cheque_value_with_additional" class="form-control" readonly />
+        </div>
+        
         <!-- Submit Button -->
         <button type="submit" class="btn btn-primary">Submit Sale</button>
+    </div><br>
     </form>
 </div>
    
@@ -301,23 +316,19 @@
         updateTotalCashValue();
     }
 
-//     function updateTotalCashValue() {
-//     let baseCashValue = parseFloat(document.getElementById('cash_value_amount').value) || 0;
-//     let additionalAmounts = document.querySelectorAll('.additional-amount');
-//     let totalAdditionalAmount = 0;
+    function updateTotalCashValue() {
+        let baseCashValue = parseFloat(document.getElementById('cash_value_amount').value) || 0;
+        let additionalAmounts = document.querySelectorAll('.additional-amount');
+        let totalAdditionalAmount = 0;
 
-//     // Sum up all additional amounts
-//     additionalAmounts.forEach(amountField => {
-//         totalAdditionalAmount += parseFloat(amountField.value) || 0;
-//     });
+        additionalAmounts.forEach(amountField => {
+            totalAdditionalAmount += parseFloat(amountField.value) || 0;
+        });
 
-//     // Calculate total cash value
-//     let totalCashValue = baseCashValue + totalAdditionalAmount;
-//     document.getElementById('total_cash_value').value = totalCashValue.toFixed(2);
+        let totalCashValue = baseCashValue + totalAdditionalAmount;
+        document.getElementById('total_cash_value').value = totalCashValue.toFixed(2);
 
-//     // Calculate the total cheque value
-//     calculateChequeValue();  // Call the function to update cheque value
-// }
+    }
 </script>
 <script>
   // Add event listeners to trigger updates
@@ -599,14 +610,14 @@ additionalAmountInputs.forEach(input => {
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Function to calculate the cheque value
-        // function calculateChequeValue() {
-        //     const finalAmount = parseFloat(document.getElementById('final_amount').value) || 0;
-        //     const totalCashValue = parseFloat(document.getElementById('total_cash_value').value) || 0;
-        //     const chequeValue = finalAmount - totalCashValue;
+        function calculateChequeValue() {
+            const finalAmount = parseFloat(document.getElementById('final_amount').value) || 0;
+            const totalCashValue = parseFloat(document.getElementById('total_cash_value').value) || 0;
+            const chequeValue = finalAmount - totalCashValue;
 
-        //     // Update the cheque value display
-        //     document.getElementById('chequeValue').innerText = chequeValue.toFixed(2);
-        // }
+            // Update the cheque value display
+            document.getElementById('chequeValue').innerText = chequeValue.toFixed(2);
+        }
 
         // Event listeners for when values change
         document.getElementById('final_amount').addEventListener('input', calculateChequeValue);
@@ -615,6 +626,7 @@ additionalAmountInputs.forEach(input => {
         // Initialize calculation on page load
         calculateChequeValue();
     });
+
 </script>
 
 <script>
@@ -645,6 +657,52 @@ function calculateChequeValue() {
 
     // Update the Total Cheque Value field
     document.getElementById('total_cheque_value').value = chequeValue.toFixed(2);
+}
+
+</script>
+
+<script>
+let baseChequeValue = 0; // This will be updated based on finalAmount and totalCashValue
+let totalChequeValueWithAdditional = 0;
+
+function calculateChequeValue() {
+    const finalAmount = parseFloat(document.getElementById('final_amount').value) || 0;
+    const totalCashValue = parseFloat(document.getElementById('total_cash_value').value) || 0;
+
+    // Calculate the base cheque value
+    baseChequeValue = finalAmount - totalCashValue;
+
+    // Update the Total Cheque Value field
+    document.getElementById('total_cheque_value').value = baseChequeValue.toFixed(2);
+
+    // Update the total cheque value with additional expenses
+    calculateTotalChequeValueWithAdditional();
+}
+
+document.getElementById('add-expense').addEventListener('click', function() {
+    const expenseContainer = document.getElementById('expense-container');
+    const newExpenseEntry = document.createElement('div');
+    newExpenseEntry.classList.add('expense-entry');
+    newExpenseEntry.innerHTML = `
+        <input type="text" placeholder="Expense Description" class="expense-description" />
+        <input type="number" placeholder="Expense Amount" class="expense-amount" oninput="calculateTotalChequeValueWithAdditional()" />
+    `;
+    expenseContainer.appendChild(newExpenseEntry);
+    calculateTotalChequeValueWithAdditional();
+});
+
+function calculateTotalChequeValueWithAdditional() {
+    const expenseAmounts = document.querySelectorAll('.expense-amount');
+    let totalExpenses = 0;
+
+    expenseAmounts.forEach(amount => {
+        totalExpenses += parseFloat(amount.value) || 0;
+    });
+
+    // Calculate the total cheque value with additional expenses
+    totalChequeValueWithAdditional = baseChequeValue + totalExpenses;
+
+    document.getElementById('total_cheque_value_with_additional').value = totalChequeValueWithAdditional.toFixed(2);
 }
 
 </script>
