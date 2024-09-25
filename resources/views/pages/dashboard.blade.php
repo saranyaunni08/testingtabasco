@@ -28,7 +28,7 @@
                         <i class="fa fa-money-bill-wave fa-4x text-primary mb-3"></i>
                         <div class="text-center">
                             <p class="mb-2">Total Advance Amount</p>
-                            <h5 class="font-weight-bolder">₹{{ number_format($totalAdvanceAmount) }}</h5>
+                            {{-- <h5 class="font-weight-bolder">₹{{ number_format($totalAdvanceAmount) }}</h5> --}}
                         </div>
                     </div>
                 </div>
@@ -38,7 +38,7 @@
                         <div class="text-center">
                             <p class="mb-2">Total Customers</p>
                             <h5 class="font-weight-bolder">
-                                {{ $totalCustomers }}
+                                {{-- {{ $totalCustomers }} --}}
                             </h5>
                         </div>
                     </div>

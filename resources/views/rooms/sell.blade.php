@@ -152,10 +152,10 @@
         </div>
 
         <div class="form-group">
-            <label for="cheque_amount">Cheque Amount</label>
-            <input type="text" class="form-control" id="cheque_amount" name="cheque_amount" readonly>
+            <label for="total_cheque_value">Total Cheque Value</label>
+            <input type="text" id="total_cheque_value" class="form-control" readonly>
         </div>
-               
+        
 
         <!-- Submit Button -->
         <button type="submit" class="btn btn-primary">Submit Sale</button>
@@ -301,71 +301,61 @@
         updateTotalCashValue();
     }
 
-    function updateTotalCashValue() {
-        let baseCashValue = parseFloat(document.getElementById('cash_value_amount').value) || 0;
-        let additionalAmounts = document.querySelectorAll('.additional-amount');
-        let totalAdditionalAmount = 0;
+//     function updateTotalCashValue() {
+//     let baseCashValue = parseFloat(document.getElementById('cash_value_amount').value) || 0;
+//     let additionalAmounts = document.querySelectorAll('.additional-amount');
+//     let totalAdditionalAmount = 0;
 
-        additionalAmounts.forEach(amountField => {
-            totalAdditionalAmount += parseFloat(amountField.value) || 0;
-        });
+//     // Sum up all additional amounts
+//     additionalAmounts.forEach(amountField => {
+//         totalAdditionalAmount += parseFloat(amountField.value) || 0;
+//     });
 
-        let totalCashValue = baseCashValue + totalAdditionalAmount;
-        document.getElementById('total_cash_value').value = totalCashValue.toFixed(2);
-    }
+//     // Calculate total cash value
+//     let totalCashValue = baseCashValue + totalAdditionalAmount;
+//     document.getElementById('total_cash_value').value = totalCashValue.toFixed(2);
+
+//     // Calculate the total cheque value
+//     calculateChequeValue();  // Call the function to update cheque value
+// }
 </script>
 <script>
-    document.getElementById('final_amount').addEventListener('input', updateChequeAmount);
+  // Add event listeners to trigger updates
 document.getElementById('cash_value_amount').addEventListener('input', updateTotalCashValue);
 document.querySelectorAll('.additional-amount').forEach(field => field.addEventListener('input', updateTotalCashValue));
+document.getElementById('received_amount').addEventListener('input', updateRemainingCashValue);
 
 function updateTotalCashValue() {
     let baseCashValue = parseFloat(document.getElementById('cash_value_amount').value) || 0;
     let additionalAmounts = document.querySelectorAll('.additional-amount');
     let totalAdditionalAmount = 0;
 
+    // Sum up all additional amounts
     additionalAmounts.forEach(amountField => {
         totalAdditionalAmount += parseFloat(amountField.value) || 0;
     });
 
+    // Calculate total cash value
     let totalCashValue = baseCashValue + totalAdditionalAmount;
     document.getElementById('total_cash_value').value = totalCashValue.toFixed(2);
 
-    // Update Cheque Amount
-    updateChequeAmount();
-}
+    // Debugging log
+    console.log("Base Cash Value:", baseCashValue);
+    console.log("Total Additional Amounts:", totalAdditionalAmount);
+    console.log("Total Cash Value (with additional amounts):", totalCashValue);
 
-function updateChequeAmount() {
-    let finalAmount = parseFloat(document.getElementById('final_amount').value) || 0;
-    let totalCashValue = parseFloat(document.getElementById('total_cash_value').value) || 0;
-
-    let chequeAmount = finalAmount - totalCashValue;
-
-    // Set the cheque amount in the readonly field
-    if (!isNaN(chequeAmount)) {
-        document.getElementById('cheque_amount').value = chequeAmount.toFixed(2);
-    } else {
-        document.getElementById('cheque_amount').value = '';
     }
-}
-
-document.getElementById('received_amount').addEventListener('input', updateRemainingCashValue);
 
 function updateRemainingCashValue() {
     let totalCashValue = parseFloat(document.getElementById('total_cash_value').value) || 0;
     let receivedAmount = parseFloat(document.getElementById('received_amount').value) || 0;
 
+    // Calculate remaining cash value
     let remainingCashValue = totalCashValue - receivedAmount;
 
-    // Set the remaining cash value in the readonly field
+    // Set remaining cash value in the readonly field
     document.getElementById('remaining_cash_value').value = remainingCashValue.toFixed(2);
-
-    
-
-   
 }
-
-
 
 </script>
 <script>
@@ -426,6 +416,7 @@ function updatePartnerPercentage(partnerId) {
 }
 
 // Function to validate that the total percentage does not exceed 100%
+// Function to validate that the total percentage does not exceed 100%
 function validateTotalPercentage() {
     let totalPercentage = 0;
     let percentageFields = document.querySelectorAll('.partner-percentage');
@@ -438,14 +429,19 @@ function validateTotalPercentage() {
     let othersPercentage = parseFloat(document.getElementById('others_percentage').value) || 0;
     totalPercentage += othersPercentage;
 
+    // Display a warning if the total exceeds 100%
     if (totalPercentage > 100) {
-        document.getElementById('total_percentage_error').textContent = "Total percentage exceeds 100%. Please adjust.";
-        disableSubmitButton();
+        document.getElementById('percentage_error').textContent = "Total percentage cannot exceed 100%";
+        document.getElementById('submit_button').disabled = true;
     } else {
-        document.getElementById('total_percentage_error').textContent = "";
-        enableSubmitButton();
+        document.getElementById('percentage_error').textContent = "";
+        document.getElementById('submit_button').disabled = false;
     }
 }
+
+// Attach event listeners to other percentage fields if needed
+document.getElementById('others_percentage').addEventListener('input', validateTotalPercentage);
+
 
 // Disable the submit button if the validation fails
 function disableSubmitButton() {
@@ -598,6 +594,58 @@ const additionalAmountInputs = document.querySelectorAll('#additional-amounts-co
 additionalAmountInputs.forEach(input => {
     input.addEventListener('input', updateTotalCashValue);
 });
+
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Function to calculate the cheque value
+        // function calculateChequeValue() {
+        //     const finalAmount = parseFloat(document.getElementById('final_amount').value) || 0;
+        //     const totalCashValue = parseFloat(document.getElementById('total_cash_value').value) || 0;
+        //     const chequeValue = finalAmount - totalCashValue;
+
+        //     // Update the cheque value display
+        //     document.getElementById('chequeValue').innerText = chequeValue.toFixed(2);
+        // }
+
+        // Event listeners for when values change
+        document.getElementById('final_amount').addEventListener('input', calculateChequeValue);
+        document.getElementById('total_cash_value').addEventListener('input', calculateChequeValue);
+
+        // Initialize calculation on page load
+        calculateChequeValue();
+    });
+</script>
+
+<script>
+    function updateTotalCashValue() {
+    let baseCashValue = parseFloat(document.getElementById('cash_value_amount').value) || 0;
+    let additionalAmounts = document.querySelectorAll('.additional-amount');
+    let totalAdditionalAmount = 0;
+
+    // Sum up all additional amounts
+    additionalAmounts.forEach(amountField => {
+        totalAdditionalAmount += parseFloat(amountField.value) || 0;
+    });
+
+    // Calculate total cash value
+    let totalCashValue = baseCashValue + totalAdditionalAmount;
+    document.getElementById('total_cash_value').value = totalCashValue.toFixed(2);
+
+    // Calculate the total cheque value
+    calculateChequeValue();  // Call the function to update cheque value
+}
+
+function calculateChequeValue() {
+    let finalAmount = parseFloat(document.getElementById('final_amount').value) || 0;
+    let totalCashValue = parseFloat(document.getElementById('total_cash_value').value) || 0;
+
+    // Subtract Total Cash Value from Final Amount to get the cheque value
+    let chequeValue = finalAmount - totalCashValue;
+
+    // Update the Total Cheque Value field
+    document.getElementById('total_cheque_value').value = chequeValue.toFixed(2);
+}
 
 </script>
 @endsection

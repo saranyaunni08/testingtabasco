@@ -35,9 +35,9 @@ class DashboardController extends Controller
             $expectedAmountByBuilding[$building->id] = $expectedAmount;
 
             // Calculate the sold amount for each building
-            $soldAmountData[] = Sale::whereHas('room', function($query) use ($building) {
-                $query->where('building_id', $building->id);
-            })->sum('total_with_discount');
+            // $soldAmountData[] = Sale::whereHas('room', function($query) use ($building) {
+            //     $query->where('building_id', $building->id);
+            // })->sum('total_with_discount');
         }
 
         // Calculate the total expected price from the rooms table
@@ -56,25 +56,25 @@ class DashboardController extends Controller
         // Calculate the total EMI payments received
         $totalEmiReceived = Installment::where('status', 'paid')->sum('installment_amount');
 
-        $totalAdvanceAmount = Sale::sum('advance_amount');
+        // $totalAdvanceAmount = Sale::sum('advance_amount');
 
 
         return view('pages.dashboard', [
             'buildings' => $buildings,
-            'totalCustomers' => Sale::distinct('customer_name')->count(),
+            // 'totalCustomers' => Sale::distinct('customer_name')->count(),
             'totalRooms' => Room::count(),
-            'soldRooms' => Sale::count(),
+            // 'soldRooms' => Sale::count(),
             'totalShops' => Room::where('room_type', 'Shops')->count(),
             'totalFlats' => Room::where('room_type', 'Flat')->count(),
             'totalKiosks' => Room::where('room_type', 'Kiosk')->count(),
             'totalChairSpaces' => Room::where('room_type', 'Chair Space')->count(),
             'totalTableSpaces' => Room::where('room_type', 'Table Space')->count(),
-            'sales' => Sale::latest()->take(5)->get(),
+            // 'sales' => Sale::latest()->take(5)->get(),
             'ExpectedPrice' => $expectedPrice,
             'expectedAmountByBuilding' => $expectedAmountByBuilding,
             'soldAmountData' => $soldAmountData,
             'totalEmiReceived' => $totalEmiReceived, // Pass the EMI total to the view
-            'totalAdvanceAmount' => $totalAdvanceAmount, 
+            // 'totalAdvanceAmount' => $totalAdvanceAmount, 
             'page' => 'dashboard',
         ]);
     }
