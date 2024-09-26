@@ -140,7 +140,7 @@
                     <input type="text" class="form-control amount-display" placeholder="Amount" oninput="calculatePercentage(this);" />
                 </div>
             </div>
-            <button type="button" class="btn btn-primary" id="add-more-expenses">Add More Expenses</button>
+            <button type="button" class="btn btn-success mt-2" id="add-more-expenses">Add Expenses</button>
         </div>
         
         
@@ -158,19 +158,40 @@
         </div>
         
 
-        <h3>Other Expenses</h3>
-        <div id="expense-container">
-            <div class="expense-entry">
-                <input type="text" placeholder="Expense Description" class="expense-description" />
-                <input type="number" placeholder="Expense Amount" class="expense-amount" />
+        <div id="additional-expenses-container">
+            <h5>Other Expenses</h5>
+            <div class="row mb-2" id="expense-container">
+                <div class="col-md-6">
+                    <input type="text" placeholder="Expense Description" class="form-control expense-description" />
+                </div>
+                <div class="col-md-6">
+                    <input type="number" placeholder="Expense Amount" class="form-control expense-amount" />
+                </div>
             </div>
-        </div><br>
-        <button id="add-expense">Add Expense</button>
+            <button id="add-expense" class="btn btn-success mt-2">Add Expense</button>
+        </div>
+        
+
         <div class="form-group">
             <label>Total Cheque Value (with Additional Amounts):</label>
             <input type="text" id="total_cheque_value_with_additional" class="form-control" readonly />
         </div>
+
+        <div class="form-group ">
+            <label >Gst Percentage</label>
+            <input type="number" id="gst_percentage" placeholder="GST Percentage" oninput="calculateTotalChequeValueWithAdditional()" class="form-control" />
+        </div>
+        <div class="form-group ">
+            <label >Gst Amount</label>
+            <input type="text" id="gst_amount" placeholder="GST Amount" class="form-control" readonly  />
+        </div>
         
+        <div class="form-group ">
+            <label >Total Cheque Value (with Gst):</label>
+            <input type="text" id="total_cheque_value_with_gst" placeholder="Total Cheque Value + GST" class="form-control" readonly />
+        </div>
+        
+
         <!-- Submit Button -->
         <button type="submit" class="btn btn-primary">Submit Sale</button>
     </div><br>
@@ -682,13 +703,16 @@ function calculateChequeValue() {
 document.getElementById('add-expense').addEventListener('click', function() {
     const expenseContainer = document.getElementById('expense-container');
     const newExpenseEntry = document.createElement('div');
-    newExpenseEntry.classList.add('expense-entry');
+    newExpenseEntry.classList.add('row', 'mb-2'); // Added Bootstrap classes for spacing
     newExpenseEntry.innerHTML = `
-        <input type="text" placeholder="Expense Description" class="expense-description" />
-        <input type="number" placeholder="Expense Amount" class="expense-amount" oninput="calculateTotalChequeValueWithAdditional()" />
+        <div class="col-md-6">
+            <input type="text" placeholder="Expense Description" class="form-control expense-description" />
+        </div>
+        <div class="col-md-6">
+            <input type="number" placeholder="Expense Amount" class="form-control expense-amount" oninput="calculateTotalChequeValueWithAdditional()" />
+        </div>
     `;
     expenseContainer.appendChild(newExpenseEntry);
-    calculateTotalChequeValueWithAdditional();
 });
 
 function calculateTotalChequeValueWithAdditional() {
@@ -705,5 +729,42 @@ function calculateTotalChequeValueWithAdditional() {
     document.getElementById('total_cheque_value_with_additional').value = totalChequeValueWithAdditional.toFixed(2);
 }
 
+</script>
+<script>
+
+document.getElementById('gst_percentage').addEventListener('input', calculateGST);
+
+function calculateGST() {
+        const gstPercentage = parseFloat(document.getElementById('gst_percentage').value) || 0;
+        const totalChequeValueWithAdditional = parseFloat(document.getElementById('total_cheque_value_with_additional').value) || 0;
+
+        // Calculate the GST amount
+        const gstAmount = (totalChequeValueWithAdditional * gstPercentage) / 100;
+
+        // Update the GST Amount field
+        document.getElementById('gst_amount').value = gstAmount.toFixed(2);
+
+        // Calculate and update the Total Cheque Value (with GST)
+        const totalChequeValueWithGST = totalChequeValueWithAdditional + gstAmount;
+        document.getElementById('total_cheque_value_with_gst').value = totalChequeValueWithGST.toFixed(2);
+    }
+
+
+     function calculateTotalChequeValueWithAdditional() {
+        const expenseAmounts = document.querySelectorAll('.expense-amount');
+        let totalExpenses = 0;
+
+        expenseAmounts.forEach(amount => {
+            totalExpenses += parseFloat(amount.value) || 0;
+        });
+
+        // Calculate the total cheque value with additional expenses
+        totalChequeValueWithAdditional = baseChequeValue + totalExpenses;
+
+        document.getElementById('total_cheque_value_with_additional').value = totalChequeValueWithAdditional.toFixed(2);
+        
+        // Also recalculate the GST amount when expenses change
+        calculateGST();
+    }
 </script>
 @endsection
