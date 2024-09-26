@@ -167,7 +167,7 @@
                 <div class="col-md-6">
                     <input type="number" placeholder="Expense Amount" class="form-control expense-amount" />
                 </div>
-            </div>
+            </div><br>
             <button id="add-expense" class="btn btn-success mt-2">Add Expense</button>
         </div>
         
@@ -189,9 +189,55 @@
         <div class="form-group ">
             <label >Total Cheque Value (with Gst):</label>
             <input type="text" id="total_cheque_value_with_gst" placeholder="Total Cheque Value + GST" class="form-control" readonly />
+        <br>
+            <h5>Received Amount:</h5>
+            <input type="number" id="received_cheque_value" class="form-control" placeholder="Received Amount" oninput="calculateBalance()" />
+        <br>
+            <h5>Balance Amount:</h5>
+            <input type="text" id="balance_amount" class="form-control" placeholder="Balance Amount" readonly />
+        </div>
+
+        <div id="loan-type-container" style="display: none;">
+            <label for="loan_type">Select Loan Type:</label>
+            <select id="loan_type" class="form-control" onchange="handleLoanTypeChange()">
+                <option value="">Select...</option>
+                <option value="bank">Bank</option>
+                <option value="directors">Director's</option>
+                <option value="others">Others</option>
+            </select>
+        </div>
+        
+        <div id="other-loan-description-container" style="display: none;">
+            <label for="other_loan_description">Please specify:</label>
+            <input type="text" id="other_loan_description" class="form-control" placeholder="Describe Other Loan Type">
+        </div>
+
+
+        <div id="installment-container" style="display: none;">
+            <label for="installment_frequency">Installment Frequency:</label>
+            <select id="installment_frequency" class="form-control">
+                <option value="">Select Frequency...</option>
+                <option value="monthly">Every Month</option>
+                <option value="3months">Every 3 Months</option>
+                <option value="6months">Every 6 Months</option>
+            </select>
+        
+            <label for="installment_date">Installment Start Date:</label>
+            <input type="date" id="installment_date" class="form-control">
+        
+            <label for="no_of_installments">Number of Installments:</label>
+            <input type="number" id="no_of_installments" class="form-control" placeholder="Enter No. of Installments" oninput="calculateInstallmentAmount()">
+        
+            <label for="installment_amount">Installment Amount (auto-calculated):</label>
+            <input type="number" id="installment_amount" class="form-control" readonly>
+        </div>
+        <div id="grand-total-container">
+            <label for="grand_total_amount">Grand Total Amount (auto-calculated):</label>
+            <input type="number" id="grand_total_amount" class="form-control" readonly>
         </div>
         
 
+        <br><br>
         <!-- Submit Button -->
         <button type="submit" class="btn btn-primary">Submit Sale</button>
     </div><br>
@@ -747,6 +793,8 @@ function calculateGST() {
         // Calculate and update the Total Cheque Value (with GST)
         const totalChequeValueWithGST = totalChequeValueWithAdditional + gstAmount;
         document.getElementById('total_cheque_value_with_gst').value = totalChequeValueWithGST.toFixed(2);
+
+        calculateGrandTotal();
     }
 
 
@@ -765,6 +813,97 @@ function calculateGST() {
         
         // Also recalculate the GST amount when expenses change
         calculateGST();
+        calculateGrandTotal();
     }
+
+    function calculateBalance() {
+    const totalChequeValueWithGst = parseFloat(document.getElementById('total_cheque_value_with_gst').value) || 0;
+    const receivedChequeValue = parseFloat(document.getElementById('received_cheque_value').value) || 0;
+
+    // Calculate the balance
+    const balanceAmount = totalChequeValueWithGst - receivedChequeValue;
+
+    // Update the balance amount field
+    document.getElementById('balance_amount').value = balanceAmount.toFixed(2);
+
+    // Show or hide loan type selection based on balance amount
+    const loanTypeContainer = document.getElementById('loan-type-container');
+    if (balanceAmount !== 0) {
+        loanTypeContainer.style.display = 'block'; // Show loan type selection
+    } else {
+        loanTypeContainer.style.display = 'none'; // Hide loan type selection
+        document.getElementById('other-loan-description-container').style.display = 'none'; // Hide description field if balance is 0
+    }
+}
+
+function handleLoanTypeChange() {
+    const loanType = document.getElementById('loan_type').value;
+    const otherLoanDescriptionContainer = document.getElementById('other-loan-description-container');
+    const installmentContainer = document.getElementById('installment-container');
+
+    // Show or hide the description field based on loan type selection
+    if (loanType === 'others') {
+        otherLoanDescriptionContainer.style.display = 'block';  // Show description field for "Others"
+        installmentContainer.style.display = 'none';            // Hide installment fields for "Others"
+    } else if (loanType !== "") {
+        otherLoanDescriptionContainer.style.display = 'none';   // Hide description field
+        installmentContainer.style.display = 'block';           // Show installment fields for valid loan types
+    } else {
+        otherLoanDescriptionContainer.style.display = 'none';   // Hide description field if no loan type is selected
+        installmentContainer.style.display = 'none';            // Hide installment fields if no loan type is selected
+    }
+}
+
+function calculateInstallmentAmount() {
+    const balanceAmount = parseFloat(document.getElementById('balance_amount').value) || 0;
+    const noOfInstallments = parseInt(document.getElementById('no_of_installments').value) || 1;
+
+    // Calculate installment amount
+    const installmentAmount = (balanceAmount / noOfInstallments).toFixed(2);
+
+    // Update the Installment Amount field
+    document.getElementById('installment_amount').value = installmentAmount;
+}
+
+function calculateBalance() {
+    const totalChequeValueWithGst = parseFloat(document.getElementById('total_cheque_value_with_gst').value) || 0;
+    const receivedChequeValue = parseFloat(document.getElementById('received_cheque_value').value) || 0;
+
+    // Calculate the balance
+    const balanceAmount = totalChequeValueWithGst - receivedChequeValue;
+
+    // Update the balance amount field
+    document.getElementById('balance_amount').value = balanceAmount.toFixed(2);
+
+    // Show or hide loan type selection and installment options based on balance amount
+    const loanTypeContainer = document.getElementById('loan-type-container');
+    if (balanceAmount !== 0) {
+        loanTypeContainer.style.display = 'block'; // Show loan type selection
+    } else {
+        loanTypeContainer.style.display = 'none';  // Hide loan type selection
+        document.getElementById('installment-container').style.display = 'none'; // Hide installment fields if balance is 0
+        document.getElementById('other-loan-description-container').style.display = 'none'; // Hide description field if balance is 0
+    }
+}
+
+function calculateGrandTotal() {
+    // Get values from the fields, ensuring they're treated as numbers
+    const totalChequeValueWithAdditional = parseFloat(document.getElementById('total_cheque_value_with_additional').value) || 0;
+    const totalChequeValueWithGst = parseFloat(document.getElementById('total_cheque_value_with_gst').value) || 0;
+
+    // Calculate the grand total amount
+    const grandTotalAmount = totalChequeValueWithAdditional + totalChequeValueWithGst;
+
+    console.log("Total Cheque Value with Additional Amounts:", totalChequeValueWithAdditional);
+    console.log("Total Cheque Value with GST:", totalChequeValueWithGst);
+    console.log("Grand Total Amount:", grandTotalAmount);
+
+    // Update the Grand Total Amount field
+    document.getElementById('grand_total_amount').value = grandTotalAmount.toFixed(2);
+}
+
+// Add event listeners to update the grand total amount when input changes
+document.getElementById('total_cheque_value_with_additional').addEventListener('input', calculateGrandTotal);
+document.getElementById('total_cheque_value_with_gst').addEventListener('input', calculateGrandTotal);
+
 </script>
-@endsection
