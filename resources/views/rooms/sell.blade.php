@@ -5,6 +5,9 @@
     <h2>Sell Room</h2>
     <form action="{{ route('admin.sales.store') }}" method="POST">
         @csrf
+
+        <input type="hidden" name="room_id" value="{{ $room->id }}">
+
         <!-- Customer Name -->
         <div class="form-group">
             <label class="font-weight-bold" for="customer_name">Customer Name</label>
@@ -142,18 +145,49 @@
             </div>
             <button type="button" class="btn btn-success mt-2" id="add-more-expenses">Add Expenses</button>
         </div>
-        
-        
-
-        <!-- Remaining Cash Value -->
+    <!-- Remaining Cash Value -->
         <div class="form-group">
             <label for="remaining_cash_value">Remaining Cash Value</label>
             <input type="text" class="form-control" id="remaining_cash_value" name="remaining_cash_value" readonly>
         </div>
 
+    <!-- Loan Type and Installment Container for Cash Handling -->
+    <div id="loan-type-container-cash" style="display: none;">
+        <label for="loan_type_cash">Select Loan Type:</label>
+        <select id="loan_type_cash" class="form-control" onchange="handleLoanTypeChangeCash()">
+            <option value="">Select...</option>
+            <option value="bank">Bank</option>
+            <option value="directors">Director's</option>
+            <option value="others">Others</option>
+        </select>
+    </div>
+
+    <div id="other-loan-description-container-cash" style="display: none;">
+        <label for="other_loan_description_cash">Please specify:</label>
+        <input type="text" id="other_loan_description_cash" class="form-control" placeholder="Describe Other Loan Type">
+    </div>
+
+    <div id="installment-container-cash" style="display: none;">
+        <label for="installment_frequency_cash">Installment Frequency:</label>
+        <select id="installment_frequency_cash" class="form-control">
+            <option value="">Select Frequency...</option>
+            <option value="monthly">Every Month</option>
+            <option value="3months">Every 3 Months</option>
+            <option value="6months">Every 6 Months</option>
+        </select>
+
+        <label for="installment_date_cash">Installment Start Date:</label>
+        <input type="date" id="installment_date_cash" class="form-control">
+
+        <label for="no_of_installments_cash">Number of Installments:</label>
+        <input type="number" id="no_of_installments_cash" class="form-control" placeholder="Enter No. of Installments" oninput="calculateInstallmentAmountCash()">
+
+        <label for="installment_amount_cash">Installment Amount (auto-calculated):</label>
+        <input type="number" id="installment_amount_cash" class="form-control" readonly>
+    </div>
 
         <div class="form-group">
-            <label for="total_cheque_value">Total Cheque Value</label>
+            <label for="total_cheque_value"> <h2> Total Cheque Value </h2></label>
             <input type="text" id="total_cheque_value" class="form-control" readonly>
         </div>
         
@@ -240,9 +274,8 @@
         <br><br>
         <!-- Submit Button -->
         <button type="submit" class="btn btn-primary">Submit Sale</button>
-    </div><br>
     </form>
-</div>
+    </div><br>
    
 
 <script>
@@ -423,17 +456,23 @@ function updateTotalCashValue() {
     console.log("Total Cash Value (with additional amounts):", totalCashValue);
 
     }
+ 
 
-function updateRemainingCashValue() {
-    let totalCashValue = parseFloat(document.getElementById('total_cash_value').value) || 0;
-    let receivedAmount = parseFloat(document.getElementById('received_amount').value) || 0;
+// Function to calculate the installment amount
+function calculateInstallmentAmountCash() {
+    const noOfInstallmentsCash = parseInt(document.getElementById('no_of_installments_cash').value) || 1;
 
-    // Calculate remaining cash value
-    let remainingCashValue = totalCashValue - receivedAmount;
+    // Calculate installment amount
+    const installmentAmountCash = (remainingCashValue / noOfInstallmentsCash).toFixed(2);
 
-    // Set remaining cash value in the readonly field
-    document.getElementById('remaining_cash_value').value = remainingCashValue.toFixed(2);
+    // Update the Installment Amount field
+    document.getElementById('installment_amount_cash').value = installmentAmountCash;
 }
+
+// Event listeners to trigger functions on input changes
+document.getElementById('received_amount').addEventListener('input', updateRemainingCashValue);
+document.getElementById('loan_type_cash').addEventListener('change', handleLoanTypeChangeCash);
+document.getElementById('no_of_installments_cash').addEventListener('input', calculateInstallmentAmountCash);
 
 </script>
 <script>
@@ -905,5 +944,73 @@ function calculateGrandTotal() {
 // Add event listeners to update the grand total amount when input changes
 document.getElementById('total_cheque_value_with_additional').addEventListener('input', calculateGrandTotal);
 document.getElementById('total_cheque_value_with_gst').addEventListener('input', calculateGrandTotal);
+
+</script>
+<script>
+    let remainingCashValue = 0; // This will be updated based on totalCashValue and receivedAmount
+
+    // Function to update Remaining Cash Value and toggle visibility of fields
+    function updateRemainingCashValue() {
+        let totalCashValue = parseFloat(document.getElementById('total_cash_value').value) || 0;
+        let totalReceivedAmount = parseFloat(document.getElementById('total_received_amount').value) || 0;
+
+        // Calculate remaining cash value
+        remainingCashValue = totalCashValue - totalReceivedAmount;
+
+        // Set remaining cash value in the readonly field
+        document.getElementById('remaining_cash_value').value = remainingCashValue.toFixed(2);
+
+        // Show loan fields if Total Received Amount is not the same as Total Cash Value
+        const loanTypeContainer = document.getElementById('loan-type-container-cash');
+        if (totalCashValue !== totalReceivedAmount && totalCashValue !== 0) {
+            loanTypeContainer.style.display = 'block';
+        } else {
+            loanTypeContainer.style.display = 'none';
+            document.getElementById('installment-container-cash').style.display = 'none';
+            document.getElementById('other-loan-description-container-cash').style.display = 'none';
+        }
+    }
+
+    function handleLoanTypeChangeCash() {
+        const loanType = document.getElementById('loan_type_cash').value;
+        const otherLoanDescriptionContainer = document.getElementById('other-loan-description-container-cash');
+        const installmentContainer = document.getElementById('installment-container-cash');
+
+        // Show or hide the description field and installment fields based on loan type
+        if (loanType === 'others') {
+            otherLoanDescriptionContainer.style.display = 'block';
+            installmentContainer.style.display = 'none';
+        } else if (loanType !== "") {
+            otherLoanDescriptionContainer.style.display = 'none';
+            installmentContainer.style.display = 'block';
+        } else {
+            otherLoanDescriptionContainer.style.display = 'none';
+            installmentContainer.style.display = 'none';
+        }
+    }
+
+    function calculateInstallmentAmountCash() {
+        const remainingCashValue = parseFloat(document.getElementById('remaining_cash_value').value) || 0;
+        const noOfInstallments = parseInt(document.getElementById('no_of_installments_cash').value) || 1;
+
+        // Calculate installment amount
+        const installmentAmount = (remainingCashValue / noOfInstallments).toFixed(2);
+
+        // Update the Installment Amount field
+        document.getElementById('installment_amount_cash').value = installmentAmount;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form'); // Select your form
+    const submitButton = document.querySelector('button[type="submit"]'); // Select the Submit Sale button
+
+    // Listen to the form submit event
+    form.addEventListener('submit', function(event) {
+        if (event.submitter !== submitButton) {
+            // Prevent form submission if the submitter is not the Submit Sale button
+            event.preventDefault();
+        }
+    });
+});
 
 </script>

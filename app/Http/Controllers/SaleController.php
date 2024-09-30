@@ -18,131 +18,49 @@ use Barryvdh\DomPDF\Facade\Pdf as PDF;
 
 class SaleController extends Controller
 {
+
     public function store(Request $request)
     {
-        // Validate the incoming request data
         $validatedData = $request->validate([
-            'room_id' => 'required|exists:rooms,id',
+            'room_id' => 'required|exists:rooms,id', 
             'customer_name' => 'required|string|max:255',
             'customer_email' => 'required|email|max:255',
-            'customer_contact' => 'required|string|max:20',
-            'area_calculation_type' => 'required|string',
+            'customer_contact' => 'required|string|max:255',
             'sale_amount' => 'required|numeric',
-            'calculation_type' => 'nullable|string',
-            'parking_rate_per_sq_ft' => 'nullable|numeric',
-            'total_sq_ft_for_parking' => 'nullable|numeric',
-            'fixed_parking_amount' => 'nullable|numeric',
-            'gst_percent' => 'required|numeric',
-            'advance_payment' => 'required|string',
-            'advance_amount' => 'nullable|numeric',
-            'payment_method' => 'nullable|string',
-            'transfer_id' => 'nullable|string',
-            'cheque_id' => 'nullable|string',
-            'last_date' => 'nullable|date',
-            'discount_percent' => 'nullable|numeric',
-            'installments' => 'required|integer|min:1',
-            'installment_date' => 'nullable|date',
-            'cash_in_hand_percent' => 'nullable|numeric',
-            'in_hand_amount' => 'nullable|numeric',
-            'cash_in_hand_paid_amount' => 'nullable|numeric',
-            'cash_in_hand_status' => 'nullable|string',
-            'cash_in_hand_partner_name' => 'nullable|string|max:255',
-            'partner_ids' => 'nullable|array', // For multi-partner handling
-            'partner_percentage' => 'nullable|array', // For saving the percentages for each partner
-            'loan_type' => 'required|in:personal_loan,bank_loan',
+            'area_calculation_type' => 'required|string',
+            'flat_build_up_area' => 'nullable|numeric',
+            'flat_carpet_area' => 'nullable|numeric',
+            'total_amount' => 'nullable|numeric',
+            'discount_percentage' => 'nullable|numeric|min:0|max:100',
+            'discount_amount' => 'nullable|numeric',
+            'final_amount' => 'nullable|numeric',
+            'cash_value_percentage' => 'nullable|numeric|min:0|max:100',
+            'cash_value_amount' => 'nullable|numeric',
+            'additional_amounts' => 'nullable|string',
+            'total_cash_value' => 'nullable|numeric',
+            'total_received_amount' => 'nullable|numeric',
+            'partners' => 'nullable|string',
+            'partner_distribution' => 'nullable|string',
+            'other_expenses' => 'nullable|string',
+            'remaining_cash_value' => 'nullable|numeric',
+            'loan_type' => 'nullable|string',
+            'installment_frequency' => 'nullable|string',
+            'installment_start_date' => 'nullable|date',
+            'number_of_installments' => 'nullable|integer',
+            'installment_amount' => 'nullable|numeric',
+            'gst_percentage' => 'nullable|numeric|min:0|max:100',
+            'gst_amount' => 'nullable|numeric',
+            'total_cheque_value_with_gst' => 'nullable|numeric',
+            'received_cheque_value' => 'nullable|numeric',
+            'balance_amount' => 'nullable|numeric',
         ]);
     
-        $installments = (int) $validatedData['installments'];
+        Sale::create($validatedData); // Ensure your Sale model uses fillable properties or guarded appropriately
 
-
-        if ($installments <= 0) {
-            return redirect()->back()->withErrors(['installments' => 'Number of installments must be greater than zero.']);
-        }
-
-
-        $room = Room::find($validatedData['room_id']);
-        
-        // Calculate the parking amount based on the calculation type
-        if ($validatedData['calculation_type'] === 'fixed_amount') {
-            $parkingAmount = $validatedData['fixed_parking_amount'];
-        } else {
-            $parkingAmount = $this->calculateParkingAmount($validatedData);
-        }
-    
-        // Calculate the total amounts and GST
-        $roomRate = $this->calculateRoomRate($validatedData, $room);
-        $totalAmount = $roomRate + $parkingAmount;
-        $amountForGst = $totalAmount - ($validatedData['in_hand_amount'] ?? 0);
-        $gstAmount = $amountForGst * ($validatedData['gst_percent'] / 100);
-        $totalWithGst = $totalAmount + $gstAmount;
-        $totalWithDiscount = isset($validatedData['discount_percent']) ? $totalWithGst - ($totalWithGst * ($validatedData['discount_percent'] / 100)) : $totalWithGst;
-        $remainingBalance = $totalWithDiscount - ($validatedData['advance_amount'] ?? 0);
-    
-        // Determine cash in hand status
-        $cashInHandPaidAmount = $validatedData['cash_in_hand_paid_amount'] ?? 0;
-        $cashInHandStatus = 'not paid';
-    
-        if ($cashInHandPaidAmount == ($validatedData['in_hand_amount'] ?? 0)) {
-            $cashInHandStatus = 'fully paid';
-        } elseif ($cashInHandPaidAmount > 0) {
-            $cashInHandStatus = 'partially paid';
-        }
-    
-        // Store the sale record
-        $sale = new Sale();
-        $sale->fill($validatedData);
-        $sale->room_rate = $roomRate;
-        $sale->total_amount = $totalAmount;
-        $sale->parking_amount = $parkingAmount;
-        $sale->gst_amount = $gstAmount;
-        $sale->total_with_gst = $totalWithGst;
-        $sale->total_with_discount = $totalWithDiscount;
-        $sale->remaining_balance = $remainingBalance;
-        $sale->cash_in_hand_paid_amount = $cashInHandPaidAmount;
-        $sale->cash_in_hand_status = $cashInHandStatus;
-        $sale->status = 'sold';
-        
-        if ($request->input('loan_type') === 'personal_loan') {
-// Set installments to a default value of 0 if not provided
-$sale->installments = $request->input('loan_type') === 'personal_loan' ? $request->input('installments', 0) : 0;
-        }
-    
-
-        $sale->save();
-    
+        $room = Room::find($request->room_id);
         $room->status = 'sold';
-        $room->save();
-    
-        // Handle partners
-        if (isset($validatedData['partner_ids']) && is_array($validatedData['partner_ids'])) {
-            foreach ($validatedData['partner_ids'] as $partnerId) {
-                $partnerPercentage = $validatedData['partner_percentage'][$partnerId] ?? 0;
-                DB::table('sales_partners')->insert([
-                    'sale_id' => $sale->id,
-                    'partner_id' => $partnerId,
-                    'percentage' => $partnerPercentage,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
-            }
-        }
-    
-       if ($validatedData['loan_type'] === 'personal_loan') {
-        $installmentAmount = $remainingBalance / $installments;
-        $installmentDate = Carbon::parse($validatedData['installment_date']);
-
-        for ($i = 0; $i < $installments; $i++) {
-            Installment::create([
-                'sale_id' => $sale->id,
-                'installment_date' => $installmentDate->copy()->addMonths($i),
-                'installment_amount' => $installmentAmount,
-                'transaction_details' => '',
-                'bank_details' => '',
-                'status' => 'pending',
-            ]);
-        }
-    }
-        return back()->with('success', 'Room sold successfully!');
+        $room->save();    
+        return redirect()->route('admin.sales.index')->with('success', 'Sale recorded successfully!');
     }
     
     protected function getAreaProperty($room, $areaCalculationType)
