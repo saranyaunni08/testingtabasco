@@ -13,7 +13,8 @@ class Sale extends Model
     use SoftDeletes;
 
     protected $fillable = [
-        'room_id',  'customer_name',
+        'room_id',
+        'customer_name',
         'customer_email',
         'customer_contact',
         'sale_amount',
@@ -40,9 +41,21 @@ class Sale extends Model
         'installment_amount',
         'gst_percentage',
         'gst_amount',
-        'total_cheque_value_with_gst',
-        'received_cheque_value',
-        'balance_amount',
+        'total_cheque_value',                 // New field
+        'total_cheque_value_with_additional', // New field
+        'cheque_distribution',                 // Optional: for cheque distribution if needed
+        'cheque_expense_descriptions',        // Optional: if storing as JSON
+        'cheque_expense_amounts',             // Optional: if storing as JSON
+        'partner_percentages',
+        'partner_amounts',
+    ];
+
+    protected $casts = [
+        'partner_distribution' => 'array',  
+        'partner_percentages' => 'array',    
+        'partner_amounts' => 'array',         
+        'cheque_expense_descriptions' => 'array', // New field
+        'cheque_expense_amounts' => 'array',      // New field
     ];
 
     // public function installments()
@@ -59,6 +72,14 @@ public function installments()
     return $this->hasMany(Installment::class, 'sale_id');
 }
 
+public function partnerDistributions()
+{
+    return $this->hasMany(PartnerDistribution::class);
+}
+public function cashExpenses()
+{
+    return $this->hasMany(CashExpense::class, 'sale_id');
+}
 
 }
     

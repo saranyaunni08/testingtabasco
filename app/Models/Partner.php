@@ -28,4 +28,9 @@ class Partner extends Model
     {
         return $this->hasMany(Sale::class);
     }
+    public function partnerDistributions()
+    {
+        return $this->hasMany(PartnerDistribution::class);
+    }
+
 }

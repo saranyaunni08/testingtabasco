@@ -6,6 +6,7 @@ use App\Models\Sale;
 use App\Models\Room;
 use App\Models\Installment;
 use App\Models\Building;
+use App\Models\CashExpense;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
@@ -15,14 +16,27 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 use Illuminate\Support\Facades\Storage;
 use League\Csv\Writer;
 use Barryvdh\DomPDF\Facade\Pdf as PDF;
+use App\Models\PartnerDistribution;
+
+
 
 class SaleController extends Controller
 {
 
+
     public function store(Request $request)
     {
+        // dd($request->all());
+        // Decode JSON strings into arrays
+        $request->merge([
+            'partner_distribution' => json_decode($request->partner_distribution, true),
+            'partner_percentages' => json_decode($request->partner_percentages, true),
+            'partner_amounts' => json_decode($request->partner_amounts, true),
+        ]);
+    
+        // Validate the incoming request data
         $validatedData = $request->validate([
-            'room_id' => 'required|exists:rooms,id', 
+            'room_id' => 'required|exists:rooms,id',
             'customer_name' => 'required|string|max:255',
             'customer_email' => 'required|email|max:255',
             'customer_contact' => 'required|string|max:255',
@@ -36,33 +50,87 @@ class SaleController extends Controller
             'final_amount' => 'nullable|numeric',
             'cash_value_percentage' => 'nullable|numeric|min:0|max:100',
             'cash_value_amount' => 'nullable|numeric',
-            'additional_amounts' => 'nullable|string',
             'total_cash_value' => 'nullable|numeric',
             'total_received_amount' => 'nullable|numeric',
-            'partners' => 'nullable|string',
-            'partner_distribution' => 'nullable|string',
-            'other_expenses' => 'nullable|string',
             'remaining_cash_value' => 'nullable|numeric',
-            'loan_type' => 'nullable|string',
-            'installment_frequency' => 'nullable|string',
-            'installment_start_date' => 'nullable|date',
-            'number_of_installments' => 'nullable|integer',
-            'installment_amount' => 'nullable|numeric',
-            'gst_percentage' => 'nullable|numeric|min:0|max:100',
-            'gst_amount' => 'nullable|numeric',
-            'total_cheque_value_with_gst' => 'nullable|numeric',
-            'received_cheque_value' => 'nullable|numeric',
-            'balance_amount' => 'nullable|numeric',
+    
+            'partner_distribution' => 'required|array',
+            'partner_percentages' => 'required|array',
+            'partner_amounts' => 'required|array',
+            'partner_distribution.*' => 'exists:partners,id',
+            'partner_percentages.*' => 'numeric|min:0|max:100',
+            'partner_amounts.*' => 'numeric|min:0',
+    
+            'cash_expense_descriptions' => 'nullable|array',
+            'cash_expense_percentages' => 'nullable|array',
+            'cash_expense_amounts' => 'nullable|array',
+            'cash_expense_descriptions.*' => 'string|max:255',
+            'cash_expense_percentages.*' => 'numeric|min:0|max:100',
+            'cash_expense_amounts.*' => 'numeric|min:0',
+    
+            'cheque_expense_descriptions' => 'nullable|array',
+            'cheque_expense_amounts' => 'nullable|array',
+            'cheque_expense_descriptions.*' => 'string|max:255',
+            'cheque_expense_amounts.*' => 'numeric|min:0',
+            'total_cheque_value_with_additional' => 'nullable|numeric',
+            'total_cheque_value' => 'nullable|numeric',
+
         ]);
     
-        Sale::create($validatedData); // Ensure your Sale model uses fillable properties or guarded appropriately
-
+        // Update the room status
         $room = Room::find($request->room_id);
         $room->status = 'sold';
-        $room->save();    
-        return redirect()->route('admin.sales.index')->with('success', 'Sale recorded successfully!');
+        $room->save();
+    
+        $building_id = $room->building_id;
+    
+        // Store the sale
+        $sale = Sale::create($validatedData);
+    
+        // Store partner distributions
+        foreach ($request->partner_distribution as $index => $partnerId) {
+            PartnerDistribution::create([
+                'sale_id' => $sale->id,
+                'partner_id' => $partnerId,
+                'percentage' => $request->partner_percentages[$index] ?? 0,
+                'amount' => $request->partner_amounts[$index] ?? 0,
+            ]);
+        }
+    
+        // Store cash expenses if they exist
+        if ($request->has('cash_expense_descriptions')) {
+            foreach ($request->cash_expense_descriptions as $index => $description) {
+                if ($description) {
+                    try {
+                        CashExpense::create([
+                            'sale_id' => $sale->id, // Link the expense to the sale
+                            'cash_expense_description' => $description,
+                            'cash_expense_percentage' => $request->cash_expense_percentages[$index] ?? null,
+                            'cash_expense_amount' => $request->cash_expense_amounts[$index] ?? null,
+                        ]);
+                    } catch (\Exception $e) {
+                        dd('Error inserting cash expense:', $e->getMessage());
+                    }
+                }
+            }
+        }
+    
+        // Store cheque expenses if they exist
+        if ($request->has('cheque_expense_descriptions')) {
+            $chequeExpenseDescriptions = json_encode($request->cheque_expense_descriptions);
+            $chequeExpenseAmounts = json_encode($request->cheque_expense_amounts);
+            
+            $sale->update([
+                'cheque_expense_descriptions' => $chequeExpenseDescriptions,
+                'cheque_expense_amounts' => $chequeExpenseAmounts,
+                'total_cheque_value_with_additional' => $request->total_cheque_value_with_additional,
+            ]);
+        }
+    
+        return redirect()->route('admin.rooms.sell', [$room->id, $building_id])->with('success', 'Sale recorded successfully!');
     }
     
+
     protected function getAreaProperty($room, $areaCalculationType)
     {
         $areaProperties = [
@@ -106,12 +174,6 @@ class SaleController extends Controller
         return view('sales.create', compact('rooms', 'page'));
     }
 
-    public function showSales()
-    {
-        $sales = Sale::all();
-        $page = 'sales';
-        return view('sales.sales', compact('sales', 'page'));
-    }
 
     public function softDelete($id)
     {

@@ -80,8 +80,6 @@ Route::controller(AuthController::class)->group(function () {
         // Route::put('rooms/{id}/sell', [RoomController::class, 'processSell'])->name('rooms.sell');
         Route::get('/rooms/{room}/sell', [SaleController::class, 'create'])->name('sales.create');
 
-        Route::get('/sales', [SaleController::class, 'showSales'])->name('sales.index');
-
         Route::get('/buildings/{building_id}/rooms', [RoomController::class, 'showRooms'])->name('buildings.rooms');
 
         Route::delete('sales/{id}/soft-delete', [SaleController::class, 'softDelete'])->name('sales.soft-delete');
@@ -92,7 +90,7 @@ Route::controller(AuthController::class)->group(function () {
 
         Route::get('/customers/sales/{saleId}', [SaleController::class, 'showCustomer'])->name('customers.show');
 
-        Route::get('/room-dashboard', [RoomController::class, 'dashboard'])->name('room-dashboard');
+        // Route::get('/room-dashboard', [RoomController::class, 'dashboard'])->name('room-dashboard');
 
         Route::get('/room-dashboard/{building_id}', [RoomController::class, 'showBuildingRooms'])->name('building-room-dashboard');
 

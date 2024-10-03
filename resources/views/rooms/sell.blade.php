@@ -109,42 +109,53 @@
             <input type="number" class="form-control" id="total_received_amount" name="total_received_amount" oninput="updatePartnerFields()">
         </div>
         
-        <!-- Partner Selection (Checkboxes) -->
         <div class="form-group">
-            <label>Select Partners</label>
-            <div id="partner_checkbox_container">
-                @foreach($partners as $partner)
-                <div class="form-check">
-                    <input class="form-check-input partner-checkbox" type="checkbox" value="{{ $partner->id }}" id="partner_{{ $partner->id }}" onchange="togglePartnerFields({{ $partner->id }})">
-                    <label class="form-check-label" for="partner_{{ $partner->id }}">
-                        {{ $partner->first_name }}
-                    </label>
-                </div>
-                @endforeach
+            <label for="partner_distribution">Select Partners</label>
+            <!-- Your partner selection checkboxes -->
+            @foreach($partners as $partner)
+            <div class="form-check">
+                <input class="form-check-input partner-checkbox" type="checkbox" value="{{ $partner->id }}" id="partner_{{ $partner->id }}" onchange="togglePartnerFields({{ $partner->id }})">
+                <label class="form-check-label" for="partner_{{ $partner->id }}">
+                    {{ $partner->first_name }}
+                </label>
             </div>
+            @endforeach
+        
+            <!-- Error message for partner distribution -->
+            @if ($errors->has('partner_distribution'))
+                <div class="alert alert-danger">
+                    {{ $errors->first('partner_distribution') }}
+                </div>
+            @endif
         </div>
 
-        <!-- Partner Amount Distribution -->
         <div id="partner_distribution_container"></div>
+    
+        <input type="hidden" name="partner_distribution" id="partner_distribution" value="">
+        <input type="hidden" name="partner_percentages" id="partner_percentages" value="">
+        <input type="hidden" name="partner_amounts" id="partner_amounts" value="">
+    
+        
 
         <div id="total_percentage_error" style="color:red;"></div>
 
 
         <div id="additional-expenses-container">
             <h5>Other Expenses</h5>
-            <div class="row mb-2" id="additional-expense-0">
+            <div class="row mb-2" id="expense-container">
                 <div class="col-md-6">
-                    <input type="text" class="form-control" name="expense_descriptions[]" placeholder="Description">
+                    <input type="text" placeholder="Expense Description" class="form-control expense-description" />
                 </div>
-                <div class="col-md-4">
-                    <input type="number" class="form-control percentage-input" name="expense_percentages[]" placeholder="Percentage" step="0.01" oninput="calculateExpenseAmount(this); updateTotalPercentage()">
-                </div>
-                <div class="col-md-2">
-                    <input type="text" class="form-control amount-display" placeholder="Amount" oninput="calculatePercentage(this);" />
+                <div class="col-md-6">
+                    <input type="number" placeholder="Expense Amount" class="form-control expense-amount" oninput="calculateTotalChequeValueWithAdditional()" />
                 </div>
             </div>
-            <button type="button" class="btn btn-success mt-2" id="add-more-expenses">Add Expenses</button>
+            <br>
+            <button id="add-expense" class="btn btn-success mt-2">Add Expense</button>
         </div>
+        
+
+        
     <!-- Remaining Cash Value -->
         <div class="form-group">
             <label for="remaining_cash_value">Remaining Cash Value</label>
@@ -186,11 +197,12 @@
         <input type="number" id="installment_amount_cash" class="form-control" readonly>
     </div>
 
-        <div class="form-group">
-            <label for="total_cheque_value"> <h2> Total Cheque Value </h2></label>
-            <input type="text" id="total_cheque_value" class="form-control" readonly>
-        </div>
-        
+    <div class="form-group">
+        <label for="total_cheque_value"><h2>Total Cheque Value</h2></label>
+        <input type="text" id="total_cheque_value" class="form-control" readonly>
+        <input type="hidden" name="total_cheque_value" id="total_cheque_value_hidden"> <!-- Hidden field for form submission -->
+    </div>
+    
 
         <div id="additional-expenses-container">
             <h5>Other Expenses</h5>
@@ -199,16 +211,17 @@
                     <input type="text" placeholder="Expense Description" class="form-control expense-description" />
                 </div>
                 <div class="col-md-6">
-                    <input type="number" placeholder="Expense Amount" class="form-control expense-amount" />
+                    <input type="number" placeholder="Expense Amount" class="form-control expense-amount" oninput="calculateTotalChequeValueWithAdditional()" />
                 </div>
             </div><br>
             <button id="add-expense" class="btn btn-success mt-2">Add Expense</button>
         </div>
         
-
+  
         <div class="form-group">
-            <label>Total Cheque Value (with Additional Amounts):</label>
+            <label for="total_cheque_value_with_additional">Total Cheque Value with Additional Expenses</label>
             <input type="text" id="total_cheque_value_with_additional" class="form-control" readonly />
+            <input type="hidden" name="total_cheque_value_with_additional" id="total_cheque_value_with_additional_hidden" />
         </div>
 
         <div class="form-group ">
@@ -477,12 +490,11 @@ document.getElementById('no_of_installments_cash').addEventListener('input', cal
 </script>
 <script>
    // Function to show or hide partner fields based on checkbox selection
-function togglePartnerFields(partnerId) {
+   function togglePartnerFields(partnerId) {
     let container = document.getElementById('partner_distribution_container');
     let checkbox = document.getElementById('partner_' + partnerId);
     
     if (checkbox.checked) {
-        // If checked, add percentage and amount fields
         let partnerDiv = document.createElement('div');
         partnerDiv.className = 'partner-field';
         partnerDiv.id = 'partner_field_' + partnerId;
@@ -490,23 +502,59 @@ function togglePartnerFields(partnerId) {
             <h5>Partner: ${document.querySelector('label[for="partner_' + partnerId + '"]').textContent}</h5>
             <div class="form-group">
                 <label for="partner_${partnerId}_percentage">Percentage</label>
-                <input type="number" class="form-control partner-percentage" data-partner-id="${partnerId}" id="partner_${partnerId}_percentage" min="0" max="100" oninput="updatePartnerAmount(${partnerId}); validateTotalPercentage();">
+                <input type="number" class="form-control partner-percentage" data-partner-id="${partnerId}" id="partner_${partnerId}_percentage" min="0" max="100" oninput="updatePartnerAmount(${partnerId}); validateTotalPercentage(); updateHiddenFields();">
             </div>
             <div class="form-group">
                 <label for="partner_${partnerId}_amount">Amount</label>
-                <input type="number" class="form-control partner-amount" data-partner-id="${partnerId}" id="partner_${partnerId}_amount" oninput="updatePartnerPercentage(${partnerId}); validateTotalPercentage();">
+                <input type="number" class="form-control partner-amount" data-partner-id="${partnerId}" id="partner_${partnerId}_amount" oninput="updatePartnerPercentage(${partnerId}); validateTotalPercentage(); updateHiddenFields();">
             </div>
         `;
         container.appendChild(partnerDiv);
     } else {
-        // If unchecked, remove the fields
         let partnerDiv = document.getElementById('partner_field_' + partnerId);
         if (partnerDiv) {
             container.removeChild(partnerDiv);
         }
-        validateTotalPercentage(); // Re-validate total percentage after removing a partner
     }
+    updateHiddenFields();  // Ensure hidden fields are updated when toggling partners
 }
+function updateHiddenFields() {
+    let partnerDistribution = [];
+    let partnerPercentages = [];
+    let partnerAmounts = [];
+
+    document.querySelectorAll('.partner-checkbox:checked').forEach(function(checkbox) {
+        let partnerId = checkbox.value;
+        let percentageField = document.getElementById('partner_' + partnerId + '_percentage');
+        let amountField = document.getElementById('partner_' + partnerId + '_amount');
+
+        if (percentageField && amountField) {
+            partnerDistribution.push(partnerId);
+            partnerPercentages.push(percentageField.value);
+            partnerAmounts.push(amountField.value);
+        }
+    });
+
+    document.getElementById('partner_distribution').value = JSON.stringify(partnerDistribution);
+    document.getElementById('partner_percentages').value = JSON.stringify(partnerPercentages);
+    document.getElementById('partner_amounts').value = JSON.stringify(partnerAmounts);
+}
+
+
+document.querySelector('form').addEventListener('submit', function(event) {
+    const partnerIds = Array.from(document.querySelectorAll('.partner-checkbox:checked')).map(checkbox => checkbox.value);
+    const percentages = Array.from(document.querySelectorAll('.partner-percentage')).map(input => input.value);
+    const amounts = Array.from(document.querySelectorAll('.partner-amount')).map(input => input.value);
+
+    document.getElementById('partner_distribution').value = JSON.stringify(partnerIds);
+    document.getElementById('partner_percentages').value = JSON.stringify(percentages);
+    document.getElementById('partner_amounts').value = JSON.stringify(amounts);
+    
+    // Log the values being set
+    console.log("Partner Distribution:", document.getElementById('partner_distribution').value);
+    console.log("Partner Percentages:", document.getElementById('partner_percentages').value);
+    console.log("Partner Amounts:", document.getElementById('partner_amounts').value);
+});
 
 // Function to update partner amount based on percentage entered
 function updatePartnerAmount(partnerId) {
@@ -532,6 +580,7 @@ function updatePartnerPercentage(partnerId) {
     percentageField.value = percentage.toFixed(2);
 }
 
+
 // Function to validate that the total percentage does not exceed 100%
 // Function to validate that the total percentage does not exceed 100%
 function validateTotalPercentage() {
@@ -542,7 +591,6 @@ function validateTotalPercentage() {
         totalPercentage += parseFloat(field.value) || 0;
     });
     
-    // Include "Others" percentage if available
     let othersPercentage = parseFloat(document.getElementById('others_percentage').value) || 0;
     totalPercentage += othersPercentage;
 
@@ -555,7 +603,6 @@ function validateTotalPercentage() {
         document.getElementById('submit_button').disabled = false;
     }
 }
-
 // Attach event listeners to other percentage fields if needed
 document.getElementById('others_percentage').addEventListener('input', validateTotalPercentage);
 
@@ -580,7 +627,6 @@ function updateOthersAmount() {
 
     validateTotalPercentage(); // Revalidate after updating "Others" amount
 }
-
 </script>
 <script>
 let expenseCount = 1; // Initialize counter for additional expenses
@@ -629,36 +675,36 @@ function calculateExpenseAmount(inputElement) {
 }
 
 // Function to calculate percentage based on the amount input
-function calculatePercentage(inputElement) {
-    const amount = parseFloat(inputElement.value) || 0; // Get the amount
-    const totalReceivedAmount = parseFloat(document.getElementById('total_received_amount').value) || 0; // Get total received amount
-    const percentageInput = inputElement.closest('.row').querySelector('.percentage-input'); // Get the corresponding percentage input
+function calculatePercentage(input) {
+    const amount = parseFloat(input.value) || 0;
+    const parentDiv = input.closest('.row');
+    const percentageInput = parentDiv.querySelector('.percentage-input');
 
-    // Calculate the percentage based on the amount relative to the total received amount
-    const percentage = ((amount / totalReceivedAmount) * 100).toFixed(2);
-    percentageInput.value = percentage; // Update the percentage field
+    // Assuming total_cash_value is a predefined global variable or retrieved from the DOM
+    const totalCashValue = parseFloat(document.querySelector('[name="total_cash_value"]').value) || 0;
 
-    // Update total percentage on change
-    updateTotalPercentage();
+    // Calculate the percentage based on the amount and total cash value
+    if (totalCashValue > 0) {
+        const percentage = (amount / totalCashValue) * 100;
+        percentageInput.value = percentage.toFixed(2); // Set calculated percentage with two decimal places
+    }
 }
-
-// Function to add more expense fields
 document.getElementById('add-more-expenses').addEventListener('click', function() {
     const container = document.getElementById('additional-expenses-container');
     const newExpenseDiv = document.createElement('div');
     newExpenseDiv.className = 'row mb-2';
     newExpenseDiv.id = `additional-expense-${expenseCount}`;
 
-    // Create new expense fields
+    // Create new expense fields with updated names
     newExpenseDiv.innerHTML = `
         <div class="col-md-6">
-            <input type="text" class="form-control" name="expense_descriptions[]" placeholder="Description">
+            <input type="text" class="form-control" name="cash_expense_descriptions[]" placeholder="Description">
         </div>
         <div class="col-md-4">
-            <input type="number" class="form-control percentage-input" name="expense_percentages[]" placeholder="Percentage" step="0.01" oninput="calculateExpenseAmount(this); updateTotalPercentage()">
+            <input type="number" class="form-control percentage-input" name="cash_expense_percentages[]" placeholder="Percentage" step="0.01" oninput="calculateExpenseAmount(this); updateTotalPercentage()">
         </div>
         <div class="col-md-2">
-            <input type="text" class="form-control amount-display" placeholder="Amount" oninput="calculatePercentage(this);" />
+            <input type="text" class="form-control amount-display" name="cash_expense_amounts[]" placeholder="Amount" oninput="calculatePercentage(this);" />
         </div>
     `;
 
@@ -666,6 +712,8 @@ document.getElementById('add-more-expenses').addEventListener('click', function(
     container.appendChild(newExpenseDiv);
     expenseCount++; // Increment the expense counter
 });
+
+
 
 // Add event listeners for partner checkboxes to update total percentage
 const partnerCheckboxes = document.querySelectorAll('.partner-checkbox');
@@ -713,27 +761,7 @@ additionalAmountInputs.forEach(input => {
 });
 
 </script>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Function to calculate the cheque value
-        function calculateChequeValue() {
-            const finalAmount = parseFloat(document.getElementById('final_amount').value) || 0;
-            const totalCashValue = parseFloat(document.getElementById('total_cash_value').value) || 0;
-            const chequeValue = finalAmount - totalCashValue;
 
-            // Update the cheque value display
-            document.getElementById('chequeValue').innerText = chequeValue.toFixed(2);
-        }
-
-        // Event listeners for when values change
-        document.getElementById('final_amount').addEventListener('input', calculateChequeValue);
-        document.getElementById('total_cash_value').addEventListener('input', calculateChequeValue);
-
-        // Initialize calculation on page load
-        calculateChequeValue();
-    });
-
-</script>
 
 <script>
     function updateTotalCashValue() {
@@ -754,22 +782,12 @@ additionalAmountInputs.forEach(input => {
     calculateChequeValue();  // Call the function to update cheque value
 }
 
-function calculateChequeValue() {
-    let finalAmount = parseFloat(document.getElementById('final_amount').value) || 0;
-    let totalCashValue = parseFloat(document.getElementById('total_cash_value').value) || 0;
-
-    // Subtract Total Cash Value from Final Amount to get the cheque value
-    let chequeValue = finalAmount - totalCashValue;
-
-    // Update the Total Cheque Value field
-    document.getElementById('total_cheque_value').value = chequeValue.toFixed(2);
-}
 
 </script>
 
+
 <script>
-let baseChequeValue = 0; // This will be updated based on finalAmount and totalCashValue
-let totalChequeValueWithAdditional = 0;
+let baseChequeValue = 0; // Declare at a broader scope
 
 function calculateChequeValue() {
     const finalAmount = parseFloat(document.getElementById('final_amount').value) || 0;
@@ -781,9 +799,14 @@ function calculateChequeValue() {
     // Update the Total Cheque Value field
     document.getElementById('total_cheque_value').value = baseChequeValue.toFixed(2);
 
-    // Update the total cheque value with additional expenses
-    calculateTotalChequeValueWithAdditional();
+    // Update the hidden input for form submission
+    document.getElementById('total_cheque_value_hidden').value = baseChequeValue.toFixed(2);
+
+    // Calculate total cheque value with additional expenses
+    calculateTotalChequeValueWithAdditional(); // Call this function here
 }
+
+
 
 document.getElementById('add-expense').addEventListener('click', function() {
     const expenseContainer = document.getElementById('expense-container');
@@ -800,19 +823,6 @@ document.getElementById('add-expense').addEventListener('click', function() {
     expenseContainer.appendChild(newExpenseEntry);
 });
 
-function calculateTotalChequeValueWithAdditional() {
-    const expenseAmounts = document.querySelectorAll('.expense-amount');
-    let totalExpenses = 0;
-
-    expenseAmounts.forEach(amount => {
-        totalExpenses += parseFloat(amount.value) || 0;
-    });
-
-    // Calculate the total cheque value with additional expenses
-    totalChequeValueWithAdditional = baseChequeValue + totalExpenses;
-
-    document.getElementById('total_cheque_value_with_additional').value = totalChequeValueWithAdditional.toFixed(2);
-}
 
 </script>
 <script>
@@ -846,10 +856,11 @@ function calculateGST() {
         });
 
         // Calculate the total cheque value with additional expenses
-        totalChequeValueWithAdditional = baseChequeValue + totalExpenses;
+        const totalChequeValueWithAdditional = baseChequeValue + totalExpenses;
 
         document.getElementById('total_cheque_value_with_additional').value = totalChequeValueWithAdditional.toFixed(2);
-        
+        document.getElementById('total_cheque_value_with_additional_hidden').value = totalChequeValueWithAdditional.toFixed(2);
+
         // Also recalculate the GST amount when expenses change
         calculateGST();
         calculateGrandTotal();
@@ -936,6 +947,7 @@ function calculateGrandTotal() {
     console.log("Total Cheque Value with Additional Amounts:", totalChequeValueWithAdditional);
     console.log("Total Cheque Value with GST:", totalChequeValueWithGst);
     console.log("Grand Total Amount:", grandTotalAmount);
+    console.log("cheque amount:", baseChequeValue);
 
     // Update the Grand Total Amount field
     document.getElementById('grand_total_amount').value = grandTotalAmount.toFixed(2);
