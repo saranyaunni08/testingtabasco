@@ -98,15 +98,15 @@ class SaleController extends Controller
         }
     
         // Store cash expenses if they exist
-        if ($request->has('cash_expense_descriptions')) {
-            foreach ($request->cash_expense_descriptions as $index => $description) {
+        if ($request->has('expense_descriptions')) {
+            foreach ($request->expense_descriptions as $index => $description) {
                 if ($description) {
                     try {
                         CashExpense::create([
                             'sale_id' => $sale->id, // Link the expense to the sale
                             'cash_expense_description' => $description,
-                            'cash_expense_percentage' => $request->cash_expense_percentages[$index] ?? null,
-                            'cash_expense_amount' => $request->cash_expense_amounts[$index] ?? null,
+                            'cash_expense_percentage' => $request->expense_percentages[$index] ?? null,
+                            'cash_expense_amount' => $request->expense_amounts[$index] ?? null, // Save the expense amount
                         ]);
                     } catch (\Exception $e) {
                         dd('Error inserting cash expense:', $e->getMessage());
@@ -114,6 +114,7 @@ class SaleController extends Controller
                 }
             }
         }
+
     
         // Store cheque expenses if they exist
         if ($request->has('cheque_expense_descriptions')) {

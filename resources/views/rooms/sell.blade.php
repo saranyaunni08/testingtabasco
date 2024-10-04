@@ -140,18 +140,21 @@
         <div id="total_percentage_error" style="color:red;"></div>
 
 
+        
         <div id="additional-expenses-container">
             <h5>Other Expenses</h5>
-            <div class="row mb-2" id="expense-container">
+            <div class="row mb-2" id="additional-expense-0">
                 <div class="col-md-6">
-                    <input type="text" placeholder="Expense Description" class="form-control expense-description" />
+                    <input type="text" class="form-control" name="expense_descriptions[]" placeholder="Description">
                 </div>
-                <div class="col-md-6">
-                    <input type="number" placeholder="Expense Amount" class="form-control expense-amount" oninput="calculateTotalChequeValueWithAdditional()" />
+                <div class="col-md-4">
+                    <input type="number" class="form-control percentage-input" name="expense_percentages[]" placeholder="Percentage" step="0.01" oninput="calculateExpenseAmount(this); updateTotalPercentage()">
+                </div>
+                <div class="col-md-2">
+                    <input type="number" class="form-control amount-display" name="expense_amounts[]" placeholder="Amount" oninput="calculatePercentage(this);" />
                 </div>
             </div>
-            <br>
-            <button id="add-expense" class="btn btn-success mt-2">Add Expense</button>
+            <button type="button" class="btn btn-success mt-2" id="add-more-expenses">Add Expenses</button>
         </div>
         
 
@@ -690,29 +693,25 @@ function calculatePercentage(input) {
     }
 }
 document.getElementById('add-more-expenses').addEventListener('click', function() {
-    const container = document.getElementById('additional-expenses-container');
-    const newExpenseDiv = document.createElement('div');
-    newExpenseDiv.className = 'row mb-2';
-    newExpenseDiv.id = `additional-expense-${expenseCount}`;
-
-    // Create new expense fields with updated names
-    newExpenseDiv.innerHTML = `
+    const expenseContainer = document.getElementById('additional-expenses-container');
+    const expenseCount = expenseContainer.getElementsByClassName('row').length;
+    
+    const newExpenseEntry = document.createElement('div');
+    newExpenseEntry.classList.add('row', 'mb-2'); // Added Bootstrap classes for spacing
+    newExpenseEntry.id = `additional-expense-${expenseCount}`; // Assign unique ID if needed
+    newExpenseEntry.innerHTML = `
         <div class="col-md-6">
-            <input type="text" class="form-control" name="cash_expense_descriptions[]" placeholder="Description">
+            <input type="text" class="form-control" name="expense_descriptions[]" placeholder="Description">
         </div>
         <div class="col-md-4">
-            <input type="number" class="form-control percentage-input" name="cash_expense_percentages[]" placeholder="Percentage" step="0.01" oninput="calculateExpenseAmount(this); updateTotalPercentage()">
+            <input type="number" class="form-control percentage-input" name="expense_percentages[]" placeholder="Percentage" step="0.01" oninput="calculateExpenseAmount(this); updateTotalPercentage()">
         </div>
         <div class="col-md-2">
-            <input type="text" class="form-control amount-display" name="cash_expense_amounts[]" placeholder="Amount" oninput="calculatePercentage(this);" />
+            <input type="text" class="form-control amount-display" placeholder="Amount" oninput="calculatePercentage(this);" />
         </div>
     `;
-
-    // Append new expense fields to the container
-    container.appendChild(newExpenseDiv);
-    expenseCount++; // Increment the expense counter
+    expenseContainer.appendChild(newExpenseEntry);
 });
-
 
 
 // Add event listeners for partner checkboxes to update total percentage
@@ -819,8 +818,17 @@ document.getElementById('add-expense').addEventListener('click', function() {
         <div class="col-md-6">
             <input type="number" placeholder="Expense Amount" class="form-control expense-amount" oninput="calculateTotalChequeValueWithAdditional()" />
         </div>
+        <div class="col-md-2">
+            <button type="button" class="btn btn-danger remove-expense">Remove</button>
+        </div>
     `;
     expenseContainer.appendChild(newExpenseEntry);
+
+    // Add event listener for the remove button
+    newExpenseEntry.querySelector('.remove-expense').addEventListener('click', function() {
+        expenseContainer.removeChild(newExpenseEntry);
+        calculateTotalChequeValueWithAdditional(); // Recalculate total after removal
+    });
 });
 
 
