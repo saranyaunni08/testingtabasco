@@ -229,27 +229,30 @@
 
         <div class="form-group ">
             <label >Gst Percentage</label>
-            <input type="number" id="gst_percentage" placeholder="GST Percentage" oninput="calculateTotalChequeValueWithAdditional()" class="form-control" />
+            <input type="number" id="gst_percentage" name="gst_percentage" placeholder="GST Percentage" oninput="calculateTotalChequeValueWithAdditional()" class="form-control" />
+
         </div>
         <div class="form-group ">
             <label >Gst Amount</label>
-            <input type="text" id="gst_amount" placeholder="GST Amount" class="form-control" readonly  />
+            <input type="text" id="gst_amount" name="gst_amount" placeholder="GST Amount" class="form-control" readonly />
+
         </div>
         
         <div class="form-group ">
             <label >Total Cheque Value (with Gst):</label>
-            <input type="text" id="total_cheque_value_with_gst" placeholder="Total Cheque Value + GST" class="form-control" readonly />
+            <input type="text" id="total_cheque_value_with_gst" name="total_cheque_value_with_gst" placeholder="Total Cheque Value + GST" class="form-control" readonly />
+
         <br>
-            <h5>Received Amount:</h5>
-            <input type="number" id="received_cheque_value" class="form-control" placeholder="Received Amount" oninput="calculateBalance()" />
-        <br>
-            <h5>Balance Amount:</h5>
-            <input type="text" id="balance_amount" class="form-control" placeholder="Balance Amount" readonly />
+        <h5>Received Amount:</h5>
+        <input type="number" id="received_cheque_value" name="received_cheque_value" class="form-control" placeholder="Received Amount" oninput="calculateBalance()" />
+        
+        <h5>Balance Amount:</h5>
+        <input type="text" id="balance_amount" name="balance_amount" class="form-control" placeholder="Balance Amount" readonly />
         </div>
 
         <div id="loan-type-container" style="display: none;">
             <label for="loan_type">Select Loan Type:</label>
-            <select id="loan_type" class="form-control" onchange="handleLoanTypeChange()">
+            <select id="loan_type" name="loan_type" class="form-control" onchange="handleLoanTypeChange()">
                 <option value="">Select...</option>
                 <option value="bank">Bank</option>
                 <option value="directors">Director's</option>
@@ -259,13 +262,12 @@
         
         <div id="other-loan-description-container" style="display: none;">
             <label for="other_loan_description">Please specify:</label>
-            <input type="text" id="other_loan_description" class="form-control" placeholder="Describe Other Loan Type">
+            <input type="text" id="other_loan_description" name="other_loan_description" class="form-control" placeholder="Describe Other Loan Type">
         </div>
-
-
+        
         <div id="installment-container" style="display: none;">
             <label for="installment_frequency">Installment Frequency:</label>
-            <select id="installment_frequency" class="form-control">
+            <select id="installment_frequency" name="installment_frequency" class="form-control">
                 <option value="">Select Frequency...</option>
                 <option value="monthly">Every Month</option>
                 <option value="3months">Every 3 Months</option>
@@ -273,17 +275,18 @@
             </select>
         
             <label for="installment_date">Installment Start Date:</label>
-            <input type="date" id="installment_date" class="form-control">
+            <input type="date" id="installment_date" name="installment_date" class="form-control">
         
             <label for="no_of_installments">Number of Installments:</label>
-            <input type="number" id="no_of_installments" class="form-control" placeholder="Enter No. of Installments" oninput="calculateInstallmentAmount()">
+            <input type="number" id="no_of_installments" name="no_of_installments" class="form-control" placeholder="Enter No. of Installments" oninput="calculateInstallmentAmount()">
         
             <label for="installment_amount">Installment Amount (auto-calculated):</label>
-            <input type="number" id="installment_amount" class="form-control" readonly>
+            <input type="number" id="installment_amount" name="installment_amount" class="form-control" readonly>
         </div>
+        
         <div id="grand-total-container">
             <label for="grand_total_amount">Grand Total Amount (auto-calculated):</label>
-            <input type="number" id="grand_total_amount" class="form-control" readonly>
+            <input type="number" id="grand_total_amount" name="grand_total_amount" class="form-control" readonly>
         </div>
         
 
@@ -874,26 +877,7 @@ function calculateGST() {
         calculateGrandTotal();
     }
 
-    function calculateBalance() {
-    const totalChequeValueWithGst = parseFloat(document.getElementById('total_cheque_value_with_gst').value) || 0;
-    const receivedChequeValue = parseFloat(document.getElementById('received_cheque_value').value) || 0;
-
-    // Calculate the balance
-    const balanceAmount = totalChequeValueWithGst - receivedChequeValue;
-
-    // Update the balance amount field
-    document.getElementById('balance_amount').value = balanceAmount.toFixed(2);
-
-    // Show or hide loan type selection based on balance amount
-    const loanTypeContainer = document.getElementById('loan-type-container');
-    if (balanceAmount !== 0) {
-        loanTypeContainer.style.display = 'block'; // Show loan type selection
-    } else {
-        loanTypeContainer.style.display = 'none'; // Hide loan type selection
-        document.getElementById('other-loan-description-container').style.display = 'none'; // Hide description field if balance is 0
-    }
-}
-
+//     
 function handleLoanTypeChange() {
     const loanType = document.getElementById('loan_type').value;
     const otherLoanDescriptionContainer = document.getElementById('other-loan-description-container');
@@ -922,7 +906,6 @@ function calculateInstallmentAmount() {
     // Update the Installment Amount field
     document.getElementById('installment_amount').value = installmentAmount;
 }
-
 function calculateBalance() {
     const totalChequeValueWithGst = parseFloat(document.getElementById('total_cheque_value_with_gst').value) || 0;
     const receivedChequeValue = parseFloat(document.getElementById('received_cheque_value').value) || 0;
@@ -932,6 +915,7 @@ function calculateBalance() {
 
     // Update the balance amount field
     document.getElementById('balance_amount').value = balanceAmount.toFixed(2);
+    console.log("Balance Amount: ", balanceAmount.toFixed(2)); // Debug
 
     // Show or hide loan type selection and installment options based on balance amount
     const loanTypeContainer = document.getElementById('loan-type-container');
@@ -943,6 +927,7 @@ function calculateBalance() {
         document.getElementById('other-loan-description-container').style.display = 'none'; // Hide description field if balance is 0
     }
 }
+
 
 function calculateGrandTotal() {
     // Get values from the fields, ensuring they're treated as numbers

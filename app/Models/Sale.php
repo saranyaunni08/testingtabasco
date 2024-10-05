@@ -48,6 +48,17 @@ class Sale extends Model
         'cheque_expense_amounts',             // Optional: if storing as JSON
         'partner_percentages',
         'partner_amounts',
+        'total_cheque_value_with_gst',
+        'received_cheque_value',
+        'balance_amount',
+        'other_loan_description',
+        'installment_date',
+        'no_of_installments',
+        'grand_total_amount',
+
+
+
+
     ];
 
     protected $casts = [

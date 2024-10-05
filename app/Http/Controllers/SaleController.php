@@ -53,6 +53,10 @@ class SaleController extends Controller
             'total_cash_value' => 'nullable|numeric',
             'total_received_amount' => 'nullable|numeric',
             'remaining_cash_value' => 'nullable|numeric',
+            'gst_percentage' => 'nullable|numeric|min:0|max:100', 
+            'gst_amount' => 'nullable|numeric', 
+            'total_cheque_value_with_gst' => 'nullable|numeric',
+    
     
             'partner_distribution' => 'required|array',
             'partner_percentages' => 'required|array',
@@ -74,6 +78,17 @@ class SaleController extends Controller
             'cheque_expense_amounts.*' => 'numeric|min:0',
             'total_cheque_value_with_additional' => 'nullable|numeric',
             'total_cheque_value' => 'nullable|numeric',
+
+            'received_cheque_value' => 'nullable|numeric',
+            'balance_amount' => 'nullable|numeric',
+
+            'loan_type' => 'nullable|string',
+            'other_loan_description' => 'nullable|string',
+            'installment_frequency' => 'nullable|string',
+            'installment_date' => 'nullable|date',
+            'no_of_installments' => 'nullable|integer',
+            'installment_amount' => 'nullable|numeric',
+            'grand_total_amount' => 'nullable|numeric',
 
         ]);
     
