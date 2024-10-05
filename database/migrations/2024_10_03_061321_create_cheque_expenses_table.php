@@ -11,8 +11,8 @@ class CreateChequeExpensesTable extends Migration
         Schema::create('cheque_expenses', function (Blueprint $table) {
             $table->id();
             $table->foreignId('sale_id')->constrained()->onDelete('cascade');
-            $table->string('cheque_expense_description')->nullable();
-            $table->decimal('cheque_expense_amount', 10, 2)->nullable();
+            $table->string('cheque_expense_descriptions')->nullable(); // Changed to cheque_expense_descriptions
+            $table->decimal('cheque_expense_amounts', 10, 2)->nullable(); // Changed to cheque_expense_amounts
             $table->timestamps();
         });
     }

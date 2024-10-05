@@ -7,6 +7,7 @@ use App\Models\Room;
 use App\Models\Installment;
 use App\Models\Building;
 use App\Models\CashExpense;
+use App\Models\ChequeExpense;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
@@ -26,7 +27,10 @@ class SaleController extends Controller
 
     public function store(Request $request)
     {
+        // Debugging to check incoming request data
         // dd($request->all());
+        
+    
         // Decode JSON strings into arrays
         $request->merge([
             'partner_distribution' => json_decode($request->partner_distribution, true),
@@ -53,10 +57,9 @@ class SaleController extends Controller
             'total_cash_value' => 'nullable|numeric',
             'total_received_amount' => 'nullable|numeric',
             'remaining_cash_value' => 'nullable|numeric',
-            'gst_percentage' => 'nullable|numeric|min:0|max:100', 
-            'gst_amount' => 'nullable|numeric', 
+            'gst_percentage' => 'nullable|numeric|min:0|max:100',
+            'gst_amount' => 'nullable|numeric',
             'total_cheque_value_with_gst' => 'nullable|numeric',
-    
     
             'partner_distribution' => 'required|array',
             'partner_percentages' => 'required|array',
@@ -65,23 +68,25 @@ class SaleController extends Controller
             'partner_percentages.*' => 'numeric|min:0|max:100',
             'partner_amounts.*' => 'numeric|min:0',
     
-            'cash_expense_descriptions' => 'nullable|array',
-            'cash_expense_percentages' => 'nullable|array',
-            'cash_expense_amounts' => 'nullable|array',
-            'cash_expense_descriptions.*' => 'string|max:255',
-            'cash_expense_percentages.*' => 'numeric|min:0|max:100',
-            'cash_expense_amounts.*' => 'numeric|min:0',
+            'expense_descriptions' => 'nullable|array',
+            'expense_percentages' => 'nullable|array',
+            'expense_amounts' => 'nullable|array',
+            'expense_descriptions.*' => 'string|max:255',
+            'expense_percentages.*' => 'numeric|min:0|max:100',
+            'expense_amounts.*' => 'numeric|min:0',
     
+            // Adding validation for cheque expenses
             'cheque_expense_descriptions' => 'nullable|array',
             'cheque_expense_amounts' => 'nullable|array',
             'cheque_expense_descriptions.*' => 'string|max:255',
             'cheque_expense_amounts.*' => 'numeric|min:0',
+    
             'total_cheque_value_with_additional' => 'nullable|numeric',
             'total_cheque_value' => 'nullable|numeric',
-
+    
             'received_cheque_value' => 'nullable|numeric',
             'balance_amount' => 'nullable|numeric',
-
+    
             'loan_type' => 'nullable|string',
             'other_loan_description' => 'nullable|string',
             'installment_frequency' => 'nullable|string',
@@ -89,7 +94,6 @@ class SaleController extends Controller
             'no_of_installments' => 'nullable|integer',
             'installment_amount' => 'nullable|numeric',
             'grand_total_amount' => 'nullable|numeric',
-
         ]);
     
         // Update the room status
@@ -98,10 +102,15 @@ class SaleController extends Controller
         $room->save();
     
         $building_id = $room->building_id;
-    
+        $chequeExpenseAmounts = $request->cheque_expense_amounts; // This is an array
+        $chequeExpenseAmount = !empty($chequeExpenseAmounts) ? (float)$chequeExpenseAmounts[0] : 0; // Cast to float
+        
+
         // Store the sale
-        $sale = Sale::create($validatedData);
-    
+        $sale = Sale::create(array_merge($validatedData, [
+            'cheque_expense_amounts' => $chequeExpenseAmount,
+        ]));
+
         // Store partner distributions
         foreach ($request->partner_distribution as $index => $partnerId) {
             PartnerDistribution::create([
@@ -112,39 +121,19 @@ class SaleController extends Controller
             ]);
         }
     
-        // Store cash expenses if they exist
-        if ($request->has('expense_descriptions')) {
-            foreach ($request->expense_descriptions as $index => $description) {
-                if ($description) {
-                    try {
-                        CashExpense::create([
-                            'sale_id' => $sale->id, // Link the expense to the sale
-                            'cash_expense_description' => $description,
-                            'cash_expense_percentage' => $request->expense_percentages[$index] ?? null,
-                            'cash_expense_amount' => $request->expense_amounts[$index] ?? null, // Save the expense amount
-                        ]);
-                    } catch (\Exception $e) {
-                        dd('Error inserting cash expense:', $e->getMessage());
-                    }
-                }
-            }
-        }
-
-    
-        // Store cheque expenses if they exist
         if ($request->has('cheque_expense_descriptions')) {
-            $chequeExpenseDescriptions = json_encode($request->cheque_expense_descriptions);
-            $chequeExpenseAmounts = json_encode($request->cheque_expense_amounts);
-            
-            $sale->update([
-                'cheque_expense_descriptions' => $chequeExpenseDescriptions,
-                'cheque_expense_amounts' => $chequeExpenseAmounts,
-                'total_cheque_value_with_additional' => $request->total_cheque_value_with_additional,
-            ]);
+            foreach ($request->cheque_expense_descriptions as $index => $description) {
+                ChequeExpense::create([
+                    'sale_id' => $sale->id,
+                    'cheque_expense_descriptions' => $description,
+                    'cheque_expense_amounts' => $request->cheque_expense_amounts[$index] ?? 0,
+                ]);
+            }
         }
     
         return redirect()->route('admin.rooms.sell', [$room->id, $building_id])->with('success', 'Sale recorded successfully!');
     }
+    
     
 
     protected function getAreaProperty($room, $areaCalculationType)

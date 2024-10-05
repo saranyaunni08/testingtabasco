@@ -206,26 +206,30 @@
         <input type="hidden" name="total_cheque_value" id="total_cheque_value_hidden"> <!-- Hidden field for form submission -->
     </div>
     
+    
 
-        <div id="additional-expenses-container">
-            <h5>Other Expenses</h5>
-            <div class="row mb-2" id="expense-container">
-                <div class="col-md-6">
-                    <input type="text" placeholder="Expense Description" class="form-control expense-description" />
-                </div>
-                <div class="col-md-6">
-                    <input type="number" placeholder="Expense Amount" class="form-control expense-amount" oninput="calculateTotalChequeValueWithAdditional()" />
-                </div>
-            </div><br>
-            <button id="add-expense" class="btn btn-success mt-2">Add Expense</button>
+    <div id="additional-expenses-container">
+        <h5>Other Expenses</h5>
+        <div class="row mb-2" id="expense-container">
+            <div class="col-md-6">
+                <input type="text" placeholder="Expense Description" class="form-control cheque-expense-description" name="cheque_expense_descriptions[]" />
+            </div>
+            <div class="col-md-6">
+                <input type="number" placeholder="Expense Amount" class="form-control cheque-expense-amount" name="cheque_expense_amounts[]" oninput="calculateTotalChequeValueWithAdditional()" />
+            </div>
         </div>
-        
+        <br>
+        <button id="add-expense" class="btn btn-success mt-2">Add Expense</button>
+    </div>
+    
+    
   
-        <div class="form-group">
-            <label for="total_cheque_value_with_additional">Total Cheque Value with Additional Expenses</label>
-            <input type="text" id="total_cheque_value_with_additional" class="form-control" readonly />
-            <input type="hidden" name="total_cheque_value_with_additional" id="total_cheque_value_with_additional_hidden" />
-        </div>
+    <div class="form-group">
+        <label for="total_cheque_value_with_additional">Total Cheque Value with Additional Expenses</label>
+        <input type="text" id="total_cheque_value_with_additional" class="form-control" readonly>
+        <input type="hidden" name="total_cheque_value_with_additional" id="total_cheque_value_with_additional_hidden"> <!-- Hidden field for form submission -->
+    </div>
+    
 
         <div class="form-group ">
             <label >Gst Percentage</label>
@@ -807,19 +811,16 @@ function calculateChequeValue() {
     // Calculate total cheque value with additional expenses
     calculateTotalChequeValueWithAdditional(); // Call this function here
 }
-
-
-
 document.getElementById('add-expense').addEventListener('click', function() {
     const expenseContainer = document.getElementById('expense-container');
     const newExpenseEntry = document.createElement('div');
-    newExpenseEntry.classList.add('row', 'mb-2'); // Added Bootstrap classes for spacing
+    newExpenseEntry.classList.add('row', 'mb-2');
     newExpenseEntry.innerHTML = `
         <div class="col-md-6">
-            <input type="text" placeholder="Expense Description" class="form-control expense-description" />
+            <input type="text" placeholder="Expense Description" class="form-control cheque-expense-description" name="cheque_expense_descriptions[]" />
         </div>
         <div class="col-md-6">
-            <input type="number" placeholder="Expense Amount" class="form-control expense-amount" oninput="calculateTotalChequeValueWithAdditional()" />
+            <input type="number" placeholder="Expense Amount" class="form-control cheque-expense-amount" name="cheque_expense_amounts[]" oninput="calculateTotalChequeValueWithAdditional()" />
         </div>
         <div class="col-md-2">
             <button type="button" class="btn btn-danger remove-expense">Remove</button>
@@ -856,26 +857,30 @@ function calculateGST() {
 
         calculateGrandTotal();
     }
+    function calculateTotalChequeValueWithAdditional() {
+    // Get the base cheque value from the relevant field
+    const baseChequeValue = parseFloat(document.getElementById('total_cheque_value').value) || 0;
 
+    // Get all expense amounts
+    const expenseAmounts = document.querySelectorAll('.cheque-expense-amount');
+    let totalExpenses = 0;
 
-     function calculateTotalChequeValueWithAdditional() {
-        const expenseAmounts = document.querySelectorAll('.expense-amount');
-        let totalExpenses = 0;
+    // Sum all expense amounts
+    expenseAmounts.forEach(amount => {
+        totalExpenses += parseFloat(amount.value) || 0; // Convert to float, default to 0
+    });
 
-        expenseAmounts.forEach(amount => {
-            totalExpenses += parseFloat(amount.value) || 0;
-        });
+    // Calculate the total cheque value with additional expenses
+    const totalChequeValueWithAdditional = baseChequeValue + totalExpenses;
 
-        // Calculate the total cheque value with additional expenses
-        const totalChequeValueWithAdditional = baseChequeValue + totalExpenses;
+    // Update the fields for displaying total cheque value with additional expenses
+    document.getElementById('total_cheque_value_with_additional').value = totalChequeValueWithAdditional.toFixed(2); // Update visible input
+    document.getElementById('total_cheque_value_with_additional_hidden').value = totalChequeValueWithAdditional.toFixed(2); // Update hidden input
 
-        document.getElementById('total_cheque_value_with_additional').value = totalChequeValueWithAdditional.toFixed(2);
-        document.getElementById('total_cheque_value_with_additional_hidden').value = totalChequeValueWithAdditional.toFixed(2);
-
-        // Also recalculate the GST amount when expenses change
-        calculateGST();
-        calculateGrandTotal();
-    }
+    // Optional: Recalculate GST and Grand Total if necessary
+    calculateGST(); // Ensure this function exists and correctly calculates GST
+    calculateGrandTotal(); // Ensure this function exists and correctly calculates the grand total
+}
 
 //     
 function handleLoanTypeChange() {
