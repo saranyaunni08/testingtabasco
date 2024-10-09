@@ -11,10 +11,10 @@ class Installment extends Model
 
     protected $fillable = [
         'sale_id',
+        'installment_frequency',
         'installment_date',
+        'installment_number',
         'installment_amount',
-        'transaction_details',
-        'bank_details',
         'status',
     ];
 
@@ -22,7 +22,4 @@ class Installment extends Model
     {
         return $this->belongsTo(Sale::class);
     }
-    protected $casts = [
-        'installment_date' => 'date',
-    ];
 }

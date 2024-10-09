@@ -27,17 +27,16 @@ class SaleController extends Controller
 
     public function store(Request $request)
     {
-        // Debugging to check incoming request data
+        // Optional: Debugging to check incoming request data
         // dd($request->all());
-        
-    
+
         // Decode JSON strings into arrays
         $request->merge([
             'partner_distribution' => json_decode($request->partner_distribution, true),
             'partner_percentages' => json_decode($request->partner_percentages, true),
             'partner_amounts' => json_decode($request->partner_amounts, true),
         ]);
-    
+
         // Validate the incoming request data
         $validatedData = $request->validate([
             'room_id' => 'required|exists:rooms,id',
@@ -46,8 +45,8 @@ class SaleController extends Controller
             'customer_contact' => 'required|string|max:255',
             'sale_amount' => 'required|numeric',
             'area_calculation_type' => 'required|string',
-            'flat_build_up_area' => 'nullable|numeric',
-            'flat_carpet_area' => 'nullable|numeric',
+            'build_up_area' => 'nullable|numeric',
+            'carpet_area' => 'nullable|numeric',
             'total_amount' => 'nullable|numeric',
             'discount_percentage' => 'nullable|numeric|min:0|max:100',
             'discount_amount' => 'nullable|numeric',
@@ -60,80 +59,120 @@ class SaleController extends Controller
             'gst_percentage' => 'nullable|numeric|min:0|max:100',
             'gst_amount' => 'nullable|numeric',
             'total_cheque_value_with_gst' => 'nullable|numeric',
-    
+
             'partner_distribution' => 'required|array',
             'partner_percentages' => 'required|array',
             'partner_amounts' => 'required|array',
             'partner_distribution.*' => 'exists:partners,id',
             'partner_percentages.*' => 'numeric|min:0|max:100',
             'partner_amounts.*' => 'numeric|min:0',
-    
+
             'expense_descriptions' => 'nullable|array',
             'expense_percentages' => 'nullable|array',
             'expense_amounts' => 'nullable|array',
             'expense_descriptions.*' => 'string|max:255',
             'expense_percentages.*' => 'numeric|min:0|max:100',
             'expense_amounts.*' => 'numeric|min:0',
-    
-            // Adding validation for cheque expenses
+
+            // Validation for cheque expenses
             'cheque_expense_descriptions' => 'nullable|array',
             'cheque_expense_amounts' => 'nullable|array',
             'cheque_expense_descriptions.*' => 'string|max:255',
             'cheque_expense_amounts.*' => 'numeric|min:0',
-    
+
             'total_cheque_value_with_additional' => 'nullable|numeric',
             'total_cheque_value' => 'nullable|numeric',
-    
+
             'received_cheque_value' => 'nullable|numeric',
             'balance_amount' => 'nullable|numeric',
-    
+
             'loan_type' => 'nullable|string',
             'other_loan_description' => 'nullable|string',
-            'installment_frequency' => 'nullable|string',
+            'installment_frequency' => 'nullable|string', // e.g., '3 months'
             'installment_date' => 'nullable|date',
-            'no_of_installments' => 'nullable|integer',
+            'no_of_installments' => 'nullable|integer|min:1',
             'installment_amount' => 'nullable|numeric',
             'grand_total_amount' => 'nullable|numeric',
         ]);
-    
-        // Update the room status
-        $room = Room::find($request->room_id);
-        $room->status = 'sold';
-        $room->save();
-    
-        $building_id = $room->building_id;
-        $chequeExpenseAmounts = $request->cheque_expense_amounts; // This is an array
-        $chequeExpenseAmount = !empty($chequeExpenseAmounts) ? (float)$chequeExpenseAmounts[0] : 0; // Cast to float
-        
 
-        // Store the sale
-        $sale = Sale::create(array_merge($validatedData, [
-            'cheque_expense_amounts' => $chequeExpenseAmount,
-        ]));
+        // Start a transaction to ensure data integrity
+        DB::beginTransaction();
 
-        // Store partner distributions
-        foreach ($request->partner_distribution as $index => $partnerId) {
-            PartnerDistribution::create([
-                'sale_id' => $sale->id,
-                'partner_id' => $partnerId,
-                'percentage' => $request->partner_percentages[$index] ?? 0,
-                'amount' => $request->partner_amounts[$index] ?? 0,
-            ]);
-        }
-    
-        if ($request->has('cheque_expense_descriptions')) {
-            foreach ($request->cheque_expense_descriptions as $index => $description) {
-                ChequeExpense::create([
+        try {
+            // Update the room status
+            $room = Room::find($request->room_id);
+            $room->status = 'sold';
+            $room->save();
+
+            $building_id = $room->building_id;
+            $chequeExpenseAmounts = $request->cheque_expense_amounts; // This is an array
+            $chequeExpenseAmount = !empty($chequeExpenseAmounts) ? (float)$chequeExpenseAmounts[0] : 0; // Cast to float
+
+            // Store the sale
+            $sale = Sale::create(array_merge($validatedData, [
+                'cheque_expense_amounts' => $chequeExpenseAmount,
+            ]));
+
+            // Store partner distributions
+            foreach ($request->partner_distribution as $index => $partnerId) {
+                PartnerDistribution::create([
                     'sale_id' => $sale->id,
-                    'cheque_expense_descriptions' => $description,
-                    'cheque_expense_amounts' => $request->cheque_expense_amounts[$index] ?? 0,
+                    'partner_id' => $partnerId,
+                    'percentage' => $request->partner_percentages[$index] ?? 0,
+                    'amount' => $request->partner_amounts[$index] ?? 0,
                 ]);
             }
+
+            // Store cheque expenses if any
+            if ($request->has('cheque_expense_descriptions')) {
+                foreach ($request->cheque_expense_descriptions as $index => $description) {
+                    ChequeExpense::create([
+                        'sale_id' => $sale->id,
+                        'cheque_expense_descriptions' => $description,
+                        'cheque_expense_amounts' => $request->cheque_expense_amounts[$index] ?? 0,
+                    ]);
+                }
+            }
+
+            // Check if installment details are provided
+            if ($request->filled(['installment_frequency', 'installment_amount', 'installment_date', 'no_of_installments'])) {
+                $frequencyInput = $request->input('installment_frequency'); // e.g., '3 months'
+                $installmentAmount = $request->input('installment_amount');
+                $startDate = Carbon::parse($request->input('installment_date'));
+                $noOfInstallments = $request->input('no_of_installments');
+
+                // Parse frequency, assuming it's in 'X months' format
+                if (preg_match('/(\d+)\s*month/i', $frequencyInput, $matches)) {
+                    $interval = intval($matches[1]);
+                } else {
+                    // Handle other frequency formats or set default
+                    $interval = 1; // default to 1 month
+                }
+
+                for ($i = 0; $i < $noOfInstallments; $i++) {
+                    Installment::create([
+                        'sale_id' => $sale->id,
+                        'installment_frequency' => $frequencyInput,
+                        'installment_date' => $startDate->copy()->addMonths($interval * $i),
+                        'installment_number' => $i + 1,
+                        'installment_amount' => $installmentAmount,
+                        'status' => 'unpaid',
+                    ]);
+                }
+            }
+
+            // Commit the transaction
+            DB::commit();
+
+            return redirect()->route('admin.rooms.sell', [$room->id, $building_id])->with('success', 'Sale recorded successfully!');
+        } catch (\Exception $e) {
+            // Rollback the transaction on error
+            DB::rollBack();
+
+            // Optionally, log the error or handle it as needed
+            return back()->withErrors(['error' => 'An error occurred while recording the sale. Please try again.']);
         }
-    
-        return redirect()->route('admin.rooms.sell', [$room->id, $building_id])->with('success', 'Sale recorded successfully!');
     }
-    
     
 
     protected function getAreaProperty($room, $areaCalculationType)
@@ -206,31 +245,31 @@ class SaleController extends Controller
         return view('customers.index', compact('customerNames', 'sales', 'search'));
     }
 
-    public function showCustomer($saleId)
-    {
-        $sale = Sale::with('room', 'installments')->findOrFail($saleId);
-        $installments = Installment::where('sale_id', $saleId)->get(); 
-        $room = Room::find($sale->room_id);
+    // public function showCustomer($saleId)
+    // {
+    //     $sale = Sale::with('room', 'installments')->findOrFail($saleId);
+    //     $installments = Installment::where('sale_id', $saleId)->get(); 
+    //     $room = Room::find($sale->room_id);
 
-        $totalPaidInstallments = $installments->where('status', 'paid')->sum('installment_amount');
-        $emi_amount = $installments->sum('installment_amount');
-        $tenure_months = $installments->count();
-        $emi_start_date = $installments->first()->installment_date ?? null;
-        $emi_end_date = $installments->last()->installment_date ?? null;
+    //     $totalPaidInstallments = $installments->where('status', 'paid')->sum('installment_amount');
+    //     $emi_amount = $installments->sum('installment_amount');
+    //     $tenure_months = $installments->count();
+    //     $emi_start_date = $installments->first()->installment_date ?? null;
+    //     $emi_end_date = $installments->last()->installment_date ?? null;
 
-        $remainingBalanceAfterInstallments = $sale->remaining_balance - $totalPaidInstallments;
-        $page = 'customer';
+    //     $remainingBalanceAfterInstallments = $sale->remaining_balance - $totalPaidInstallments;
+    //     $page = 'customer';
 
-        // If the view expects multiple sales, wrap the single sale in a collection
-        $sales = collect([$sale]);
+    //     // If the view expects multiple sales, wrap the single sale in a collection
+    //     $sales = collect([$sale]);
 
-        return view('customers.show', compact(
-            'sales', 'installments', 'page',
-            'remainingBalanceAfterInstallments', 'emi_amount', 'tenure_months',
-            'emi_start_date', 'emi_end_date',
-            'room',
-        ));
-    }
+    //     return view('customers.show', compact(
+    //         'sales', 'installments', 'page',
+    //         'remainingBalanceAfterInstallments', 'emi_amount', 'tenure_months',
+    //         'emi_start_date', 'emi_end_date',
+    //         'room',
+    //     ));
+    // }
 
     public function getCalculationType(Request $request)
     {
@@ -274,203 +313,203 @@ class SaleController extends Controller
             ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
     }
 
-    public function markMultipleAsPaid(Request $request)
-    {
-        try {
-            $installments = $request->input('installments');
-            $installmentDates = $request->input('installment_dates');
-            $transactionDetails = $request->input('transaction_details');
-            $bankDetails = $request->input('bank_details');
+    // public function markMultipleAsPaid(Request $request)
+    // {
+    //     try {
+    //         $installments = $request->input('installments');
+    //         $installmentDates = $request->input('installment_dates');
+    //         $transactionDetails = $request->input('transaction_details');
+    //         $bankDetails = $request->input('bank_details');
     
-            // Validate that installments is an array
-            if (is_array($installments)) {
-                foreach ($installments as $installmentId) {
-                    $installment = Installment::find($installmentId);
+    //         // Validate that installments is an array
+    //         if (is_array($installments)) {
+    //             foreach ($installments as $installmentId) {
+    //                 $installment = Installment::find($installmentId);
     
-                    if ($installment) {
-                        // Update installment details
-                        $installment->status = 'paid';
-                        $installment->installment_date = $installmentDates[$installmentId] ?? $installment->installment_date;
-                        $installment->transaction_details = $transactionDetails[$installmentId] ?? $installment->transaction_details;
-                        $installment->bank_details = $bankDetails[$installmentId] ?? $installment->bank_details;
-                        $installment->save();
-                    } else {
-                        // Log or handle the case where 'id' is missing
-                        Log::warning('Installment data missing or invalid', ['id' => $installmentId]);
-                    }
-                }
+    //                 if ($installment) {
+    //                     // Update installment details
+    //                     $installment->status = 'paid';
+    //                     $installment->installment_date = $installmentDates[$installmentId] ?? $installment->installment_date;
+    //                     $installment->transaction_details = $transactionDetails[$installmentId] ?? $installment->transaction_details;
+    //                     $installment->bank_details = $bankDetails[$installmentId] ?? $installment->bank_details;
+    //                     $installment->save();
+    //                 } else {
+    //                     // Log or handle the case where 'id' is missing
+    //                     Log::warning('Installment data missing or invalid', ['id' => $installmentId]);
+    //                 }
+    //             }
     
-                return redirect()->back()->with('success', 'Selected installments marked as paid.');
-            }
-        } catch (\Exception $e) {
-            Log::error('Error marking installments as paid: ' . $e->getMessage());
-        }
+    //             return redirect()->back()->with('success', 'Selected installments marked as paid.');
+    //         }
+    //     } catch (\Exception $e) {
+    //         Log::error('Error marking installments as paid: ' . $e->getMessage());
+    //     }
     
-        return redirect()->back()->with('error', 'No installments selected.');
-    }
-    public function downloadCustomerDetails($customerName)
-    {
-        // Fetch customer by name
-        $customer = Sale::where('customer_name', $customerName)->first();
+    //     return redirect()->back()->with('error', 'No installments selected.');
+    // }
+    // public function downloadCustomerDetails($customerName)
+    // {
+    //     // Fetch customer by name
+    //     $customer = Sale::where('customer_name', $customerName)->first();
     
-        if (!$customer) {
-            abort(404);
-        }
+    //     if (!$customer) {
+    //         abort(404);
+    //     }
     
-        // Fetch related sales records for the customer
-        $sales = Sale::where('customer_name', $customerName)->get();
+    //     // Fetch related sales records for the customer
+    //     $sales = Sale::where('customer_name', $customerName)->get();
     
-        if ($sales->isEmpty()) {
-            abort(404);
-        }
+    //     if ($sales->isEmpty()) {
+    //         abort(404);
+    //     }
     
-        $room = $sales->first()->room;
+    //     $room = $sales->first()->room;
     
-        // Fetch related installments
-        $installments = Installment::whereIn('sale_id', $sales->pluck('id'))->get();
+    //     // Fetch related installments
+    //     $installments = Installment::whereIn('sale_id', $sales->pluck('id'))->get();
     
-        // Calculate total paid installments
-        $totalPaidInstallments = $installments->where('status', 'paid')->sum('installment_amount');
+    //     // Calculate total paid installments
+    //     $totalPaidInstallments = $installments->where('status', 'paid')->sum('installment_amount');
     
-        // Calculate remaining balance after installments
-        $remainingBalanceAfterInstallments = $customer->remaining_balance - $totalPaidInstallments;
+    //     // Calculate remaining balance after installments
+    //     $remainingBalanceAfterInstallments = $customer->remaining_balance - $totalPaidInstallments;
     
-        // Calculate EMI Amount
-        $emi_amount = $installments->sum('installment_amount');
+    //     // Calculate EMI Amount
+    //     $emi_amount = $installments->sum('installment_amount');
     
-        // Calculate tenure (months)
-        $tenure_months = $installments->count();
+    //     // Calculate tenure (months)
+    //     $tenure_months = $installments->count();
     
-        // Get first and last installment dates
-        $emi_start_date = $installments->first()->installment_date;
-        $emi_end_date = $installments->last()->installment_date;
+    //     // Get first and last installment dates
+    //     $emi_start_date = $installments->first()->installment_date;
+    //     $emi_end_date = $installments->last()->installment_date;
     
-        // Prepare CSV data
-        $csvData = [
-            ['Loan Details'],
-            ['Loan No', $customer->id],
-            ['Disb Date', $customer->created_at->format('d-m-Y')],
-            ['Cost of Asset', $customer->total_with_discount],
-            ['EMI Start Date', $emi_start_date->format('d-m-Y')],
-            ['EMI End Date', $emi_end_date->format('d-m-Y')],
-            ['EMI Amount', $emi_amount],
-            ['Tenure (Months)', $tenure_months],
-            ['Asset', $room->room_type],
-            ['Loan Amount', $customer->remaining_balance],
-            ['Current EMI OS', $remainingBalanceAfterInstallments],
-            [],
-            ['Installment Details'],
-            ['SL No', 'ID', 'Installment Date', 'Amount', 'Transaction Details', 'Bank Details', 'Status'],
-        ];
+    //     // Prepare CSV data
+    //     $csvData = [
+    //         ['Loan Details'],
+    //         ['Loan No', $customer->id],
+    //         ['Disb Date', $customer->created_at->format('d-m-Y')],
+    //         ['Cost of Asset', $customer->total_with_discount],
+    //         ['EMI Start Date', $emi_start_date->format('d-m-Y')],
+    //         ['EMI End Date', $emi_end_date->format('d-m-Y')],
+    //         ['EMI Amount', $emi_amount],
+    //         ['Tenure (Months)', $tenure_months],
+    //         ['Asset', $room->room_type],
+    //         ['Loan Amount', $customer->remaining_balance],
+    //         ['Current EMI OS', $remainingBalanceAfterInstallments],
+    //         [],
+    //         ['Installment Details'],
+    //         ['SL No', 'ID', 'Installment Date', 'Amount', 'Transaction Details', 'Bank Details', 'Status'],
+    //     ];
     
-        foreach ($installments as $index => $installment) {
-            $csvData[] = [
-                $index + 1,
-                $installment->id,
-                $installment->installment_date->format('d-m-Y'),
-                $installment->installment_amount,
-                $installment->transaction_details,
-                $installment->bank_details,
-                $installment->status === 'paid' ? 'Paid' : 'Pending'
-            ];
-        }
+    //     foreach ($installments as $index => $installment) {
+    //         $csvData[] = [
+    //             $index + 1,
+    //             $installment->id,
+    //             $installment->installment_date->format('d-m-Y'),
+    //             $installment->installment_amount,
+    //             $installment->transaction_details,
+    //             $installment->bank_details,
+    //             $installment->status === 'paid' ? 'Paid' : 'Pending'
+    //         ];
+    //     }
     
-        // Generate CSV
-        $csv = Writer::createFromString('');
-        $csv->insertAll($csvData);
+    //     // Generate CSV
+    //     $csv = Writer::createFromString('');
+    //     $csv->insertAll($csvData);
     
-        // Create a filename for the CSV
-        $filename = 'customer_details_' . $customer->id . '.csv';
+    //     // Create a filename for the CSV
+    //     $filename = 'customer_details_' . $customer->id . '.csv';
     
-        // Save CSV to storage
-        Storage::put('public/' . $filename, $csv->getContent());
+    //     // Save CSV to storage
+    //     Storage::put('public/' . $filename, $csv->getContent());
     
-        // Return CSV download response
-        return response()->download(storage_path('app/public/' . $filename))->deleteFileAfterSend(true);
-    }
+    //     // Return CSV download response
+    //     return response()->download(storage_path('app/public/' . $filename))->deleteFileAfterSend(true);
+    // }
 
-    public function downloadPdf($customerName)
-    {
+    // public function downloadPdf($customerName)
+    // {
 
-        $customer = Sale::where('customer_name', $customerName)->firstOrFail();
+    //     $customer = Sale::where('customer_name', $customerName)->firstOrFail();
         
 
-        $sales = Sale::where('customer_name', $customerName)->get();
+    //     $sales = Sale::where('customer_name', $customerName)->get();
         
-        if ($sales->isEmpty()) {
-            abort(404);
-        }
+    //     if ($sales->isEmpty()) {
+    //         abort(404);
+    //     }
     
-        $room = $sales->first()->room;
-    
-
-        $installments = Installment::whereIn('sale_id', $sales->pluck('id'))->get();
+    //     $room = $sales->first()->room;
     
 
-        $totalPaidInstallments = $installments->where('status', 'paid')->sum('installment_amount');
-        $remainingBalanceAfterInstallments = $customer->remaining_balance - $totalPaidInstallments;
-        $emi_amount = $installments->sum('installment_amount');
-        $tenure_months = $installments->count();
-        $emi_start_date = $installments->first()->installment_date;
-        $emi_end_date = $installments->last()->installment_date;
+    //     $installments = Installment::whereIn('sale_id', $sales->pluck('id'))->get();
     
 
-        $pdf = PDF::loadView('pdf.customer-details', [
-            'customer' => $customer,
-            'installments' => $installments,
-            'emi_start_date' => $emi_start_date,
-            'emi_end_date' => $emi_end_date,
-            'emi_amount' => $emi_amount,
-            'tenure_months' => $tenure_months,
-            'remainingBalanceAfterInstallments' => $remainingBalanceAfterInstallments,
-            'room' => $room
-        ]);
+    //     $totalPaidInstallments = $installments->where('status', 'paid')->sum('installment_amount');
+    //     $remainingBalanceAfterInstallments = $customer->remaining_balance - $totalPaidInstallments;
+    //     $emi_amount = $installments->sum('installment_amount');
+    //     $tenure_months = $installments->count();
+    //     $emi_start_date = $installments->first()->installment_date;
+    //     $emi_end_date = $installments->last()->installment_date;
     
 
-        return $pdf->download('customer-details.pdf');
-    }
+    //     $pdf = PDF::loadView('pdf.customer-details', [
+    //         'customer' => $customer,
+    //         'installments' => $installments,
+    //         'emi_start_date' => $emi_start_date,
+    //         'emi_end_date' => $emi_end_date,
+    //         'emi_amount' => $emi_amount,
+    //         'tenure_months' => $tenure_months,
+    //         'remainingBalanceAfterInstallments' => $remainingBalanceAfterInstallments,
+    //         'room' => $room
+    //     ]);
+    
+
+    //     return $pdf->download('customer-details.pdf');
+    // }
        
-    public function downloadInstallmentPdf($id)
-    {
-        $installment = Installment::find($id);
-        $sale = $installment ? Sale::find($installment->sale_id) : null;
+    // public function downloadInstallmentPdf($id)
+    // {
+    //     $installment = Installment::find($id);
+    //     $sale = $installment ? Sale::find($installment->sale_id) : null;
 
-        // Extracting customer and room details directly from the sale
-        $customer_name = $sale ? $sale->customer_name : 'N/A';
-        $customer_email = $sale ? $sale->customer_email : 'N/A';
-        $customer_contact = $sale ? $sale->customer_contact : 'N/A';
+    //     // Extracting customer and room details directly from the sale
+    //     $customer_name = $sale ? $sale->customer_name : 'N/A';
+    //     $customer_email = $sale ? $sale->customer_email : 'N/A';
+    //     $customer_contact = $sale ? $sale->customer_contact : 'N/A';
 
-        // Fetch all installments for the given sale_id
-        $installments = $sale ? Installment::where('sale_id', $sale->id)->get() : collect();
+    //     // Fetch all installments for the given sale_id
+    //     $installments = $sale ? Installment::where('sale_id', $sale->id)->get() : collect();
 
-        // Determine the EMI start and end dates
-        $emi_start_date = $installments->min('installment_date') ?? 'N/A';
-        $emi_end_date = $installments->max('installment_date') ?? 'N/A';
+    //     // Determine the EMI start and end dates
+    //     $emi_start_date = $installments->min('installment_date') ?? 'N/A';
+    //     $emi_end_date = $installments->max('installment_date') ?? 'N/A';
 
-        $emi_amount = $installment ? $installment->installment_amount : 0;
-        $tenure_months = $installments->count();
+    //     $emi_amount = $installment ? $installment->installment_amount : 0;
+    //     $tenure_months = $installments->count();
 
-        // Remaining balance calculation
-        $total_paid_installments = $installments->where('status', 'paid')->sum('installment_amount');
-        $remaining_balance_after_installments = $sale ? $sale->remaining_balance - $total_paid_installments : 0;
+    //     // Remaining balance calculation
+    //     $total_paid_installments = $installments->where('status', 'paid')->sum('installment_amount');
+    //     $remaining_balance_after_installments = $sale ? $sale->remaining_balance - $total_paid_installments : 0;
 
-        $data = [
-            'installment' => $installment,
-            'customer_name' => $customer_name,
-            'customer_email' => $customer_email,
-            'customer_contact' => $customer_contact,
-            'sale' => $sale,
-            'emi_start_date' => $emi_start_date,
-            'emi_end_date' => $emi_end_date,
-            'emi_amount' => $emi_amount,
-            'tenure_months' => $tenure_months,
-            'remainingBalanceAfterInstallments' => $remaining_balance_after_installments,
-            'room' => $sale ? $sale->room : null
-        ];
+    //     $data = [
+    //         'installment' => $installment,
+    //         'customer_name' => $customer_name,
+    //         'customer_email' => $customer_email,
+    //         'customer_contact' => $customer_contact,
+    //         'sale' => $sale,
+    //         'emi_start_date' => $emi_start_date,
+    //         'emi_end_date' => $emi_end_date,
+    //         'emi_amount' => $emi_amount,
+    //         'tenure_months' => $tenure_months,
+    //         'remainingBalanceAfterInstallments' => $remaining_balance_after_installments,
+    //         'room' => $sale ? $sale->room : null
+    //     ];
 
-        $pdf = PDF::loadView('pdf.installment_detail', $data);
-        return $pdf->download('installment_detail.pdf');
-    }
+    //     $pdf = PDF::loadView('pdf.installment_detail', $data);
+    //     return $pdf->download('installment_detail.pdf');
+    // }
 
     public function cancelSale(Request $request)
     {
@@ -523,49 +562,49 @@ class SaleController extends Controller
         
         return view('admin.sales.cancelled', compact('cancelledSales', 'page', 'building','rooms'));
     }
-    public function viewCancelledSaleDetails($id)
-    {
-        // Fetch the sale details by ID with the related room and installments
-        $sale = Sale::with(['room.building', 'installments'])->find($id);
+    // public function viewCancelledSaleDetails($id)
+    // {
+    //     // Fetch the sale details by ID with the related room and installments
+    //     $sale = Sale::with(['room.building', 'installments'])->find($id);
     
-        // Check if sale is found and status is 'cancelled'
-        if (!$sale || $sale->status !== 'cancelled') {
-            return redirect()->route('admin.sales.cancelled')->withErrors('Sale not found or not cancelled.');
-        }
+    //     // Check if sale is found and status is 'cancelled'
+    //     if (!$sale || $sale->status !== 'cancelled') {
+    //         return redirect()->route('admin.sales.cancelled')->withErrors('Sale not found or not cancelled.');
+    //     }
     
-        // Fetch the installments related to this sale
-        $installments = Installment::where('sale_id', $id)->get();
+    //     // Fetch the installments related to this sale
+    //     $installments = Installment::where('sale_id', $id)->get();
     
-        // Calculate the total tenure as the count of installments
-        $totalTenureMonths = $installments->count();
+    //     // Calculate the total tenure as the count of installments
+    //     $totalTenureMonths = $installments->count();
     
-        // Calculate the remaining tenure by counting only pending installments
-        $pendingInstallments = $installments->where('status', 'pending');
-        $remainingTenureMonths = $pendingInstallments->count();
+    //     // Calculate the remaining tenure by counting only pending installments
+    //     $pendingInstallments = $installments->where('status', 'pending');
+    //     $remainingTenureMonths = $pendingInstallments->count();
     
-        // Calculate the remaining balance by summing up the amounts of pending installments
-        $remainingBalance = $pendingInstallments->sum('installment_amount');
+    //     // Calculate the remaining balance by summing up the amounts of pending installments
+    //     $remainingBalance = $pendingInstallments->sum('installment_amount');
     
-        // Calculate the total received amount by summing up the amounts of paid installments
-        $receivedAmount = $installments->where('status', 'paid')->sum('installment_amount');
+    //     // Calculate the total received amount by summing up the amounts of paid installments
+    //     $receivedAmount = $installments->where('status', 'paid')->sum('installment_amount');
     
-        // Fetch the first and last installment dates
-        $firstInstallment = $installments->sortBy('installment_date')->first();
-        $lastInstallment = $installments->sortByDesc('installment_date')->first();
+    //     // Fetch the first and last installment dates
+    //     $firstInstallment = $installments->sortBy('installment_date')->first();
+    //     $lastInstallment = $installments->sortByDesc('installment_date')->first();
     
-        $firstInstallmentDate = $firstInstallment ? $firstInstallment->installment_date : null;
-        $lastInstallmentDate = $lastInstallment ? $lastInstallment->installment_date : null;
+    //     $firstInstallmentDate = $firstInstallment ? $firstInstallment->installment_date : null;
+    //     $lastInstallmentDate = $lastInstallment ? $lastInstallment->installment_date : null;
     
-        // Get the related building
-        $building = $sale->room ? $sale->room->building : null;
+    //     // Get the related building
+    //     $building = $sale->room ? $sale->room->building : null;
     
-        // Fetch the cancellation fine amount
-        $cancellationFineAmount = $sale->cancellation_fine_amount;
+    //     // Fetch the cancellation fine amount
+    //     $cancellationFineAmount = $sale->cancellation_fine_amount;
     
-        // Calculate the amount to be paid back
-        $amountToPayBack = $receivedAmount + $sale->advance_amount + $sale->cash_in_hand_paid_amount - $cancellationFineAmount;
+    //     // Calculate the amount to be paid back
+    //     $amountToPayBack = $receivedAmount + $sale->advance_amount + $sale->cash_in_hand_paid_amount - $cancellationFineAmount;
     
-        return view('admin.sales.cancelled_details', compact('sale', 'installments', 'building', 'firstInstallment', 'firstInstallmentDate', 'lastInstallmentDate', 'totalTenureMonths', 'remainingTenureMonths', 'remainingBalance', 'receivedAmount', 'cancellationFineAmount', 'amountToPayBack'));
-    }
+    //     return view('admin.sales.cancelled_details', compact('sale', 'installments', 'building', 'firstInstallment', 'firstInstallmentDate', 'lastInstallmentDate', 'totalTenureMonths', 'remainingTenureMonths', 'remainingBalance', 'receivedAmount', 'cancellationFineAmount', 'amountToPayBack'));
+    // }
     
 }

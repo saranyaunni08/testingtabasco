@@ -6,30 +6,20 @@ use Illuminate\Support\Facades\Schema;
 
 class CreateInstallmentsTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
     public function up()
     {
         Schema::create('installments', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('sale_id')->constrained('sales')->onDelete('cascade');
+            $table->foreignId('sale_id')->constrained()->onDelete('cascade');
+            $table->string('installment_frequency'); // e.g., '3 months'
             $table->date('installment_date');
-            $table->decimal('installment_amount', 10, 2);
-            $table->text('transaction_details');
-            $table->text('bank_details');
-            $table->string('status')->default('Due');
+            $table->integer('installment_number');
+            $table->decimal('installment_amount', 15, 2);
+            $table->string('status')->default('unpaid'); // 'unpaid', 'paid', etc.
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
     public function down()
     {
         Schema::dropIfExists('installments');

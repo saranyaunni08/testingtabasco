@@ -45,13 +45,37 @@
         <!-- Read-only Fields for Super Build-Up and Carpet Area -->
         @if($room->room_type == 'Flat')
             <div class="form-group">
-                <label class="font-weight-bold" for="flat_build_up_area">Super Build-Up Area (sq ft)</label>
-                <input type="text" class="form-control" id="flat_build_up_area" name="flat_build_up_area" value="{{ $room->flat_build_up_area }}" readonly>
+                <label class="font-weight-bold" for="build_up_area">Super Build-Up Area (sq ft)</label>
+                <input type="text" class="form-control" id="build_up_area" name="build_up_area" value="{{ $room->flat_build_up_area }}" readonly>
             </div>
             <div class="form-group">
-                <label class="font-weight-bold" for="flat_carpet_area">Carpet Area (sq ft)</label>
-                <input type="text" class="form-control" id="flat_carpet_area" name="flat_carpet_area" value="{{ $room->flat_carpet_area }}" readonly>
+                <label class="font-weight-bold" for="carpet_area">Carpet Area (sq ft)</label>
+                <input type="text" class="form-control" id="carpet_area" name="carpet_area" value="{{ $room->flat_carpet_area }}" readonly>
             </div>
+        @endif
+        @if($room->room_type == 'Shops')
+            <div class="form-group">
+                <label class="font-weight-bold" for="build_up_area">Super Build-Up Area (sq ft)</label>
+                <input type="text" class="form-control" id="build_up_area" name="build_up_area" value="{{ $room->build_up_area }}" readonly>
+            </div>
+            <div class="form-group">
+                <label class="font-weight-bold" for="carpet_area">Carpet Area (sq ft)</label>
+                <input type="text" class="form-control" id="carpet_area" name="carpet_area" value="{{ $room->carpet_area }}" readonly>
+            </div>
+        @endif
+        @if($room->room_type == 'Table space')
+            <div class="form-group">
+                <label class="font-weight-bold" for="build_up_area">Super Build-Up Area (sq ft)</label>
+                <input type="text" class="form-control" id="build_up_area" name="build_up_area" value="{{ $room->space_area }}" readonly>
+            </div>
+            
+        @endif
+        @if($room->room_type == 'Chair space')
+            <div class="form-group">
+                <label class="font-weight-bold" for="build_up_area">Super Build-Up Area (sq ft)</label>
+                <input type="text" class="form-control" id="build_up_area" name="build_up_area" value="{{ $room->chair_space_in_sq}}" readonly>
+            </div>
+            
         @endif
 
         <!-- Total Amount (Read-only) -->
@@ -166,15 +190,17 @@
         </div>
 
     <!-- Loan Type and Installment Container for Cash Handling -->
-    <div id="loan-type-container-cash" style="display: none;">
-        <label for="loan_type_cash">Select Loan Type:</label>
-        <select id="loan_type_cash" class="form-control" onchange="handleLoanTypeChangeCash()">
-            <option value="">Select...</option>
-            <option value="bank">Bank</option>
-            <option value="directors">Director's</option>
-            <option value="others">Others</option>
-        </select>
-    </div>
+<div id="loan-type-container-cash" style="display: none;">
+    <label for="loan_type_cash">Select Loan Type:</label>
+    <select id="loan_type_cash" class="form-control" onchange="handleLoanTypeChangeCash()">
+        <option value="">Select...</option>
+        <option value="no_loan">No Loan</option> <!-- Add this option -->
+        <option value="bank">Bank</option>
+        <option value="directors">Director's</option>
+        <option value="others">Others</option>
+    </select>
+</div>
+
 
     <div id="other-loan-description-container-cash" style="display: none;">
         <label for="other_loan_description_cash">Please specify:</label>
@@ -316,9 +342,9 @@
 
         if (saleAmount && areaType) {
             if (areaType === 'super_build_up_area') {
-                totalAmount = saleAmount * parseFloat(document.getElementById('flat_build_up_area')?.value || 0);
+                totalAmount = saleAmount * parseFloat(document.getElementById('build_up_area')?.value || 0);
             } else if (areaType === 'carpet_area') {
-                totalAmount = saleAmount * parseFloat(document.getElementById('flat_carpet_area')?.value || 0);
+                totalAmount = saleAmount * parseFloat(document.getElementById('carpet_area')?.value || 0);
             }
         }
 
