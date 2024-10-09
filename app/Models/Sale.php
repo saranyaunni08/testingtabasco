@@ -89,6 +89,9 @@ public function cashExpenses()
 {
     return $this->hasMany(CashExpense::class, 'sale_id');
 }
-
+public function cashInstallments()
+{
+    return $this->hasMany(CashInstallment::class);
+}
 }
     

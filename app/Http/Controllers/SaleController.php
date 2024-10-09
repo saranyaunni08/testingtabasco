@@ -93,6 +93,14 @@ class SaleController extends Controller
             'no_of_installments' => 'nullable|integer|min:1',
             'installment_amount' => 'nullable|numeric',
             'grand_total_amount' => 'nullable|numeric',
+
+            'cash_installment_value' => 'nullable|numeric|min:0',
+            'cash_loan_type' => 'required_if:cash_installment_value,>,0|string',
+            'other_loan_description_cash' => 'required_if:cash_loan_type,others|string',
+            'cash_installment_frequency' => 'required_if:cash_installment_value,>,0|string',
+            'cash_installment_start_date' => 'required_if:cash_installment_value,>,0|date',
+            'cash_no_of_installments' => 'required_if:cash_installment_value,>,0|integer|min:1',
+            'cash_installment_amount' => 'required_if:cash_installment_value,>,0|numeric|min:0',
         ]);
 
         // Start a transaction to ensure data integrity
@@ -160,6 +168,49 @@ class SaleController extends Controller
                     ]);
                 }
             }
+
+             // Handle Cash Installments
+        if ($request->filled(['cash_installment_value'])) {
+            $cashInstallmentValue = floatval($request->input('cash_installment_value'));
+            if ($cashInstallmentValue > 0) {
+                $cashLoanType = $request->input('cash_loan_type');
+                $otherLoanDescriptionCash = $request->input('other_loan_description_cash');
+                $cashInstallmentFrequency = $request->input('cash_installment_frequency');
+                $cashInstallmentStartDate = Carbon::parse($request->input('cash_installment_start_date'));
+                $cashNoOfInstallments = intval($request->input('cash_no_of_installments'));
+                $cashInstallmentAmount = floatval($request->input('cash_installment_amount'));
+
+                // Create Cash Installment Records
+                for ($i = 0; $i < $cashNoOfInstallments; $i++) {
+                    // Determine the interval based on frequency
+                    switch ($cashInstallmentFrequency) {
+                        case 'monthly':
+                            $monthsToAdd = 1;
+                            break;
+                        case '3months':
+                            $monthsToAdd = 3;
+                            break;
+                        case '6months':
+                            $monthsToAdd = 6;
+                            break;
+                        default:
+                            $monthsToAdd = 1; // default to 1 month
+                    }
+
+                    Installment::create([
+                        'sale_id' => $sale->id,
+                        'installment_frequency' => $cashInstallmentFrequency,
+                        'installment_date' => $cashInstallmentStartDate->copy()->addMonths($monthsToAdd * $i),
+                        'installment_number' => $i + 1,
+                        'installment_amount' => $cashInstallmentAmount,
+                        'status' => 'unpaid',
+                        // Optionally, you can add a field to differentiate between regular and cash installments
+                        // e.g., 'type' => 'cash'
+                    ]);
+                }
+            }
+        }
+
 
             // Commit the transaction
             DB::commit();

@@ -189,6 +189,71 @@
             <input type="text" class="form-control" id="remaining_cash_value" name="remaining_cash_value" readonly>
         </div>
 
+     <!-- Cash Installment Value -->
+        <div class="form-group">
+            <label for="cash_installment_value">Cash Installment Value</label>
+            <input type="number" class="form-control" id="cash_installment_value" name="cash_installment_value" min="0" step="0.01" oninput="toggleCashInstallmentFields()">
+        </div>
+
+
+
+        <!-- Cash Installment Related Fields -->
+                <div id="cash-installment-container" style="display: none; margin-top: 20px;">
+                    <h5>Cash Installment Details</h5>
+
+                    <!-- Cash Loan Type -->
+                    <div class="form-group">
+                        <label for="cash_loan_type">Select Cash Loan Type:</label>
+                        <select id="cash_loan_type" name="cash_loan_type" class="form-control">
+                            <option value="">Select...</option>
+                            <option value="no_loan">No Loan</option>
+                            <option value="bank">Bank</option>
+                            <option value="directors">Director's</option>
+                            <option value="others">Others</option>
+                        </select>
+                    </div>
+
+                    <!-- Other Loan Description for Cash -->
+                    <div id="other-loan-description-container-cash" style="display: none;">
+                        <label for="other_loan_description_cash">Please specify:</label>
+                        <input type="text" id="other_loan_description_cash" name="other_loan_description_cash" class="form-control" placeholder="Describe Other Loan Type">
+                    </div>
+
+                    <!-- Cash Installment Frequency -->
+                    <div class="form-group">
+                        <label for="cash_installment_frequency">Installment Frequency:</label>
+                        <select id="cash_installment_frequency" name="cash_installment_frequency" class="form-control">
+                            <option value="">Select Frequency...</option>
+                            <option value="monthly">Every Month</option>
+                            <option value="3months">Every 3 Months</option>
+                            <option value="6months">Every 6 Months</option>
+                        </select>
+                    </div>
+
+                    <!-- Cash Installment Start Date -->
+                    <div class="form-group">
+                        <label for="cash_installment_start_date">Installment Start Date:</label>
+                        <input type="date" id="cash_installment_start_date" name="cash_installment_start_date" class="form-control">
+                    </div>
+
+                    <!-- Number of Cash Installments -->
+                    <div class="form-group">
+                        <label for="cash_no_of_installments">Number of Installments:</label>
+                        <input type="number" id="cash_no_of_installments" name="cash_no_of_installments" class="form-control" placeholder="Enter No. of Installments" min="1" oninput="calculateCashInstallmentAmount()">
+                    </div>
+
+                    <!-- Cash Installment Amount (Auto-calculated) -->
+                    <div class="form-group">
+                        <label for="cash_installment_amount">Cash Installment Amount (auto-calculated):</label>
+                        <input type="number" id="cash_installment_amount" name="cash_installment_amount" class="form-control" readonly>
+                    </div>
+                </div>
+
+
+
+
+
+
     <!-- Loan Type and Installment Container for Cash Handling -->
 <div id="loan-type-container-cash" style="display: none;">
     <label for="loan_type_cash">Select Loan Type:</label>
@@ -1049,4 +1114,78 @@ document.getElementById('total_cheque_value_with_gst').addEventListener('input',
     });
 });
 
+</script>
+<script>
+    // Function to toggle Cash Installment Fields
+    function toggleCashInstallmentFields() {
+        const cashInstallmentValue = parseFloat(document.getElementById('cash_installment_value').value);
+        const cashInstallmentContainer = document.getElementById('cash-installment-container');
+
+        if (cashInstallmentValue > 0) {
+            cashInstallmentContainer.style.display = 'block';
+        } else {
+            cashInstallmentContainer.style.display = 'none';
+            // Reset cash installment fields
+            document.getElementById('cash_loan_type').value = '';
+            document.getElementById('other-loan-description-container-cash').style.display = 'none';
+            document.getElementById('other_loan_description_cash').value = '';
+            document.getElementById('cash_installment_frequency').value = '';
+            document.getElementById('cash_installment_start_date').value = '';
+            document.getElementById('cash_no_of_installments').value = '';
+            document.getElementById('cash_installment_amount').value = '';
+        }
+    }
+
+    // Function to handle Cash Loan Type change
+    function handleLoanTypeChangeCash() {
+        const loanType = document.getElementById('cash_loan_type').value;
+        const otherLoanDescriptionContainer = document.getElementById('other-loan-description-container-cash');
+
+        if (loanType === 'others') {
+            otherLoanDescriptionContainer.style.display = 'block';
+        } else {
+            otherLoanDescriptionContainer.style.display = 'none';
+            document.getElementById('other_loan_description_cash').value = '';
+        }
+    }
+
+    // Attach the loan type change handler
+    document.getElementById('cash_loan_type').addEventListener('change', handleLoanTypeChangeCash);
+
+    // Function to calculate Cash Installment Amount
+    function calculateCashInstallmentAmount() {
+        const remainingCashValue = parseFloat(document.getElementById('remaining_cash_value').value) || 0;
+        const cashInstallmentValue = parseFloat(document.getElementById('cash_installment_value').value) || 0;
+        const cashNoOfInstallments = parseInt(document.getElementById('cash_no_of_installments').value) || 0;
+
+        if (cashNoOfInstallments > 0 && cashInstallmentValue > 0) {
+            const installmentAmount = (cashInstallmentValue / cashNoOfInstallments).toFixed(2);
+            document.getElementById('cash_installment_amount').value = installmentAmount;
+        } else {
+            document.getElementById('cash_installment_amount').value = '';
+        }
+    }
+
+    // Attach the loan type change handler for main loan type (if not already handled)
+    function handleLoanTypeChange() {
+        const loanType = document.getElementById('loan_type').value;
+        const otherLoanDescriptionContainer = document.getElementById('other-loan-description-container');
+
+        if (loanType === 'others') {
+            otherLoanDescriptionContainer.style.display = 'block';
+        } else {
+            otherLoanDescriptionContainer.style.display = 'none';
+            document.getElementById('other_loan_description').value = '';
+        }
+    }
+
+    // Existing Installment Calculation (Assuming similar to Cash Installment)
+    function calculateInstallmentAmount() {
+        const remainingCashValue = parseFloat(document.getElementById('remaining_cash_value').value) || 0;
+        const installmentValue = parseFloat(document.getElementById('installment_value').value) || 0; // If exists
+        // Implement as per your logic
+    }
+
+    // Initialize event listeners for existing loan type
+    document.getElementById('loan_type').addEventListener('change', handleLoanTypeChange);
 </script>
