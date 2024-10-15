@@ -8,6 +8,7 @@ use App\Models\Installment;
 use App\Models\Building;
 use App\Models\CashExpense;
 use App\Models\ChequeExpense;
+use App\Models\CashInstallment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
@@ -191,11 +192,35 @@ class SaleController extends Controller
             }
         }
         
+        if ($request->filled(['cash_installment_frequency', 'cash_installment_amount', 'cash_installment_start_date', 'cash_no_of_installments'])) {
+            $cashFrequencyInput = $request->input('cash_installment_frequency');
+            $cashInstallmentAmount = $request->input('cash_installment_amount');
+            $cashStartDate = Carbon::parse($request->input('cash_installment_start_date'));
+            $cashNoOfInstallments = $request->input('cash_no_of_installments');
+
+            // Assume frequency is in 'X months' format
+            if (preg_match('/(\d+)\s*month/i', $cashFrequencyInput, $matches)) {
+                $cashInterval = intval($matches[1]);
+            } else {
+                $cashInterval = 1; // Default to 1 month
+            }
+
+            for ($i = 0; $i < $cashNoOfInstallments; $i++) {
+                CashInstallment::create([
+                    'sale_id' => $sale->id,
+                    'installment_frequency' => $cashFrequencyInput,
+                    'installment_date' => $cashStartDate->copy()->addMonths($cashInterval * $i),
+                    'installment_number' => $i + 1,
+                    'installment_amount' => $cashInstallmentAmount,
+                    'status' => 'unpaid',
+                ]);
+            }
+        }
 
         // Commit the transaction
         DB::commit();
 
-        return redirect()->route('admin.rooms.sell', [$room->id, $building_id])->with('success', 'Sale recorded successfully!');
+        return redirect()->route('admin.rooms.sell', [$room->id, $room->building_id])->with('success', 'Sale recorded successfully!');
     } catch (\Exception $e) {
         // Rollback the transaction on error
         DB::rollBack();
@@ -204,7 +229,6 @@ class SaleController extends Controller
         return back()->withErrors(['error' => 'An error occurred while recording the sale. Please try again.']);
     }
 }
-
     protected function getAreaProperty($room, $areaCalculationType)
     {
         $areaProperties = [

@@ -7,6 +7,18 @@
         @csrf
 
         <input type="hidden" name="room_id" value="{{ $room->id }}">
+        @if ($errors->any())
+    <div class="alert alert-danger">
+        <ul>
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
+
+<!-- Your existing form elements -->
+
 
         <!-- Customer Name -->
         <div class="form-group">

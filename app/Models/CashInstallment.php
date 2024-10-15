@@ -1,27 +1,20 @@
 <?php
 
-namespace App\Models;
+namespace App\Models; // Ensure this is correct
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class CashInstallment extends Model
 {
-    use HasFactory;
+    use HasFactory; // Add this if you are using factories
 
     protected $fillable = [
         'sale_id',
-        'cash_loan_type',
-        'other_loan_description_cash',
-        'cash_installment_frequency',
-        'cash_installment_start_date',
-        'cash_no_of_installments',
-        'cash_installment_amount',
+        'installment_frequency',
+        'installment_date',
+        'installment_number',
+        'installment_amount',
         'status',
     ];
-
-    public function sale()
-    {
-        return $this->belongsTo(Sale::class);
-    }
 }
