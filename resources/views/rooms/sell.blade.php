@@ -1,7 +1,7 @@
 @extends('layouts.default')
 
 @section('content')
-<div class="container">
+<div class="container"><br><br>
     <h2>Sell Room</h2>
     <form action="{{ route('admin.sales.store') }}" method="POST">
         @csrf
@@ -239,7 +239,7 @@
                     <!-- Number of Cash Installments -->
                     <div class="form-group">
                         <label for="cash_no_of_installments">Number of Installments:</label>
-                        <input type="number" id="cash_no_of_installments" name="cash_no_of_installments" class="form-control" placeholder="Enter No. of Installments" min="1" oninput="calculateCashInstallmentAmount()">
+                        <input type="number" id="cash_no_of_installments" name="cash_no_of_installments" class="form-control" min="1" oninput="calculateCashInstallmentAmount()">
                     </div>
 
                     <!-- Cash Installment Amount (Auto-calculated) -->
@@ -248,11 +248,6 @@
                         <input type="number" id="cash_installment_amount" name="cash_installment_amount" class="form-control" readonly>
                     </div>
                 </div>
-
-
-
-
-
 
     <!-- Loan Type and Installment Container for Cash Handling -->
 <div id="loan-type-container-cash" style="display: none;">
@@ -349,6 +344,7 @@
             <label for="loan_type">Select Loan Type:</label>
             <select id="loan_type" name="loan_type" class="form-control" onchange="handleLoanTypeChange()">
                 <option value="">Select...</option>
+                <option value="no_loan">No Loan</option>
                 <option value="bank">Bank</option>
                 <option value="directors">Director's</option>
                 <option value="others">Others</option>
@@ -1013,13 +1009,18 @@ function calculateBalance() {
     document.getElementById('balance_amount').value = balanceAmount.toFixed(2);
     console.log("Balance Amount: ", balanceAmount.toFixed(2)); // Debug
 
-    // Show or hide loan type selection and installment options based on balance amount
     const loanTypeContainer = document.getElementById('loan-type-container');
-    if (balanceAmount !== 0) {
-        loanTypeContainer.style.display = 'block'; // Show loan type selection
+    const installmentContainer = document.getElementById('installment-container');
+
+    // Show loan type and installment fields if balance amount is not zero or if received cheque value is entered
+    if (balanceAmount !== 0 || receivedChequeValue > 0) {
+        loanTypeContainer.style.display = 'block';  // Show loan type selection
+        
+        // Automatically show installment fields if received amount is present, regardless of loan type selection
+        installmentContainer.style.display = 'block';  // Show installment fields
     } else {
-        loanTypeContainer.style.display = 'none';  // Hide loan type selection
-        document.getElementById('installment-container').style.display = 'none'; // Hide installment fields if balance is 0
+        loanTypeContainer.style.display = 'none';    // Hide loan type selection
+        installmentContainer.style.display = 'none'; // Hide installment fields if balance is 0
         document.getElementById('other-loan-description-container').style.display = 'none'; // Hide description field if balance is 0
     }
 }
@@ -1154,37 +1155,24 @@ document.getElementById('total_cheque_value_with_gst').addEventListener('input',
 
     // Function to calculate Cash Installment Amount
     function calculateCashInstallmentAmount() {
-        const remainingCashValue = parseFloat(document.getElementById('remaining_cash_value').value) || 0;
-        const cashInstallmentValue = parseFloat(document.getElementById('cash_installment_value').value) || 0;
-        const cashNoOfInstallments = parseInt(document.getElementById('cash_no_of_installments').value) || 0;
+    const cashInstallmentValue = parseFloat(document.getElementById('cash_installment_value').value) || 0;
+    const cashNoOfInstallments = parseInt(document.getElementById('cash_no_of_installments').value) || 0;
 
-        if (cashNoOfInstallments > 0 && cashInstallmentValue > 0) {
-            const installmentAmount = (cashInstallmentValue / cashNoOfInstallments).toFixed(2);
-            document.getElementById('cash_installment_amount').value = installmentAmount;
-        } else {
-            document.getElementById('cash_installment_amount').value = '';
-        }
+    if (cashNoOfInstallments > 0 && cashInstallmentValue > 0) {
+        const installmentAmount = (cashInstallmentValue / cashNoOfInstallments).toFixed(2);
+        document.getElementById('cash_installment_amount').value = installmentAmount;
+    } else {
+        document.getElementById('cash_installment_amount').value = '';
     }
+}
+
+
+console.log('Installment Amount:', installmentAmount);
 
     // Attach the loan type change handler for main loan type (if not already handled)
-    function handleLoanTypeChange() {
-        const loanType = document.getElementById('loan_type').value;
-        const otherLoanDescriptionContainer = document.getElementById('other-loan-description-container');
+   
 
-        if (loanType === 'others') {
-            otherLoanDescriptionContainer.style.display = 'block';
-        } else {
-            otherLoanDescriptionContainer.style.display = 'none';
-            document.getElementById('other_loan_description').value = '';
-        }
-    }
-
-    // Existing Installment Calculation (Assuming similar to Cash Installment)
-    function calculateInstallmentAmount() {
-        const remainingCashValue = parseFloat(document.getElementById('remaining_cash_value').value) || 0;
-        const installmentValue = parseFloat(document.getElementById('installment_value').value) || 0; // If exists
-        // Implement as per your logic
-    }
+   
 
     // Initialize event listeners for existing loan type
     document.getElementById('loan_type').addEventListener('change', handleLoanTypeChange);

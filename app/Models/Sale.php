@@ -19,8 +19,8 @@ class Sale extends Model
         'customer_contact',
         'sale_amount',
         'area_calculation_type',
-        'build_up_area',
-        'carpet_area',
+        'flat_build_up_area',
+        'flat_carpet_area',
         'total_amount',
         'discount_percentage',
         'discount_amount',
@@ -34,16 +34,24 @@ class Sale extends Model
         'partner_distribution',
         'other_expenses',
         'remaining_cash_value',
+        'cash_installment_value',      // Add this field
+        'cash_loan_type',              // Add this field
+        'cash_installment_frequency',  // Add this field
+        'cash_installment_start_date', // Add this field
+        'cash_no_of_installments',     // Add this field
+        'cash_installment_amount',     // Add this field
         'loan_type',
         'installment_frequency',
+        'installment_start_date',
+        'number_of_installments',
         'installment_amount',
         'gst_percentage',
         'gst_amount',
-        'total_cheque_value',                 // New field
-        'total_cheque_value_with_additional', // New field
-        'cheque_distribution',                 // Optional: for cheque distribution if needed
-        'cheque_expense_descriptions',        // Optional: if storing as JSON
-        'cheque_expense_amounts',             // Optional: if storing as JSON
+        'total_cheque_value', 
+        'total_cheque_value_with_additional',
+        'cheque_distribution',
+        'cheque_expense_descriptions',
+        'cheque_expense_amounts',
         'partner_percentages',
         'partner_amounts',
         'total_cheque_value_with_gst',
@@ -53,11 +61,8 @@ class Sale extends Model
         'installment_date',
         'no_of_installments',
         'grand_total_amount',
-
-
-
-
     ];
+    
 
     protected $casts = [
         'partner_distribution' => 'array',  
@@ -89,9 +94,6 @@ public function cashExpenses()
 {
     return $this->hasMany(CashExpense::class, 'sale_id');
 }
-public function cashInstallments()
-{
-    return $this->hasMany(CashInstallment::class);
-}
+
 }
     
