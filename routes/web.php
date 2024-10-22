@@ -14,6 +14,8 @@ use Illuminate\Support\Facades\Log;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Http\Controllers\PartnerController;
 use App\Http\Controllers\RoomTypeController;
+use App\Http\Controllers\StatementController;
+
 
 
 
@@ -194,6 +196,20 @@ Route::controller(AuthController::class)->group(function () {
 
         Route::get('/rooms/other-types-difference/{building_id}', [RoomController::class, 'otherRoomTypesDifference'])->name('rooms.other_types_difference');
 
+
+
+        
+        Route::get('/statement-cash/{sale}', [StatementController::class, 'cash'])->name('statement-cash');
+        Route::get('/statement-cheque/{sale}', [StatementController::class, 'cheque'])->name('statement-cheque');
+        Route::get('/statement-all/{sale}', [StatementController::class, 'all'])->name('statement-all');
+        Route::get('/statement-summary/{sale}', [StatementController::class, 'summary'])->name('statement-summary');
+
+
+        Route::get('/cash-statement/{sale}/download', [StatementController::class, 'downloadCashStatement'])
+    ->name('cash-statement.download');
+
+    Route::get('/admin/cheque-statement/download/{sale}', [StatementController::class, 'downloadChequeStatement'])
+    ->name('cheque-statement.download');
 
     });
 });

@@ -1,594 +1,144 @@
 @extends('layouts.default', ['title' => 'Customer Details'])
 
 @section('content')
-<div class="container-fluid py-4">
-    <div class="card shadow-sm">
-        <div class="card-header bg-primary text-white">
-            @if ($sales->isNotEmpty())
-                @foreach ($sales as $sale)
-                    <h5 class="mb-0" style="text-transform:capitalize">{{ $sale->customer_name }}</h5>
-                @endforeach
-            @else
-                <h5 class="mb-0">No sales data available</h5>
-            @endif
-        </div>
-        <div class="card-body">
-            @if ($sales->isNotEmpty())
-                <div class="table-responsive">
-                    <table id="customerDetailsTable" class="table table-bordered table-hover table-striped" style="width:100%">
-                        <thead class="table-dark">
+<div class="container mt-5">
+    <div class="text-center mb-4">
+        <h2 class="display-6 fw-bold">TABASCO INN - Customer Details</h2>
+    </div>
+     <!-- Links to Statement Pages -->
+     <div class="d-flex justify-content-center mb-4 gap-3">
+        <a href="{{ route('admin.statement-cash', $sale->id) }}" class="btn btn-outline-primary">Cash Statement</a>
+        <a href="{{ route('admin.statement-cheque', $sale->id) }}" class="btn btn-outline-secondary">Cheque Statement</a>
+        <a href="{{ route('admin.statement-all', $sale->id) }}" class="btn btn-outline-success">All Statements</a>
+        <a href="{{ route('admin.statement-summary', $sale->id) }}" class="btn btn-outline-info">Summary Statement</a>
+    </div>
+
+    <table class="table table-bordered shadow-lg">
+        <thead class="bg-dark text-white text-center">
+            <tr>
+                <th colspan="2">Customer Details Overview</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            <!-- Customer Information -->
+            <tr>
+                <td colspan="2" class="bg-primary text-white fw-bold">Customer Information</td>
+            </tr>
+            <tr>
+                <td>
+                    <p><strong>Customer Name:</strong> {{ $sale->customer_name }}</p>
+                    <p><strong>Type:</strong> {{ $room->room_type }}</p>
+                    <p><strong>Floor:</strong> {{ $room->room_floor }}</p>
+                </td>
+                <td>
+                    <p><strong>{{$room->room_type}} No:</strong> {{ $room->room_number }}</p>
+                    <p><strong>Sqft:</strong> 
+                        {{ $sale->area_calculation_type === 'build_up_area' ? $sale->build_up_area : ($sale->area_calculation_type === 'carpet_area' ? $sale->carpet_area : 'N/A') }} sqft
+                    </p>
+
+                </td>
+            </tr>
+
+            <!-- Pricing Details -->
+            <tr>
+                <td colspan="2" class="bg-success text-white fw-bold">Pricing Details</td>
+            </tr>
+            <tr>
+                <td>
+                    <p><strong>Rate Per Sqft:</strong> ₹{{ number_format($sale->sale_amount, 2) }}</p>
+                    <p><strong>Total Amount:</strong> ₹{{ number_format($sale->total_amount, 2) }}</p>
+                    <p><strong>Exchange (Land):</strong> {{ $sale->exchange_land }}</p>
+                    <p><strong>Balance:</strong> ₹{{ number_format($sale->balance, 2) }}</p>
+                    <p><strong>Cash:</strong> ₹{{ number_format($sale->cash_value_amount, 2) }}</p>
+                    <p><strong>Cheque:</strong> ₹{{ number_format($sale->total_cheque_value, 2) }}</p>
+                    <p><strong>Discount:</strong> ₹{{ $sale->discount_amount }}</p>
+                    <p><strong>Total After Discount:</strong> ₹{{ number_format($sale->final_amount, 2) }}</p>
+                </td>
+                <td>
+                    <p><strong>Cash (with Additional):</strong> ₹{{ number_format($sale->total_cash_value, 2) }}</p>
+                    <p><strong>Cheque (with Additional):</strong> ₹{{ number_format($sale->total_cheque_value_with_additional, 2) }}</p>
+                  
+                    <p><strong>Additional Work (cash):</strong> ₹{{ $totalCashExpenses }}</p>
+                    <p><strong>Additional Work (cheque):</strong> ₹{{ $sale->cheque_expense_amounts }}</p>
+                    <p><strong>Additional Work:</strong> ₹{{ $additionalWork }}</p>
+                    <p><strong>Total:</strong> ₹{{ number_format($totalWithAdditional, 2) }}</p>
+                </td>
+            </tr>
+
+            <!-- GST Details -->
+            <tr>
+                <td colspan="2" class="bg-warning text-dark fw-bold">GST and Total Amount</td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <p><strong>GST ({{$sale->gst_percentage}}%):</strong> ₹{{ number_format($sale->gst_amount, 2) }}</p>
+                    <p><strong>Total Amount (with GST):</strong> ₹{{ number_format($sale->total_cheque_value_with_gst, 2) }}</p>
+                </td>
+            </tr>
+
+            <!-- Installments Section -->
+            <tr>
+                <td class="bg-info text-white fw-bold">Cheque Installments</td>
+                <td class="bg-info text-white fw-bold">Cash Installments</td>
+            </tr>
+            <tr>
+                <td>
+                    <p><strong>Number of Installments:</strong> {{ $sale->no_of_installments }}</p>
+                    <p><strong>Installment Amount:</strong> ₹{{ number_format($sale->cheque_installment_amount, 2) }}</p>
+                    <table class="table table-hover">
+                        <thead class="table-secondary">
                             <tr>
-                                <th>Building Name</th>
-                                <th>Contact</th>
-                                <th>Email</th>
-                                <th>Room Model</th>
+                                <th>Date</th>
+                                <th>Amount (₹)</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($sales as $sale)
+                            @foreach ($sale->installments as $installment) <!-- Assuming all records in installments belong to cheque -->
                                 <tr>
-                                    <td style="text-transform:capitalize;color:black;">{{ $sale->room->building->building_name }}</td>
-                                    <td style="color:black;">{{ $sale->customer_contact }}</td>
-                                    <td style="color:black;">{{ $sale->customer_email }}</td>
-                                    <td style="color:black;">{{ $sale->room->room_type }}</td>
+                                    <td>{{ \Carbon\Carbon::parse($installment->installment_date)->format('d-m-Y') }}</td> <!-- Format date as needed -->
+                                    <td>₹{{ number_format($installment->installment_amount, 2) }}</td>
                                 </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </td>
+                
+
+                <td>
+                    <p><strong>Number of Installments:</strong> {{ $sale->cash_no_of_installments }}</p>
+                    <p><strong>Installment Amount:</strong> ₹{{ number_format($sale->cash_installment_amount, 2) }}</p>
+                    
+                    <table class="table table-hover">
+                        <thead class="table-secondary">
+                            <tr>
+                                <th>Date</th>
+                                <th>Amount (₹)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($sale->cash_installments as $cash_installment)
                                 <tr>
-                                    <td colspan="4">
-                                        <div class="card mt-3">
-                                            <div class="card-header">
-                                                <strong style="text-transform: capitalize">{{ $sale->room->room_type }} Details</strong>
-                                            </div>
-                                            <div class="card-body">
-                                                <table class="table table-sm table-borderless">
-                                                    <tbody>
-                                                        @if ($sale->room->room_type === 'Flat')
-                                                            <tr><td><strong style="color:black;">Room Number:</strong></td><td style="color:black; text-transform: capitalize">{{ $sale->room->room_number }}</td></tr>
-                                                            <tr><td><strong style=" color:black;">Flat Model:</strong></td><td style="color:black; ">{{ $sale->room->flat_model }}</td></tr>
-                                                            @if ($sale->area_calculation_type === 'carpet_area_rate')
-                                                                <tr><td><strong style="color:black;">Carpet Area sq ft:</strong></td><td style="color:black;">{{ $sale->room->flat_carpet_area }} sq ft</td></tr>
-                                                                <tr><td><strong style="color:black;">Carpet Area Price per sq ft:</strong></td><td style="color:black;">₹{{ $sale->room->flat_carpet_area_price }}</td></tr>
-                                                                <tr><td><strong style="color:black;">Expected Amount:</strong></td><td style="color:black;">₹{{ $sale->room->flat_expected_carpet_area_price }}</td></tr>
-                                                            @elseif ($sale->area_calculation_type === 'built_up_area_rate')
-                                                                <tr><td><strong style="color:black;">Super Build Up sq ft:</strong></td><td style="color:black;">{{ $sale->room->flat_build_up_area }}</td></tr>
-                                                                <tr><td><strong style="color:black;">Super Build Up Price per sq ft:</strong></td><td style="color:black;">₹{{ $sale->room->flat_super_build_up_price }}</td></tr>
-                                                                <tr><td><strong style="color:black;">Expected Amount:</strong></td><td style="color:black;">₹{{ $sale->room->flat_expected_super_buildup_area_price }}</td></tr>
-                                                            @endif
-                                                            <tr><td><strong style="color:black;">Sale Amount:</strong></td><td style="color:black;">₹{{ $sale->sale_amount }}</td></tr>
-                                                            <tr><td><strong style="color:black;">Total Amount:</strong></td><td style="color:black;">₹{{ $sale->total_amount }}</td></tr>
-                                                            <tr><td><strong style="color:black;">Advance Amount:</strong></td><td style="color:black;">₹{{ $sale->advance_amount}}</td></tr>
-                                                            <tr><td><strong style="color:black;">Partner Name:</strong></td><td style="color:black;">{{ $sale->partner_name}}</td></tr>
-                                                            
-                                                            <tr><td><strong style="color:black;">GST %:</strong></td><td style="color:black;">{{ $sale->gst_percent }}%</td></tr>
-                                                            <tr><td><strong style="color:black;">GST Amount:</strong>
-                                                                <td style="color:black;">₹{{ number_format($sale->total_with_gst - $sale->room_rate, 2) }}</td></tr>
-                                                            <tr><td><strong style="color:black;">Total With GST:</strong></td><td style="color:black;">₹{{ $sale->total_with_gst }}</td></tr>
+                                    <td>{{ \Carbon\Carbon::parse($cash_installment->installment_date)->format('d-m-Y') }}</td>
+                                    <td>₹{{ number_format($cash_installment->installment_amount, 2) }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </td>
+                            </tr>
 
-                                                            <tr><td><strong style="color:black;">Discount %:</strong></td><td style="color:black;">₹{{ $sale->discount_percent}}</td></tr>
-                                                            <tr><td><strong style="color:black;">Discount Amount:</strong></td><td style="color:black;">₹{{$sale->total_with_gst - $sale->total_with_discount }}</td></tr>
-                                                            <tr><td><strong style="color:black;">Parking Amount:</strong></td><td style="color:black;">₹{{ $sale->parking_amount }}</td></tr>
-                                                            <tr>
-                                                                <td><strong style="color:black;">No of Installments:</strong></td>
-                                                                <td id="remaining-installments-{{ $sale->id }}" style="color:black;">{{ $sale->installments }}</td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td><strong style="color:black;">Installment Date:</strong></td>
-                                                                <td id="remaining-installments-{{ $sale->id }}" style="color:black;">{{ $sale->installment_date }}</td>
-                                                            </tr>
-                                                            <tr><td><strong style="color:black;">Amount per Installment:</strong></td>
-                                                            <td style="color:black;">₹{{ $sale->installments > 0 ? number_format($sale->remaining_balance / $sale->installments, 2) : 'N/A' }}</td></tr>
-                                                            <tr style="display: none;">
-                                                                <td><strong style="color:black;">Remaining Installments Total:</strong></td>
-                                                                <td id="remaining-installments-total">{{ count($sales) }}</td>
-                                                            </tr>
-                                                            <tr><td><strong style="color:black;">Remaining Balance:</strong></td><td style="color:black;">₹{{ $sale->remaining_balance}}</td></tr>
-                                                            <tr>
-                                                                <td><strong style="color:black;">Remaining Balance after paid Installments:</strong></td>
-                                                                <td style="color:black;">₹{{ $remainingBalanceAfterInstallments }}</td>
-                                                            </tr>
-                                                        @elseif ($sale->room->room_type === 'Shops')
-
-                                                            
-                                                            <tr><td><strong style="color:black;">Room Number:</strong></td><td style="color:black; text-transform: capitalize">{{ $sale->room->room_number }}</td></tr>
-                                                            <tr><td><strong style=" color:black;">Shop Type:</strong></td><td style="color:black; ">{{ $sale->room->shop_type }}</td></tr>
-                                                            @if ($sale->area_calculation_type === 'carpet_area_rate')
-                                                                <tr><td><strong style="color:black;">Carpet Area sq ft:</strong></td><td style="color:black;">{{ $sale->room->carpet_area }} sq ft</td></tr>
-                                                                <tr><td><strong style="color:black;">Carpet Area Price per sq ft:</strong></td><td style="color:black;">₹{{ $sale->room->carpet_area_price }}</td></tr>
-                                                                <tr><td><strong style="color:black;">Expected Amount:</strong></td><td style="color:black;">₹{{ $sale->room->expected_carpet_area_price }}</td></tr>
-                                                            @elseif ($sale->area_calculation_type === 'built_up_area_rate')
-                                                                <tr><td><strong style="color:black;">Super Build Up sq ft:</strong></td><td style="color:black;">{{ $sale->room->build_up_area }}</td></tr>
-                                                                <tr><td><strong style="color:black;">Super Build Up Price per sq ft:</strong></td><td style="color:black;">₹{{ $sale->room->super_build_up_price }}</td></tr>
-                                                                <tr><td><strong style="color:black;">Expected Amount:</strong></td><td style="color:black;">₹{{ $sale->room->expected_super_buildup_area_price }}</td></tr>
-                                                            @endif
-                                                            <tr><td><strong style="color:black;">Sale Amount:</strong></td><td style="color:black;">₹{{ $sale->sale_amount }}</td></tr>
-                                                            <tr><td><strong style="color:black;">Total Amount:</strong></td><td style="color:black;">₹{{ $sale->total_amount }}</td></tr>
-                                                            
-                                                            <tr><td><strong style="color:black;">GST %:</strong></td><td style="color:black;">{{ $sale->gst_percent }}%</td></tr>
-                                                            <tr><td><strong style="color:black;">GST Amount:</strong>
-                                                                <td style="color:black;">₹{{ number_format($sale->total_with_gst - $sale->room_rate, 2) }}</td></tr>
-                                                            <tr><td><strong style="color:black;">Total With GST:</strong></td><td style="color:black;">₹{{ $sale->total_with_gst }}</td></tr>
-
-                                                            <tr><td><strong style="color:black;">Discount %:</strong></td><td style="color:black;">₹{{ $sale->discount_percent}}</td></tr>
-                                                            <tr><td><strong style="color:black;">Discount Amount:</strong></td><td style="color:black;">₹{{$sale->total_with_gst - $sale->total_with_discount }}</td></tr>
-                                                            <tr><td><strong style="color:black;">Parking Amount:</strong></td><td style="color:black;">₹{{ $sale->parking_amount }}</td></tr>
-                                                            <tr>
-                                                                <td><strong style="color:black;">No of Installments:</strong></td>
-                                                                <td id="remaining-installments-{{ $sale->id }}" style="color:black;">{{ $sale->installments }}</td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td><strong style="color:black;">Installment Date:</strong></td>
-                                                                <td id="remaining-installments-{{ $sale->id }}" style="color:black;">{{ $sale->installment_date }}</td>
-                                                            </tr>
-                                                            <tr><td><strong style="color:black;">Amount per Installment:</strong></td>
-                                                            <td style="color:black;">₹{{ $sale->installments > 0 ? number_format($sale->remaining_balance / $sale->installments, 2) : 'N/A' }}</td></tr>
-                                                            <tr style="display: none;">
-                                                                <td><strong style="color:black;">Remaining Installments Total:</strong></td>
-                                                                <td id="remaining-installments-total">{{ count($sales) }}</td>
-                                                            </tr>
-                                                            <tr><td><strong style="color:black;">Remaining Balance:</strong></td><td style="color:black;">₹{{ $sale->remaining_balance}}</td></tr>
-                                                            <tr>
-                                                                <td><strong style="color:black;">Remaining Balance after paid Installments:</strong></td>
-                                                                <td style="color:black;">₹{{ $remainingBalanceAfterInstallments }}</td>
-                                                            </tr>
-                                                            
-                                                        @elseif ($sale->room->room_type === 'Table space')
-
-                                                                
-                                                                <tr><td><strong style="color:black;">Room Number:</strong></td><td style="color:black; text-transform: capitalize">{{ $sale->room->room_number }}</td></tr>
-                                                                <tr><td><strong style=" color:black;">Table Type:</strong></td><td style="color:black; ">{{ $sale->room->space_type }}</td></tr>
-                                                                @if ($sale->area_calculation_type === 'carpet_area_rate')
-                                                                    <tr><td><strong style="color:black;">Space Area sq ft:</strong></td><td style="color:black;">{{ $sale->room->space_area }} sq ft</td></tr>
-                                                                    <tr><td><strong style="color:black;">Space Area Price per sq ft:</strong></td><td style="color:black;">₹{{ $sale->room->space_area }}</td></tr>
-                                                                    <tr><td><strong style="color:black;">Expected Amount:</strong></td><td style="color:black;">₹{{ $sale->room->space_expected_price }}</td></tr>
-                                                                @elseif ($sale->area_calculation_type === 'built_up_area_rate')
-                                                                <tr><td><strong style="color:black;">Space Area sq ft:</strong></td><td style="color:black;">{{ $sale->room->space_area }} sq ft</td></tr>
-                                                                <tr><td><strong style="color:black;">Space Area Price per sq ft:</strong></td><td style="color:black;">₹{{ $sale->room->space_area }}</td></tr>
-                                                                <tr><td><strong style="color:black;">Expected Amount:</strong></td><td style="color:black;">₹{{ $sale->room->space_expected_price }}</td></tr>
-                                                               @endif
-                                                                <tr><td><strong style="color:black;">Sale Amount:</strong></td><td style="color:black;">₹{{ $sale->sale_amount }}</td></tr>
-                                                                <tr><td><strong style="color:black;">Total Amount:</strong></td><td style="color:black;">₹{{ $sale->total_amount }}</td></tr>
-                                                                
-                                                                <tr><td><strong style="color:black;">GST %:</strong></td><td style="color:black;">{{ $sale->gst_percent }}%</td></tr>
-                                                                <tr><td><strong style="color:black;">GST Amount:</strong>
-                                                                    <td style="color:black;">₹{{ number_format($sale->total_with_gst - $sale->room_rate, 2) }}</td></tr>
-                                                                <tr><td><strong style="color:black;">Total With GST:</strong></td><td style="color:black;">₹{{ $sale->total_with_gst }}</td></tr>
-
-                                                                <tr><td><strong style="color:black;">Discount %:</strong></td><td style="color:black;">₹{{ $sale->discount_percent}}</td></tr>
-                                                                <tr><td><strong style="color:black;">Discount Amount:</strong></td><td style="color:black;">₹{{$sale->total_with_gst - $sale->total_with_discount }}</td></tr>
-                                                                <tr><td><strong style="color:black;">Parking Amount:</strong></td><td style="color:black;">₹{{ $sale->parking_amount }}</td></tr>
-                                                                <tr>
-                                                                    <td><strong style="color:black;">No of Installments:</strong></td>
-                                                                    <td id="remaining-installments-{{ $sale->id }}" style="color:black;">{{ $sale->installments }}</td>
-                                                                </tr>
-                                                                <tr>
-                                                                    <td><strong style="color:black;">Installment Date:</strong></td>
-                                                                    <td id="remaining-installments-{{ $sale->id }}" style="color:black;">{{ $sale->installment_date }}</td>
-                                                                </tr>
-                                                                <tr><td><strong style="color:black;">Amount per Installment:</strong></td>
-                                                                    <td style="color:black;">₹{{ $sale->installments > 0 ? number_format($sale->remaining_balance / $sale->installments, 2) : 'N/A' }}</td></tr>
-                                                                    <tr style="display: none;">
-                                                                        <td><strong style="color:black;">Remaining Installments Total:</strong></td>
-                                                                        <td id="remaining-installments-total">{{ count($sales) }}</td>
-                                                                    </tr>
-                                                                    <tr><td><strong style="color:black;">Remaining Balance:</strong></td><td style="color:black;">₹{{ $sale->remaining_balance}}</td></tr>
-                                                                    <tr>
-                                                                        <td><strong style="color:black;">Remaining Balance after paid Installments:</strong></td>
-                                                                        <td style="color:black;">₹{{ $remainingBalanceAfterInstallments }}</td>
-                                                                    </tr>                                          
-                                                                                                            
-                                                                    
-                                                        @elseif ($sale->room->room_type === 'Chair space')
-
-
-                                                        <tr><td><strong style="color:black;">Room Number:</strong></td><td style="color:black; text-transform: capitalize">{{ $sale->room->room_number }}</td></tr>
-                                                        <tr><td><strong style=" color:black;">Chair Type:</strong></td><td style="color:black; ">{{ $sale->room->Chair_type }}</td></tr>
-                                                        <tr><td><strong style=" color:black;">Chair Name:</strong></td><td style="color:black; ">{{ $sale->room->Chair_name }}</td></tr>
-                                                        @if ($sale->area_calculation_type === 'carpet_area_rate')
-                                                            <tr><td><strong style="color:black;">Space Area sq ft:</strong></td><td style="color:black;">{{ $sale->room->chair_space_in_sq }} sq ft</td></tr>
-                                                            <tr><td><strong style="color:black;">Space Area Price per sq ft:</strong></td><td style="color:black;">₹{{ $sale->room->chair_space_rate }}</td></tr>
-                                                            <tr><td><strong style="color:black;">Expected Amount:</strong></td><td style="color:black;">₹{{ $sale->room->chair_space_expected_price }}</td></tr>
-                                                        @elseif ($sale->area_calculation_type === 'built_up_area_rate')
-                                                        <tr><td><strong style="color:black;">Space Area sq ft:</strong></td><td style="color:black;">{{ $sale->room->chair_space_in_sq }} sq ft</td></tr>
-                                                        <tr><td><strong style="color:black;">Space Area Price per sq ft:</strong></td><td style="color:black;">₹{{ $sale->room->chair_space_rate }}</td></tr>
-                                                        <tr><td><strong style="color:black;">Expected Amount:</strong></td><td style="color:black;">₹{{ $sale->room->chair_space_expected_price }}</td></tr>
-                                                       @endif
-                                                        <tr><td><strong style="color:black;">Sale Amount:</strong></td><td style="color:black;">₹{{ $sale->sale_amount }}</td></tr>
-                                                        <tr><td><strong style="color:black;">Total Amount:</strong></td><td style="color:black;">₹{{ $sale->total_amount }}</td></tr>
-                                                        
-                                                        <tr><td><strong style="color:black;">GST %:</strong></td><td style="color:black;">{{ $sale->gst_percent }}%</td></tr>
-                                                        <tr><td><strong style="color:black;">GST Amount:</strong>
-                                                            <td style="color:black;">₹{{ number_format($sale->total_with_gst - $sale->room_rate, 2) }}</td></tr>
-                                                        <tr><td><strong style="color:black;">Total With GST:</strong></td><td style="color:black;">₹{{ $sale->total_with_gst }}</td></tr>
-
-                                                        <tr><td><strong style="color:black;">Discount %:</strong></td><td style="color:black;">₹{{ $sale->discount_percent}}</td></tr>
-                                                        <tr><td><strong style="color:black;">Discount Amount:</strong></td><td style="color:black;">₹{{$sale->total_with_gst - $sale->total_with_discount }}</td></tr>
-                                                        <tr><td><strong style="color:black;">Parking Amount:</strong></td><td style="color:black;">₹{{ $sale->parking_amount }}</td></tr>
-                                                        <tr>
-                                                            <td><strong style="color:black;">No of Installments:</strong></td>
-                                                            <td id="remaining-installments-{{ $sale->id }}" style="color:black;">{{ $sale->installments }}</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td><strong style="color:black;">Installment Date:</strong></td>
-                                                            <td id="remaining-installments-{{ $sale->id }}" style="color:black;">{{ $sale->installment_date }}</td>
-                                                        </tr>
-                                                        <tr><td><strong style="color:black;">Amount per Installment:</strong></td>
-                                                        <td style="color:black;">₹{{ $sale->installments > 0 ? number_format($sale->remaining_balance / $sale->installments, 2) : 'N/A' }}</td></tr>
-                                                        <tr style="display: none;">
-                                                            <td><strong style="color:black;">Remaining Installments Total:</strong></td>
-                                                            <td id="remaining-installments-total">{{ count($sales) }}</td>
-                                                        </tr>
-                                                        <tr><td><strong style="color:black;">Remaining Balance:</strong></td><td style="color:black;">₹{{ $sale->remaining_balance}}</td></tr>
-                                                        <tr>
-                                                            <td><strong style="color:black;">Remaining Balance after paid Installments:</strong></td>
-                                                            <td style="color:black;">₹{{ $remainingBalanceAfterInstallments }}</td>
-                                                        </tr>     
-                                                        
-                                                        @elseif ($sale->room->room_type === 'Kiosk')
-
-                                                                
-                                                                <tr><td><strong style="color:black;">Room Number:</strong></td><td style="color:black; text-transform: capitalize">{{ $sale->room->room_number }}</td></tr>
-                                                                <tr><td><strong style=" color:black;">kiosk Name:</strong></td><td style="color:black; ">{{ $sale->room->kiosk_name }}</td></tr>
-                                                                <tr><td><strong style=" color:black;">kiosk Type:</strong></td><td style="color:black; ">{{ $sale->room->kiosk_type }}</td></tr>
-                                                                @if ($sale->area_calculation_type === 'carpet_area_rate')
-                                                                    <tr><td><strong style="color:black;">kiosk Area sq ft:</strong></td><td style="color:black;">{{ $sale->room->kiosk_area }} sq ft</td></tr>
-                                                                    <tr><td><strong style="color:black;">kiosk Area Price per sq ft:</strong></td><td style="color:black;">₹{{ $sale->room->kiosk_rate }}</td></tr>
-                                                                    <tr><td><strong style="color:black;">Expected Amount:</strong></td><td style="color:black;">₹{{ $sale->room->kiosk_expected_price }}</td></tr>
-                                                                @elseif ($sale->area_calculation_type === 'built_up_area_rate')
-                                                                    <tr><td><strong style="color:black;">kiosk Area sq ft:</strong></td><td style="color:black;">{{ $sale->room->kiosk_area }} sq ft</td></tr>
-                                                                    <tr><td><strong style="color:black;">kiosk Area Price per sq ft:</strong></td><td style="color:black;">₹{{ $sale->room->kiosk_rate }}</td></tr>
-                                                                    <tr><td><strong style="color:black;">Expected Amount:</strong></td><td style="color:black;">₹{{ $sale->room->kiosk_expected_price }}</td></tr>
-                                                                @endif
-                                                                <tr><td><strong style="color:black;">Sale Amount:</strong></td><td style="color:black;">₹{{ $sale->sale_amount }}</td></tr>
-                                                                <tr><td><strong style="color:black;">Total Amount:</strong></td><td style="color:black;">₹{{ $sale->total_amount }}</td></tr>
-                                                                
-                                                                <tr><td><strong style="color:black;">GST %:</strong></td><td style="color:black;">{{ $sale->gst_percent }}%</td></tr>
-                                                                <tr><td><strong style="color:black;">GST Amount:</strong>
-                                                                    <td style="color:black;">₹{{ number_format($sale->total_with_gst - $sale->room_rate, 2) }}</td></tr>
-                                                                <tr><td><strong style="color:black;">Total With GST:</strong></td><td style="color:black;">₹{{ $sale->total_with_gst }}</td></tr>
-
-                                                                <tr><td><strong style="color:black;">Discount %:</strong></td><td style="color:black;">₹{{ $sale->discount_percent}}</td></tr>
-                                                                <tr><td><strong style="color:black;">Discount Amount:</strong></td><td style="color:black;">₹{{$sale->total_with_gst - $sale->total_with_discount }}</td></tr>
-                                                                <tr><td><strong style="color:black;">Parking Amount:</strong></td><td style="color:black;">₹{{ $sale->parking_amount }}</td></tr>
-                                                                <tr>
-                                                                    <td><strong style="color:black;">No of Installments:</strong></td>
-                                                                    <td id="remaining-installments-{{ $sale->id }}" style="color:black;">{{ $sale->installments }}</td>
-                                                                </tr>
-                                                                <tr>
-                                                                    <td><strong style="color:black;">Installment Date:</strong></td>
-                                                                    <td id="remaining-installments-{{ $sale->id }}" style="color:black;">{{ $sale->installment_date }}</td>
-                                                                </tr>
-                                                                <tr><td><strong style="color:black;">Amount per Installment:</strong></td>
-                                                                <td style="color:black;">₹{{ $sale->installments > 0 ? number_format($sale->remaining_balance / $sale->installments, 2) : 'N/A' }}</td></tr>
-                                                                <tr style="display: none;">
-                                                                    <td><strong style="color:black;">Remaining Installments Total:</strong></td>
-                                                                    <td id="remaining-installments-total">{{ count($sales) }}</td>
-                                                                </tr>
-                                                                <tr><td><strong style="color:black;">Remaining Balance:</strong></td><td style="color:black;">₹{{ $sale->remaining_balance}}</td></tr>
-                                                                <tr>
-                                                                    <td><strong style="color:black;">Remaining Balance after paid Installments:</strong></td>
-                                                                    <td style="color:black;">₹{{ $remainingBalanceAfterInstallments }}</td>
-                                                                </tr>                 
-
-
-                                                                        @endif
-                                                                    </tbody>
-                                                                </table>
-                                                                <tbody>
-                                                                    @foreach($sales as $sale)
-                                                                        <tr>
-                                                                            <td colspan="4">
-                                                                                <div class="card mt-3">
-                                                                                    <div class="card-header d-flex justify-content-between align-items-center">
-                                                                                        <strong style="text-transform: capitalize">{{ $sale->room->room_type }} Details</strong>
-                                                                                        <!-- Button to open the modal -->
-                                                                                        <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#cancelSaleModal" onclick="setSaleId({{ $sale->id }})">Cancel Sale</button>
-                                                                                    </div>
-<!-- Cancel Sale Modal -->
-<div class="modal fade" id="cancelSaleModal" tabindex="-1" role="dialog" aria-labelledby="cancelSaleModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="cancelSaleModalLabel">Cancel Sale</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <form id="cancelSaleForm" method="POST" action="{{ route('admin.sales.cancel') }}">
-                @csrf
-                <input type="hidden" name="sale_id" id="sale_id">
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label for="fine_amount">Fine Amount</label>
-                        <input type="number" class="form-control" id="fine_amount" name="fine_amount" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="payment_method">Payment Method</label>
-                        <select class="form-control" id="payment_method" name="payment_method" required>
-                            <option value="cash">Cash</option>
-                            <option value="bank">Bank</option>
-                            <option value="cheque">Cheque</option>
-                        </select>
-                    </div>
-                    <div class="form-group d-none" id="bank_id_group">
-                        <label for="bank_id">Bank ID</label>
-                        <input type="text" class="form-control" id="bank_id" name="bank_id">
-                    </div>
-                    <div class="form-group d-none" id="cheque_id_group">
-                        <label for="cheque_id">Cheque ID</label>
-                        <input type="text" class="form-control" id="cheque_id" name="cheque_id">
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-danger">Cancel Sale</button>
-                </div>
-            </form>
-        </div>
-    </div>
+            <!-- Summary -->
+            <tr>
+                <td colspan="2" class="bg-dark text-white fw-bold text-center">Summary</td>
+            </tr>
+            <tr>
+                <td colspan="2" class="text-center">
+                    <p><strong>Total (Cheque):</strong> ₹{{ number_format($totalChequeAmount, 2) }}</p>
+                    <p><strong>Cash Total:</strong> ₹{{ number_format($totalCashAmount, 2) }}</p>
+                </td>
+            </tr>
+        </tbody>
+    </table>
 </div>
-
-
-
-
-                                                                                    <div class="card-body">
-                                                                                        <div class="row mb-4">
-                                                                                            <div class="col-12">
-                                                                                                <h4>Loan Details</h4>
-                                                                                                <table class="table table-sm table-bordered">
-                                                                                                    <tbody>
-                                                                                                        <tr>
-                                                                                                            <th>Loan No</th>
-                                                                                                            <td>{{ $sale->id }}</td>
-                                                                                                        </tr>
-                                                                                                        <tr>
-                                                                                                            <th>Disb Date</th>
-                                                                                                            <td>{{ $sale->created_at->format('d/m/Y') }}</td>
-                                                                                                        </tr>
-                                                                                                        <tr>
-                                                                                                            <th>Cost of Asset</th>
-                                                                                                            <td>{{ $sale->total_with_discount }}</td>
-                                                                                                        </tr>
-                                                                                                        <tr>
-                                                                                                            <th>EMI Start Date</th>
-                                                                                                            <td>{{ $emi_start_date ? $emi_start_date->format('d/m/Y') : 'N/A' }}</td>
-                                                                                                        </tr>
-                                                                                                        <tr>
-                                                                                                            <th>EMI End Date</th>
-                                                                                                            <td>{{ $emi_end_date ? $emi_end_date->format('d/m/Y') : 'N/A' }}</td>
-                                                                                                        </tr>
-                                                                                                        
-                                                                                                        <tr>
-                                                                                                            <th>EMI Amount</th>
-                                                                                                            <td>{{ $emi_amount }}</td>
-                                                                                                        </tr>
-                                                                                                        <tr>
-                                                                                                            <th>Tenure (Months)</th>
-                                                                                                            <td>{{ $tenure_months }}</td>
-                                                                                                        </tr>
-                                                                                                        <tr>
-                                                                                                            <th>Asset</th>
-                                                                                                            <td>{{ $room->room_type }}</td>
-                                                                                                        </tr>
-                                                                                                        <tr>
-                                                                                                            <th>Loan Amount</th>
-                                                                                                            <td>{{ $sale->remaining_balance }}</td>
-                                                                                                        </tr>
-                                                                                                        <tr>
-                                                                                                            <th>Current EMI OS</th>
-                                                                                                            <td>{{ $remainingBalanceAfterInstallments }}</td>
-                                                                                                        </tr>
-                                                                                                    </tbody>
-                                                                                                </table>
-                                                                                            </div>
-                                                                                        </div>
-                                                                                        
-                                                                                        <h5 class="mt-4">Installment Details</h5>
-                                                                                        <div class="d-flex justify-content-end mt-3">
-                                                                                            <a href="{{ route('admin.customers.download', ['customerName' => $sale->customer_name]) }}" class="btn btn-outline-primary me-2">
-                                                                                                <i class="fas fa-download"></i> CSV
-                                                                                            </a>
-                                                                                            <a href="{{ route('admin.customers.downloadPdf', ['customerName' => $sale->customer_name]) }}" class="btn btn-outline-danger">
-                                                                                                <i class="fas fa-download"></i> PDF
-                                                                                            </a>
-                                                                                        </div>
-                                                                                        
-                                                                                        <form id="markAsPaidForm" method="POST" action="{{ route('admin.installments.markMultipleAsPaid') }}">
-                                                                                            @csrf
-                                                                                            @method('PUT')
-                                                                                            <table class="table table-sm table-bordered">
-                                                                                                <thead>
-                                                                                                    <tr>
-                                                                                                        <th>SL No</th>
-                                                                                                        <th>Select</th>
-                                                                                                        <th>ID</th>
-                                                                                                        <th>Installment Date</th>
-                                                                                                        <th>Amount</th>
-                                                                                                        <th>Transaction Details</th>
-                                                                                                        <th>Bank Details</th>
-                                                                                                        <th>Status</th>
-                                                                                                        <th>Download PDF</th> 
-                                                                                                    </tr>
-                                                                                                </thead>
-                                                                                                <tbody>
-                                                                                                    @foreach($installments as $installment)
-                                                                                                        <tr>
-                                                                                                            <td>{{ $loop->iteration }}</td>
-                                                                                                            <td>
-                                                                                                                <input type="checkbox" name="installments[]" value="{{ $installment->id }}"
-                                                                                                                    @if($installment->status === 'paid') style="display: none;" @endif>
-                                                                                                            </td>
-                                                                                                            <td>{{ $installment->id }}</td>
-                                                                                                            <td>
-                                                                                                                @if($installment->status === 'paid')
-                                                                                                                    {{ $installment->installment_date->format('d/m/Y') }}
-                                                                                                                @else
-                                                                                                                    <input type="date" name="installment_dates[{{ $installment->id }}]" value="{{ $installment->installment_date->format('Y-m-d') }}">
-                                                                                                                @endif
-                                                                                                            </td>
-                                                                                                            <td>{{ $installment->installment_amount }}</td>
-                                                                                                            <td>
-                                                                                                                @if($installment->status === 'paid')
-                                                                                                                    <span style="color: green; font-weight: bold;">{{ $installment->transaction_details }}</span>
-                                                                                                                @else
-                                                                                                                    <input type="text" name="transaction_details[{{ $installment->id }}]" value="{{ $installment->transaction_details }}">
-                                                                                                                @endif
-                                                                                                            </td>
-                                                                                                            <td>
-                                                                                                                @if($installment->status === 'paid')
-                                                                                                                    <span style="color: green; font-weight: bold;">{{ $installment->bank_details }}</span>
-                                                                                                                @else
-                                                                                                                    <input type="text" name="bank_details[{{ $installment->id }}]" value="{{ $installment->bank_details }}">
-                                                                                                                @endif
-                                                                                                            </td>
-                                                                                                            <td>
-                                                                                                                @if($installment->status === 'paid')
-                                                                                                                    <span class="badge bg-success">Paid</span>
-                                                                                                                @else
-                                                                                                                    <span class="badge bg-danger">Pending</span>
-                                                                                                                @endif
-                                                                                                            </td>
-                                                                                                            <td>
-                                                                                                                @if($installment->status === 'paid')
-                                                                                                                    <a href="{{ route('admin.installments.downloadPdf', $installment->id) }}" class="btn btn-primary">
-                                                                                                                        <i class="fas fa-download"></i> PDF
-                                                                                                                    </a>
-                                                                                                            </td>
-                                                                                                        
-                                                                                                                
-                                                                                                                @else
-                                                                                                                    <span>N/A</span>
-                                                                                                                @endif
-                                                                                                            </td>
-                                                                                                        </tr>
-                                                                                                    @endforeach
-                                                                                                </tbody>
-                                                                                            </table>
-                                                                                            <button type="submit" class="btn btn-primary">Mark Selected as Paid</button>
-                                                                                        </form>
-                                                                                    </div>
-                                                                                </div>
-                                                                            </td>
-                                                                        </tr>
-                                                                    @endforeach
-                                                                </tbody>
-                                                                    
-                                                            </table>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                                        </tbody>
-                                                            </table>
-                                                                    </div>
-                                                                @endforeach
-                                                                                        <!-- Mark Paid Modal -->
-                                                                                        <div class="modal fade" id="markPaidModal" tabindex="-1" role="dialog" aria-labelledby="markPaidModalLabel" aria-hidden="true">
-                                                                                            <div class="modal-dialog" role="document">
-                                                                                                <div class="modal-content">
-                                                                                                    <div class="modal-header">
-                                                                                                        <h5 class="modal-title" id="markPaidModalLabel">Mark Installment as Paid</h5>
-                                                                                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                                                                            <span aria-hidden="true">&times;</span>
-                                                                                                        </button>
-                                                                                                    </div>
-                                                                                                    <form id="markPaidForm" method="POST">
-                                                                                                        @csrf
-                                                                                                        @method('PUT')
-                                                                                                        <input type="hidden" name="installment_id" id="modalInstallmentId">
-                                                                                                        <div class="modal-body">
-                                                                                                            <div class="form-group">
-                                                                                                                <label for="modalInstallmentDate">Installment Date</label>
-                                                                                                                <input type="text" class="form-control" id="modalInstallmentDate" name="installment_date">
-                                                                                                            </div>
-                                                                                                            <div class="form-group">
-                                                                                                                <label for="modalInstallmentAmount">Installment Amount</label>
-                                                                                                                <input type="text" class="form-control" id="modalInstallmentAmount" name="installment_amount" readonly>
-                                                                                                            </div>
-                                                                                                            <div class="form-group">
-                                                                                                                <label for="transaction_details">Transaction Details</label>
-                                                                                                                <input type="text" class="form-control" id="modalTransactionDetails" name="transaction_details">
-                                                                                                            </div>
-                                                                                                            <div class="form-group">
-                                                                                                                <label for="bank_details">Bank Details</label>
-                                                                                                                <input type="text" class="form-control" id="modalBankDetails" name="bank_details">
-                                                                                                            </div>
-                                                                                                        </div>
-                                                                                                        <div class="modal-footer">
-                                                                                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                                                                                            <button type="submit" class="btn btn-primary">Mark as Paid</button>
-                                                                                                        </div>
-                                                                                                    </form>
-                                                                                                    
-                                                                                                </div>
-                                                                                            </div>
-                                                                                        </div>
-
-                                                                                        </div>
-                                                                                    </div>
-                                                                                </td>
-                                                                            </tr>
-                                                                    </tbody>
-                                                                </table>
-                                                            </div>
-                                                        @endif
-                                                    </div>
-                                                </div>
-                                            </div>
-
-
-<script>
- document.addEventListener('DOMContentLoaded', function () {
-    var markPaidModal = document.getElementById('markPaidModal');
-    var markPaidForm = document.getElementById('markPaidForm');
-    var modalInstallmentId = document.getElementById('modalInstallmentId');
-    var modalInstallmentDate = document.getElementById('modalInstallmentDate');
-    var modalInstallmentAmount = document.getElementById('modalInstallmentAmount');
-    var modalTransactionDetails = document.getElementById('modalTransactionDetails');
-    var modalBankDetails = document.getElementById('modalBankDetails');
-
-    markPaidModal.addEventListener('show.bs.modal', function (event) {
-        var button = event.relatedTarget;
-        var customerId = button.getAttribute('data-customer-id');
-        var installmentId = button.getAttribute('data-installment-id');
-        var installmentDate = button.getAttribute('data-installment-date');
-        var installmentAmount = button.getAttribute('data-installment-amount');
-        var transactionDetails = button.getAttribute('data-transaction-details');
-        var bankDetails = button.getAttribute('data-bank-details');
-
-        // Set form action URL
-        markPaidForm.action = '/admin/customers/' + customerId + '/installments/' + installmentId + '/markAsPaid';
-
-        // Set hidden input values
-        modalInstallmentId.value = installmentId;
-        modalInstallmentDate.value = installmentDate;
-        modalInstallmentAmount.value = installmentAmount;
-        modalTransactionDetails.value = transactionDetails;
-        modalBankDetails.value = bankDetails;
-    });
-});
-
-
-</script>
-
-<script>
-    function setSaleId(saleId) {
-        document.getElementById('sale_id').value = saleId;
-    }
-
-    document.getElementById('payment_method').addEventListener('change', function() {
-        var paymentMethod = this.value;
-        var bankIdGroup = document.getElementById('bank_id_group');
-        var chequeIdGroup = document.getElementById('cheque_id_group');
-
-        bankIdGroup.classList.add('d-none');
-        chequeIdGroup.classList.add('d-none');
-
-        if (paymentMethod === 'bank') {
-            bankIdGroup.classList.remove('d-none');
-        } else if (paymentMethod === 'cheque') {
-            chequeIdGroup.classList.remove('d-none');
-        }
-    });
-</script>
-
-
 @endsection

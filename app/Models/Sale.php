@@ -19,8 +19,8 @@ class Sale extends Model
         'customer_contact',
         'sale_amount',
         'area_calculation_type',
-        'flat_build_up_area',
-        'flat_carpet_area',
+        'build_up_area',
+        'carpet_area',
         'total_amount',
         'discount_percentage',
         'discount_amount',
@@ -84,6 +84,10 @@ class Sale extends Model
 public function installments()
 {
     return $this->hasMany(Installment::class, 'sale_id');
+}
+public function cash_installments()
+{
+    return $this->hasMany(CashInstallment::class, 'sale_id');
 }
 
 public function partnerDistributions()
