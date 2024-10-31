@@ -63,35 +63,45 @@
         </thead>
         <tbody>
             @php
-                $balance = 0;
+                $runningBalance = $initialBalance;
                 $totalDebit = 0;
                 $totalCredit = 0;
             @endphp
-
-            @foreach($cashInstallments as $installment)
+        
+            @foreach($cashInstallments as $index => $installment)
                 @php
-                    // Accumulate balance, total debit, and total credit
-                    $balance += $installment->debit - $installment->credit;
-                    $totalDebit += $installment->debit;
-
-                    // Calculate installment credit correctly
                     $credit = $installment->status === 'paid' 
                               ? $installment->installment_amount 
                               : $installment->credit;
-
+        
+                    $totalDebit += $installment->debit;
                     $totalCredit += $credit;
+        
+                    // Update balance only if credit is present
+                    if ($credit) {
+                        $runningBalance += $installment->debit - $credit;
+                    }
                 @endphp
+        
                 <tr>
                     <td>{{ \Carbon\Carbon::parse($installment->installment_date)->format('d/m/Y') }}</td>
                     <td>{{ $installment->voucher_no }}</td>
                     <td>{{ $installment->description }}</td>
-                    <td>Cash</td> {{-- Payment type set to Cash --}}
+                    <td>Cash</td>
                     <td>{{ number_format($installment->debit, 2) }}</td>
-                    <td>{{ number_format($credit, 2) }}</td>
-                    <td>{{ number_format($balance, 2) }}</td>
+                    <td>{{ $credit ? number_format($credit, 2) : '' }}</td>
+                    <td>
+                        @if($credit)
+                            {{ number_format($runningBalance, 2) }}
+                        @else
+                            {{-- Leave balance cell blank if no credit --}}
+                        @endif
+                    </td>
                 </tr>
             @endforeach
         </tbody>
+        
+        
         <tfoot>
             <tr>
                 <th colspan="4" class="text-end">Sub Total</th>

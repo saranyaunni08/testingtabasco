@@ -206,10 +206,15 @@ Route::controller(AuthController::class)->group(function () {
 
 
         Route::get('/cash-statement/{sale}/download', [StatementController::class, 'downloadCashStatement'])
-    ->name('cash-statement.download');
+        ->name('cash-statement.download');
 
-    Route::get('/admin/cheque-statement/download/{sale}', [StatementController::class, 'downloadChequeStatement'])
-    ->name('cheque-statement.download');
+        Route::get('/cheque-statement/download/{id}', [StatementController::class, 'downloadChequeStatement'])->name('cheque-statement.download');
 
-    });
+        Route::get('/buildings/{buildingId}/customers', [SaleController::class, 'index'])
+        ->name('building.customers');
+
+        Route::get('/statements/commercial-sales-report', [StatementController::class, 'commercialSalesReport'])->name('statements.commercial-sales-report');
+
+
+        });
 });

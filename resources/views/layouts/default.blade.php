@@ -219,6 +219,25 @@
     </a>
 </li>
 
+<li class="nav-item {{ $page == 'commercial-sales-report' ? 'active bg-gradient-info' : '' }}">
+  <a class="nav-link" href="{{ route('admin.statements.commercial-sales-report') }}">
+      <i class="material-icons opacity-10">assessment</i> <!-- Icon for commercial sales report -->
+      <span class="nav-link-text ms-1">Commercial Sales Report</span>
+  </a>
+</li>
+
+
+
+<li class="nav-item">
+  <a class="nav-link text-white" href="{{ route('admin.building.customers', ['buildingId' => $building->id]) }}">
+    <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+      <i class="material-icons opacity-10">people</i>
+    </div>
+    <span class="nav-link-text ms-1">Customers</span>
+  </a>
+</li>
+
+
 
   <li class="nav-item {{ $page == 'cancelled-sales' ? 'active bg-gradient-info' : '' }}">
     <a class="nav-link" href="{{ route('admin.sales.cancelled') }}">

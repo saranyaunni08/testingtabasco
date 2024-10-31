@@ -335,20 +335,26 @@ class SaleController extends Controller
         return redirect()->back();
     }
 
-    public function index(Request $request)
+    // CustomerController.php
+    public function index($buildingId)
     {
-        $search = $request->input('search');
-        $customerNames = Sale::pluck('customer_name')->unique();
-        $salesQuery = Sale::query();
-
-        if ($search) {
-            $salesQuery->where('customer_name', 'like', '%' . $search . '%');
+        Log::info('Building ID: ' . $buildingId); // Log the building ID for verification
+    
+        $building = Building::find($buildingId);
+    
+        if (!$building) {
+            return redirect()->back()->withErrors('Building not found.');
         }
-
-        $sales = $salesQuery->paginate(10);
-        return view('customers.index', compact('customerNames', 'sales', 'search'));
+    
+        // Fetch customers belonging to the rooms in the building
+        $customers = Sale::whereHas('room', function ($query) use ($buildingId) {
+            $query->where('building_id', $buildingId);
+        })->get();
+    
+        $title = "customers";
+        $page = 'customers';
+        return view('customers.index', compact('building', 'customers', 'title', 'page'));
     }
-   
     
     public function getCalculationType(Request $request)
     {

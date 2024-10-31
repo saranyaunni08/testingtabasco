@@ -119,5 +119,5 @@
             </tr>
         </tfoot>
     </table>
-</div>
+</div><br><br>
 @endsection
