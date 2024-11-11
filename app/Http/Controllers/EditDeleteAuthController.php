@@ -76,8 +76,9 @@ class EditDeleteAuthController extends Controller
             return redirect()->back()->withErrors(['Room not found']);
         }
     
+        $page = 'ShowEditpage';
         // Return the view without setting headers here
-        return view('rooms.edit', compact('room'));
+        return view('rooms.edit', compact('room','page'));
     }
     
     public function deleteShops(Request $request, $roomId, $buildingId)

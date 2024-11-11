@@ -3,8 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Sale;
+use App\Models\Room;
+use App\Models\Building;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\DB; 
 
 
 class StatementController extends Controller
@@ -12,7 +15,7 @@ class StatementController extends Controller
         
     public function cash(Sale $sale)
     {
-        // Retrieve cash installments related to the sale
+
         $cashInstallments = $sale->cash_installments;
     
         // Get the first and last installment dates
@@ -203,7 +206,7 @@ class StatementController extends Controller
         $totalReceivable = $saleAmount + $gst; // Total amount including GST
         $totalReceived = $cashReceived + $chequeReceived; // Total received amount
         $balanceReceivable = $totalReceivable - $totalReceived; // Remaining balance
-        $title= "";
+        $title= "summary";
 
         return view('statements.summary', [
             'sale' => $sale,
@@ -258,6 +261,7 @@ class StatementController extends Controller
         $totalReceivable = $totalSalesAmount + $totalGST; 
         $totalReceived = $totalCashReceived + $totalChequeReceived; 
         $balanceReceivable = $totalReceivable - $totalReceived;
+        
     
         // Return the view with the calculated data
         return view('statements.commercial-sales-report', [
@@ -272,8 +276,285 @@ class StatementController extends Controller
             'balanceReceivable' => $balanceReceivable,
             'totalSqft' => $totalSqft,
             'page' => 'summary',
-            'title' => 'Commercial Sales Report',
+            'title' => 'All Commercial Sales Report',
         ]);
     }
+
+        
+    public function shopSalesReport()
+    {
+        // Fetch sales data for room_type "Shops" and group by room_floor
+        $shopSales = Sale::with('room')
+            ->whereHas('room', function($query) {
+                $query->where('room_type', 'Shops');
+            })->get();
+    
+        // Calculate the totals
+        $totalSalesAmount = $shopSales->sum('sale_amount');
+        $totalSqft = $shopSales->sum(function ($sale) {
+            // Determine sqft based on area_calculation_type
+            return $sale->area_calculation_type === 'super_build_up_area'
+                ? $sale->build_up_area
+                : ($sale->area_calculation_type === 'carpet_area' ? $sale->carpet_area : 0);
+        });
+        $totalGST = $shopSales->sum('gst_amount');
+        $totalCashReceived = $shopSales->sum('cash_received');
+        $totalChequeReceived = $shopSales->sum('cheque_received');
+        $totalReceivable = $totalSalesAmount;
+        $balanceReceivable = $totalReceivable - ($totalCashReceived + $totalChequeReceived);
+    
+        // Group the sales by floor
+        $groupedSalesByFloor = $shopSales->groupBy(function ($sale) {
+            return $sale->room->room_floor ?? 'Unknown'; // Group by room_floor, defaulting to 'Unknown' if null
+        });
+    
+        // Define title and page variables
+        $title = 'Shop Sales Report';
+        $page = 'shop-sales-report';
+    
+        // Return the view with all calculated data
+        return view('statements.shop-sales-report', compact(
+            'groupedSalesByFloor',
+            'totalSalesAmount',
+            'totalSqft',
+            'totalGST',
+            'totalCashReceived',
+            'totalChequeReceived',
+            'totalReceivable',
+            'balanceReceivable',
+            'title',
+            'page'
+        ));
+    }
+    
+        
+    public function apartmentSalesReport()
+    {
+        // Fetch sales for rooms where room_type is "Flat"
+        $sales = Sale::whereHas('room', function ($query) {
+            $query->where('room_type', 'Flat');
+        })->with('room')->get();
+
+        // Group the sales by floor number
+        $groupedSalesByFloor = $sales->groupBy(fn($sale) => $sale->room->room_floor);
+
+        // Calculate total amounts
+        $totalSalesAmount = $sales->sum('final_amount');
+        $totalSqft = $sales->sum(fn($sale) => $sale->area_calculation_type === 'super_build_up_area'
+            ? $sale->room->build_up_area
+            : ($sale->area_calculation_type === 'carpet_area'
+                ? $sale->room->carpet_area
+                : 0));
+
+        $title = 'Flat Sales Report';
+        $page = 'Flat-sales-report';
+
+        return view('statements.apartments-sales-report', compact('groupedSalesByFloor', 'totalSalesAmount', 'totalSqft','title','page',));
+    }
+        
+    public function commercialSalesSummary()
+    {
+        // Fetch all commercial sales with room information, excluding deleted records
+        $commercialSales = Sale::with('room')
+            ->whereNull('deleted_at')
+            ->get();
+    
+        // Group sales by floor and then by room type (if applicable)
+        $groupedSalesByFloor = $commercialSales->groupBy(function ($sale) {
+            return $sale->room->room_floor ?? 'N/A';
+        })->map(function ($sales) {
+            return $sales->groupBy(function ($sale) {
+                return $sale->room->room_type ?? 'N/A';
+            });
+        });
+    
+        // Calculate totals for sales amounts, received amounts, and GST
+        $totalSalesAmount = $commercialSales->sum('final_amount');
+        $totalCashReceived = $commercialSales->sum('cash_received');
+        $totalChequeReceived = $commercialSales->sum('cheque_received');
+        $totalGST = $commercialSales->sum('gst');
+    
+        // Calculate total area in square feet based on the area calculation type
+        $totalSqft = $commercialSales->sum(function ($sale) {
+            // Ensure that the sale has an associated room
+            if (!$sale->room) {
+                return 0;
+            }
+            // Use the appropriate area calculation based on the type
+            return $sale->area_calculation_type === 'super_build_up_area'
+                ? $sale->room->build_up_area // Assuming `build_up_area` is a property of the room
+                : ($sale->area_calculation_type === 'carpet_area' ? $sale->room->carpet_area : 0);
+        });
+    
+        // Calculate total receivable amount and balance receivable
+        $totalReceivable = $totalSalesAmount + $totalGST;
+        $totalReceived = $totalCashReceived + $totalChequeReceived;
+        $balanceReceivable = $totalReceivable - $totalReceived;
+    
+        // Return the summary view with calculated totals and grouped sales data
+        return view('statements.commercialsummary', [
+            'sales' => $commercialSales,
+            'groupedSalesByFloor' => $groupedSalesByFloor,
+            'totalSalesAmount' => $totalSalesAmount,
+            'totalCashReceived' => $totalCashReceived,
+            'totalChequeReceived' => $totalChequeReceived,
+            'totalGST' => $totalGST,
+            'totalReceivable' => $totalReceivable,
+            'totalReceived' => $totalReceived,
+            'balanceReceivable' => $balanceReceivable,
+            'totalSqft' => $totalSqft,
+            'page' => 'commercial-sales-summary',
+            'title' => 'Commercial Sales Summary',
+        ]);
+    }
+    public function salesSummary()
+    {
+        // Initialize the title and page variables
+        $title = 'Commercial Sales Summary';  // Set the title for the page
+        $page = 'sales_summary';  // Optional identifier for the page
+    
+        // Initialize the total shop area and other required variables
+        $totalShopSqft = 0;
+        $totalSalesAmount = Sale::sum('total_amount');
+    
+        // Fetch all sales data with related room data
+        $sales = Sale::with('room')->get();
+    
+        // Group sales by floor
+        $groupedSalesByFloor = $sales->groupBy(function ($sale) {
+            return $sale->room->floor ?? 'Unknown'; // Group by floor, default to 'Unknown' if not set
+        });
+    
+        // Calculate the total shop area for shops
+        foreach ($sales as $sale) {
+            $room = $sale->room;
+    
+            if ($room && $room->room_type === 'Shop') {
+                if ($room->area_calculation_type === 'super_build_up_area') {
+                    $totalShopSqft += $room->build_up_area;
+                } elseif ($room->area_calculation_type === 'carpet_area') {
+                    $totalShopSqft += $room->carpet_area;
+                }
+            }
+        }
+    
+        // Pass the title, page, and other data to the view
+        return view('statements.commercialsummary', [
+            'title' => $title,
+            'page' => $page,
+            'totalShopSqft' => $totalShopSqft,
+            'totalSalesAmount' => $totalSalesAmount,
+            'groupedSalesByFloor' => $groupedSalesByFloor,
+        ]);
+    }
+
+    public function displayCustomerInfo($saleId)
+    {
+        // Fetch the sale details, including room and installments
+        $sale = Sale::with('installments')->findOrFail($saleId);
+
+        // Retrieve rooms associated with the same customer based on name and contact
+        $matchingRooms = Room::whereHas('sale', function($query) use ($sale) {
+            $query->where('customer_name', $sale->customer_name)
+                ->where('customer_contact', $sale->customer_contact);
+        })->get();
+
+        // Format room numbers for display as "Shop No: 21,22,23,24 & 25"
+        $roomNumbers = $matchingRooms->pluck('room_number')->join(', ');
+
+        // Calculate totals and additional information as needed
+        $totalCashExpenses = DB::table('cash_expenses')
+            ->where('sale_id', $saleId)
+            ->sum('cash_expense_amount');
+
+        $totalChequeAmount = DB::table('installments')
+            ->where('sale_id', $saleId)
+            ->sum('installment_amount');
+
+        $totalCashAmount = DB::table('cash_installments')
+            ->where('sale_id', $saleId)
+            ->sum('installment_amount');
+
+        // Additional calculations
+        $totalWithAdditional = $totalCashExpenses + $totalChequeAmount;
+        
+        $additionalWork = $totalCashExpenses + $totalChequeAmount;
+
+        $totalCashValue = $sale->total_cash_value ?? 0;
+        $cashValueAmount = $sale->cash_value_amount ?? 0;
+        $additionalWorkCash = $totalCashValue - $cashValueAmount;
+
+        $page = 'customer-info';
+        $room = $matchingRooms->first();
+        
+
+        return view('customers.info', compact(
+            'sale', 
+            'page', 
+            'roomNumbers', 
+            'totalCashExpenses', 
+            'totalChequeAmount', 
+            'totalCashAmount',
+            'totalWithAdditional',
+            'room' ,
+            'additionalWorkCash',
+            'additionalWork', 
+
+
+        ));
+    }
+
+// availability section 
+
+// app/Http/Controllers/RoomController.php
+    // app/Http/Controllers/RoomController.php
+    public function showAvailableRooms($building_id)
+    {
+        $building = Building::findOrFail($building_id);
+    
+        // Fetch available rooms grouped by room floor first, then by room type in the specified order
+        $availableRooms = Room::where('building_id', $building_id)
+                            ->where('status', 'available')
+                            ->orderBy('room_floor')  // First sort by floor
+                            ->orderByRaw("FIELD(room_type, 'Flat', 'Shops', 'Kiosk', 'Chair space', 'Table space')")  // Then by custom room type order
+                            ->get();
+                        
+        $page = 'availability';
+        $title = 'Availability';
+    
+        return view('statements.available', [
+            'building' => $building,
+            'availableRooms' => $availableRooms,
+            'title' => $title,
+            'page' => $page,
+        ]);
+    }
+        
+    public function availableShops($buildingId)
+    {
+        $building = Building::findOrFail($buildingId);
+        $availableShops = $building->rooms()->where('room_type', 'Shop')->where('status', 'available')->get();
+        $page = 'availability-Shops';
+        $title = 'availability-Shops';
+        return view('statements.available_shops', compact('building', 'availableShops','page','title'));
+    }
+    
+        
+    public function showAvailableFlats(Building $building)
+    {
+        $availableRooms = $building->rooms()
+            ->where('status', 'available')
+            ->where('room_type', 'Flat')
+            ->orderBy('room_floor', 'asc')
+            ->get();
+
+        return view('statements.available_flats', [
+            'building' => $building,
+            'availableRooms' => $availableRooms,
+            'title' => 'Available Flats',
+            'page' => 'flats'
+        ]);
+    }
+
     
 }

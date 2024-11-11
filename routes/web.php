@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Mail;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MasterSettingsController;
 use App\Http\Controllers\EditDeleteAuthController;
+use App\Http\Controllers\ParkingController;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Illuminate\Support\Facades\Log;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -214,6 +215,21 @@ Route::controller(AuthController::class)->group(function () {
         ->name('building.customers');
 
         Route::get('/statements/commercial-sales-report', [StatementController::class, 'commercialSalesReport'])->name('statements.commercial-sales-report');
+       //shops
+        Route::get('/admin/statements/shop-sales-report', [StatementController::class, 'shopSalesReport'])->name('statements.shop-sales-report');
+       //Flats
+        Route::get('/admin/statements/apartments-sales-report', [StatementController::class, 'apartmentSalesReport'])->name('statements.apartments-sales-report');
+
+        // Route::get('/commercial-sales-summary', [StatementController::class, 'commercialSalesSummary'])->name('statements.commercialsummary');
+        Route::get('/commercial-sales-summary', [StatementController::class, 'salesSummary'])->name('statements.commercialsummary');
+        Route::get('/customer/info/{saleId}', [StatementController::class, 'displayCustomerInfo'])->name('customer.info');
+        // routes/web.php
+        Route::get('/buildings/{building_id}/available-rooms', [StatementController::class, 'showAvailableRooms'])->name('rooms.available');
+        Route::get('/buildings/{building}/available-shops', [StatementController::class, 'availableShops'])->name('available.shops');
+        Route::get('/buildings/{building}/available-flats', [StatementController::class, 'showAvailableFlats'])->name('available.flats');
+    
+        Route::resource('parking', ParkingController::class);
+
 
 
         });

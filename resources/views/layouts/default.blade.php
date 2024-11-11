@@ -236,7 +236,22 @@
     <span class="nav-link-text ms-1">Customers</span>
   </a>
 </li>
-
+<li class="nav-item">
+  <a class="nav-link text-white" href="{{ route('admin.rooms.available', ['building_id' => $building->id]) }}">
+    <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+      <i class="material-icons opacity-10">hotel</i>
+    </div>
+    <span class="nav-link-text ms-1">Available Rooms</span>
+  </a>
+</li>
+<li class="nav-item">
+  <a class="nav-link text-white" href="{{ route('admin.parking.index') }}">
+    <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+      <i class="material-icons opacity-10">local_parking</i>
+    </div>
+    <span class="nav-link-text ms-1">Parking</span>
+  </a>
+</li>
 
 
   <li class="nav-item {{ $page == 'cancelled-sales' ? 'active bg-gradient-info' : '' }}">

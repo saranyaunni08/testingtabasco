@@ -5,6 +5,14 @@
     <div class="card shadow-sm p-4">
         <h1 class="text-center text-primary mb-4">Commercial Sales Report</h1>
 
+        <div class="d-flex justify-content-center mb-4 gap-3">
+            <a href="{{ route('admin.statements.shop-sales-report') }}" class="btn btn-outline-primary">Commercial</a>
+            <a href="{{ route('admin.statements.apartments-sales-report') }}" class="btn btn-outline-secondary">Apartments </a>
+            {{-- <a href="{{ route('') }}" class="btn btn-outline-success">All Statements</a> --}}
+            <a href="{{ route('admin.statements.commercialsummary') }}" class="btn btn-outline-info">Sales Summary </a>
+
+        </div>
+        
         @foreach ($groupedSalesByFloor as $floor => $roomTypes)
         <div class="my-4">
             <h3 class="text-secondary">Floor: {{ $floor }}</h3>
@@ -69,12 +77,8 @@
             <thead class="table-dark">
                 <tr>
                     <th>Total SqFt</th>
-                    <th>Total Sales Price</th>
                     <th>Total Sale Amount after Discount</th>
-                    <th>Total Cash Received</th>
-                    <th>Total Cheque Received</th>
-                    <th>Total Receivable</th>
-                    <th>Balance Receivable</th>
+                  
                 </tr>
             </thead>
             <tbody>
