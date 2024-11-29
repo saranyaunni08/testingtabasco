@@ -7,6 +7,18 @@
         @csrf
 
         <input type="hidden" name="room_id" value="{{ $room->id }}">
+        @if ($errors->any())
+    <div class="alert alert-danger">
+        <ul>
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
+
+<!-- Your existing form elements -->
+
 
         <!-- Customer Name -->
         <div class="form-group">
@@ -78,11 +90,21 @@
             
         @endif
 
+
+    <!-- Land Entry Fields (Dynamically added) -->
+    <div id="landFieldsContainer">
+        <!-- Dynamically added land fields will appear here -->
+    </div>
+
+    <!-- Button to add land details -->
+    <button type="button" id="addLandButton" class="btn btn-primary">+</button>
+
         <!-- Total Amount (Read-only) -->
         <div class="form-group">
             <label class="font-weight-bold" for="total_amount">Total Amount</label>
             <input type="text" class="form-control" id="total_amount" name="total_amount" readonly>
         </div>
+
 
         <!-- Discount Percentage -->
         <div class="form-group">
@@ -96,11 +118,31 @@
             <input type="text" class="form-control" id="discount_amount" name="discount_amount">
         </div>
 
-        <!-- Final Amount (After Discount) -->
+         <!-- Final Amount (After Discount) -->
         <div class="form-group">
             <label class="font-weight-bold" for="final_amount">Final Amount (After Discount)</label>
             <input type="text" class="form-control" id="final_amount" name="final_amount" readonly>
         </div>
+     {{-- parking slot --}}
+       <div class="form-group">
+        <label for="parkingFloor">Select Parking Floor</label>
+        <select class="form-control" id="parkingFloor" name="parking_floor">
+            <option value="">-- Select a Floor --</option>
+            @foreach($availableFloors as $floor)
+                <option value="{{ $floor }}">{{ $floor }}</option>
+            @endforeach
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="parkingSlot">Select Parking Slot</label>
+        <select class="form-control" id="parkingSlot" name="parking_id"> <!-- Changed to parking_id -->
+            <option value="">-- Select a Parking Slot --</option>
+            {{-- Options populated dynamically --}}
+        </select>
+    </div>
+    
+        {{-- end parking slot section --}}
 
         <!-- Cash Value Percentage -->
         <div class="form-group">
@@ -113,6 +155,22 @@
             <label class="font-weight-bold" for="cash_value_amount">Cash Value Amount</label>
             <input type="text" class="form-control" id="cash_value_amount" name="cash_value_amount">
         </div>
+
+         {{-- Parking Add to Cash Value --}}
+        <div class="form-group">
+            <input type="checkbox" id="addParkingAmountCashCheckbox" name="add_parking_amount_cash">
+            <label for="addParkingAmountCashCheckbox">Add Parking Amount to Cash Value</label>
+        </div>
+
+        <div class="form-group" id="parkingAmountCashGroup" style="display: none;">
+            <label for="parkingAmountCash">Enter Parking Amount (Cash)</label>
+            <input type="number" class="form-control" id="parkingAmountCash" name="parking_amount_cash" placeholder="Enter parking amount for cash">
+            <small id="parkingAmountCashError" class="text-danger" style="display: none;">Please enter a valid parking amount.</small>
+        </div>
+        {{-- End of parking add to cash value --}}
+
+
+
         <!-- Additional Amount Section -->
         <div class="form-group">
             <label>Additional Amounts</label>
@@ -249,17 +307,17 @@
                     </div>
                 </div>
 
-    <!-- Loan Type and Installment Container for Cash Handling -->
-<div id="loan-type-container-cash" style="display: none;">
-    <label for="loan_type_cash">Select Loan Type:</label>
-    <select id="loan_type_cash" class="form-control" onchange="handleLoanTypeChangeCash()">
-        <option value="">Select...</option>
-        <option value="no_loan">No Loan</option> <!-- Add this option -->
-        <option value="bank">Bank</option>
-        <option value="directors">Director's</option>
-        <option value="others">Others</option>
-    </select>
-</div>
+                    <!-- Loan Type and Installment Container for Cash Handling -->
+                <div id="loan-type-container-cash" style="display: none;">
+                    <label for="loan_type_cash">Select Loan Type:</label>
+                    <select id="loan_type_cash" class="form-control" onchange="handleLoanTypeChangeCash()">
+                        <option value="">Select...</option>
+                        <option value="no_loan">No Loan</option> <!-- Add this option -->
+                        <option value="bank">Bank</option>
+                        <option value="directors">Director's</option>
+                        <option value="others">Others</option>
+                    </select>
+                </div>
 
 
     <div id="other-loan-description-container-cash" style="display: none;">
@@ -291,21 +349,35 @@
         <input type="text" id="total_cheque_value" class="form-control" readonly>
         <input type="hidden" name="total_cheque_value" id="total_cheque_value_hidden"> <!-- Hidden field for form submission -->
     </div>
-    
-    {{-- 2 nd  --}}
+
+        
+    {{-- parking add to cash value --}}
+    <div class="form-group">
+        <input type="checkbox" id="addParkingAmountCheckbox" name="add_parking_amount">
+        <label for="addParkingAmountCheckbox">Add Parking Amount to cheque Value</label>
+    </div>
+
+    <div class="form-group" id="parkingAmountGroup" style="display: none;">
+        <label for="parkingAmount">Enter Parking Amount</label>
+        <input type="number" class="form-control" id="parkingAmount" name="parking_amount_cheque" 
+        placeholder="Enter parking amount">
+            <small id="parkingAmountError" class="text-danger" style="display: none;">Please enter a valid parking amount.</small>
+    </div>
+
+{{-- end of parking add to cash value --}}    
 
     <div id="additional-expenses-container">
-        <h5>Additional Amounts</h5>
+        <h5>Other Expenses</h5>
         <div class="row mb-2" id="expense-container">
             <div class="col-md-6">
-                <input type="text" placeholder=" Description" class="form-control cheque-expense-description" name="cheque_expense_descriptions[]" />
+                <input type="text" placeholder="Expense Description" class="form-control cheque-expense-description" name="cheque_expense_descriptions[]" />
             </div>
             <div class="col-md-6">
-                <input type="number" placeholder=" Amount" class="form-control cheque-expense-amount" name="cheque_expense_amounts[]" oninput="calculateTotalChequeValueWithAdditional()" />
+                <input type="number" placeholder="Expense Amount" class="form-control cheque-expense-amount" name="cheque_expense_amounts[]" oninput="calculateTotalChequeValueWithAdditional()" />
             </div>
         </div>
         <br>
-        <button id="add-expense" class="btn btn-success mt-2">+ Add More</button>
+        <button id="add-expense" class="btn btn-success mt-2">Add Expense</button>
     </div>
     
     
@@ -336,6 +408,12 @@
         <h5>Received Amount:</h5>
         <input type="number" id="received_cheque_value" name="received_cheque_value" class="form-control" placeholder="Received Amount" oninput="calculateBalance()" />
         
+        <div id="description-container" style="display: none;">
+            <label for="cheque_description">Cheque Description:</label>
+            <textarea id="cheque_description" name="cheque_description" class="form-control" placeholder="Describe where the money goes..."></textarea>
+        </div>
+
+
         <h5>Balance Amount:</h5>
         <input type="text" id="balance_amount" name="balance_amount" class="form-control" placeholder="Balance Amount" readonly />
         </div>
@@ -904,10 +982,10 @@ document.getElementById('add-expense').addEventListener('click', function() {
     newExpenseEntry.classList.add('row', 'mb-2');
     newExpenseEntry.innerHTML = `
         <div class="col-md-6">
-            <input type="text" placeholder=" Description" class="form-control cheque-expense-description" name="cheque_expense_descriptions[]" />
+            <input type="text" placeholder="Expense Description" class="form-control cheque-expense-description" name="cheque_expense_descriptions[]" />
         </div>
         <div class="col-md-6">
-            <input type="number" placeholder=" Amount" class="form-control cheque-expense-amount" name="cheque_expense_amounts[]" oninput="calculateTotalChequeValueWithAdditional()" />
+            <input type="number" placeholder="Expense Amount" class="form-control cheque-expense-amount" name="cheque_expense_amounts[]" oninput="calculateTotalChequeValueWithAdditional()" />
         </div>
         <div class="col-md-2">
             <button type="button" class="btn btn-danger remove-expense">Remove</button>
@@ -959,6 +1037,7 @@ function calculateGST() {
 
     // Calculate the total cheque value with additional expenses
     const totalChequeValueWithAdditional = baseChequeValue + totalExpenses;
+
 
     // Update the fields for displaying total cheque value with additional expenses
     document.getElementById('total_cheque_value_with_additional').value = totalChequeValueWithAdditional.toFixed(2); // Update visible input
@@ -1168,12 +1247,426 @@ document.getElementById('total_cheque_value_with_gst').addEventListener('input',
 
 
 console.log('Installment Amount:', installmentAmount);
-
-    // Attach the loan type change handler for main loan type (if not already handled)
-   
-
-   
-
-    // Initialize event listeners for existing loan type
     document.getElementById('loan_type').addEventListener('change', handleLoanTypeChange);
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+     const availableParkings = @json($availableParkings); 
+     const parkingFloorDropdown = document.getElementById('parkingFloor');
+     const parkingSlotDropdown = document.getElementById('parkingSlot');
+ 
+     // When a floor is selected
+     parkingFloorDropdown.addEventListener('change', function () {
+         const selectedFloor = this.value;
+ 
+         // Clear previous options
+         parkingSlotDropdown.innerHTML = '<option value="">-- Select a Parking Slot --</option>';
+ 
+         // Filter and populate slots for the selected floor
+         const filteredSlots = availableParkings.filter(parking => parking.floor_number == selectedFloor);
+ 
+         filteredSlots.forEach(parking => {
+             const option = document.createElement('option');
+             option.value = parking.id; // Store parking ID here
+             option.textContent = `Slot #${parking.slot_number} - ₹${parking.amount}`;
+             parkingSlotDropdown.appendChild(option);
+         });
+     });
+ });
+ 
+ </script>
+ <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const addParkingAmountCheckbox = document.getElementById('addParkingAmountCheckbox');
+        const parkingAmountGroup = document.getElementById('parkingAmountGroup');
+        const parkingAmountInput = document.getElementById('parkingAmount');
+        const parkingSlotDropdown = document.getElementById('parkingSlot');
+        const parkingAmountError = document.getElementById('parkingAmountError');
+        const totalCashValueField = document.getElementById('total_cash_value');
+        const cashValueAmountField = document.getElementById('cash_value_amount');
+        const additionalAmountFields = document.querySelectorAll('.additional-amount');
+
+        // Show/hide the parking amount field based on checkbox
+        addParkingAmountCheckbox.addEventListener('change', function () {
+            parkingAmountGroup.style.display = this.checked ? 'block' : 'none';
+            parkingAmountInput.value = '';  // Clear any previous input
+            parkingAmountError.style.display = 'none';  // Hide error message
+            updateTotalCashValue(); // Update total cash value
+        });
+
+        // Validate parking amount when the input field loses focus or the slot changes
+        function validateParkingAmount() {
+            const selectedSlotId = parkingSlotDropdown.value;
+            const enteredAmount = parseFloat(parkingAmountInput.value);
+
+            if (selectedSlotId) {
+                // Find the selected parking slot's details
+                const selectedParking = availableParkings.find(parking => parking.id == selectedSlotId);
+                
+                if (selectedParking) {
+                    const slotAmount = parseFloat(selectedParking.amount);
+
+                    // Validate entered parking amount
+                    if (isNaN(enteredAmount) || enteredAmount <= 0) {
+                        // Show error if entered amount is less than or equal to 0
+                        parkingAmountError.style.display = 'block';
+                        parkingAmountError.textContent = 'Parking amount must be greater than 0.';
+                        return false;
+                    } else if (enteredAmount > slotAmount) {
+                        // Show error if entered amount is greater than selected slot amount
+                        parkingAmountError.style.display = 'block';
+                        parkingAmountError.textContent = `Amount cannot be greater than the selected parking slot amount of $${slotAmount}.`;
+                        return false;
+                    } else {
+                        // Hide error if the entered amount is valid
+                        parkingAmountError.style.display = 'none';
+                        return true;
+                    }
+                }
+            }
+
+            // If no slot is selected, don't show any error
+            parkingAmountError.style.display = 'none';
+            return true;
+        }
+
+        // Event listeners for validation
+        parkingAmountInput.addEventListener('blur', validateParkingAmount);
+        parkingSlotDropdown.addEventListener('change', validateParkingAmount);
+
+        // Function to update total cash value (with parking amount)
+        function updateTotalCashValue() {
+            let baseCashValue = parseFloat(cashValueAmountField.value) || 0;
+
+            // Calculate additional amounts from the additional fields
+            let totalAdditionalAmount = 0;
+            additionalAmountFields.forEach(amountField => {
+                totalAdditionalAmount += parseFloat(amountField.value) || 0;
+            });
+
+            // Add the entered parking amount if the checkbox is checked
+            let parkingAmount = 0;
+            if (addParkingAmountCheckbox.checked) {
+                parkingAmount = parseFloat(parkingAmountInput.value) || 0;
+            }
+
+            // Calculate the total cash value
+            let totalCashValue = baseCashValue + totalAdditionalAmount + parkingAmount;
+            totalCashValueField.value = totalCashValue.toFixed(2); // Display the result
+        }
+
+        // Update total cash value when inputs change
+        cashValueAmountField.addEventListener('input', updateTotalCashValue);
+        additionalAmountFields.forEach(field => {
+            field.addEventListener('input', updateTotalCashValue);
+        });
+        parkingAmountInput.addEventListener('input', updateTotalCashValue); // When parking amount is changed
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+    const addParkingAmountCashCheckbox = document.getElementById('addParkingAmountCashCheckbox');
+    const parkingAmountCashGroup = document.getElementById('parkingAmountCashGroup');
+    const parkingAmountCashInput = document.getElementById('parkingAmountCash');
+    const parkingAmountCashError = document.getElementById('parkingAmountCashError');
+    const totalCashValueField = document.getElementById('total_cash_value'); // Assuming same field for total
+
+    // Show/hide parking cash amount field based on checkbox
+    addParkingAmountCashCheckbox.addEventListener('change', function () {
+        parkingAmountCashGroup.style.display = this.checked ? 'block' : 'none';
+        parkingAmountCashInput.value = '';  // Clear previous input
+        parkingAmountCashError.style.display = 'none';  // Hide error message
+        updateTotalCashValue(); // Update total cash value
+    });
+
+    // Validate parking amount (cash)
+    function validateParkingAmountCash() {
+        const enteredAmount = parseFloat(parkingAmountCashInput.value);
+
+        if (isNaN(enteredAmount) || enteredAmount <= 0) {
+            parkingAmountCashError.style.display = 'block';
+            parkingAmountCashError.textContent = 'Parking amount must be greater than 0.';
+            return false;
+        } else {
+            parkingAmountCashError.style.display = 'none';
+            return true;
+        }
+    }
+
+    // Update total cash value calculation
+    function updateTotalCashValue() {
+        let baseCashValue = parseFloat(document.getElementById('cash_value_amount').value) || 0;
+
+        // Add entered parking cash amount if the checkbox is checked
+        let parkingAmountCash = 0;
+        if (addParkingAmountCashCheckbox.checked) {
+            parkingAmountCash = parseFloat(parkingAmountCashInput.value) || 0;
+        }
+
+        // Calculate and update total cash value
+        let totalCashValue = baseCashValue + parkingAmountCash;
+        totalCashValueField.value = totalCashValue.toFixed(2); // Update displayed value
+    }
+
+    // Event listeners for validation and calculation
+    parkingAmountCashInput.addEventListener('blur', validateParkingAmountCash);
+    parkingAmountCashInput.addEventListener('input', updateTotalCashValue);
+});
+
+</script>
+{{-- <script>
+    document.getElementById('addParkingCheckbox').addEventListener('change', function() {
+        const parkingAmountSection = document.getElementById('parkingAmountSection');
+        
+        // Toggle visibility of parking amount input field based on checkbox
+        parkingAmountSection.style.display = this.checked ? 'block' : 'none';
+
+        // Recalculate the total cheque value with additional amounts if checkbox is checked
+        calculateTotalChequeValueWithAdditional();
+    });
+
+    document.getElementById('parkingAmountField').addEventListener('input', function() {
+        // Recalculate the total cheque value when the parking amount is entered
+        calculateTotalChequeValueWithAdditional();
+    });
+
+        
+    // Calculate the total cheque value including parking amount if applicable
+    function calculateTotalChequeValueWithAdditional() {
+        // Get the base cheque value from the relevant field
+        const baseChequeValue = parseFloat(document.getElementById('total_cheque_value').value) || 0;
+    
+        // Get all expense amounts
+        const expenseAmounts = document.querySelectorAll('.cheque-expense-amount');
+        let totalExpenses = 0;
+    
+        // Sum all expense amounts
+        expenseAmounts.forEach(amount => {
+            totalExpenses += parseFloat(amount.value) || 0; // Convert to float, default to 0
+        });
+    
+        // Get the parking amount if the checkbox is checked
+        const parkingAmount = document.getElementById('addParkingCheckbox').checked
+            ? parseFloat(document.getElementById('parkingAmountField').value) || 0
+            : 0;
+    
+        // Calculate the total cheque value with additional expenses and parking amount
+        const totalChequeValueWithAdditional = baseChequeValue + totalExpenses + parkingAmount;
+    
+        // Update the fields for displaying total cheque value with additional expenses
+        document.getElementById('total_cheque_value_with_additional').value = totalChequeValueWithAdditional.toFixed(2); // Update visible input
+        document.getElementById('total_cheque_value_with_additional_hidden').value = totalChequeValueWithAdditional.toFixed(2); // Update hidden input
+    
+        // Optional: Recalculate GST and Grand Total if necessary
+        calculateGST(); // Ensure this function exists and correctly calculates GST
+        calculateGrandTotal(); // Ensure this function exists and correctly calculates the grand total
+    }
+    
+    // Existing functions for calculating GST and Grand Total
+    
+    function calculateGST() {
+        const gstPercentage = parseFloat(document.getElementById('gst_percentage').value) || 0;
+        const totalChequeValueWithAdditional = parseFloat(document.getElementById('total_cheque_value_with_additional').value) || 0;
+    
+        const gstAmount = (totalChequeValueWithAdditional * gstPercentage) / 100;
+        document.getElementById('gst_amount').value = gstAmount.toFixed(2);
+    
+        const totalChequeValueWithGST = totalChequeValueWithAdditional + gstAmount;
+        document.getElementById('total_cheque_value_with_gst').value = totalChequeValueWithGST.toFixed(2);
+    
+        calculateGrandTotal();
+    }
+    
+    function calculateGrandTotal() {
+        const totalChequeValueWithAdditional = parseFloat(document.getElementById('total_cheque_value_with_additional').value) || 0;
+        const totalChequeValueWithGST = parseFloat(document.getElementById('total_cheque_value_with_gst').value) || 0;
+    
+        const grandTotalAmount = totalChequeValueWithAdditional + totalChequeValueWithGST;
+        document.getElementById('grand_total_amount').value = grandTotalAmount.toFixed(2);
+    }
+    
+    </script> --}}
+    <script>
+        function calculateBalance() {
+    const totalChequeValueWithGst = parseFloat(document.getElementById('total_cheque_value_with_gst').value) || 0;
+    const receivedChequeValue = parseFloat(document.getElementById('received_cheque_value').value) || 0;
+
+    // Calculate the balance
+    const balanceAmount = totalChequeValueWithGst - receivedChequeValue;
+
+    // Update the balance amount field
+    document.getElementById('balance_amount').value = balanceAmount.toFixed(2);
+    console.log("Balance Amount: ", balanceAmount.toFixed(2)); // Debug
+
+    const loanTypeContainer = document.getElementById('loan-type-container');
+    const installmentContainer = document.getElementById('installment-container');
+    const descriptionContainer = document.getElementById('description-container'); // Get the description container
+
+    // Show loan type and installment fields if balance amount is not zero or if received cheque value is entered
+    if (balanceAmount !== 0 || receivedChequeValue > 0) {
+        loanTypeContainer.style.display = 'block';  // Show loan type selection
+        
+        // Automatically show installment fields if received amount is present, regardless of loan type selection
+        installmentContainer.style.display = 'block';  // Show installment fields
+        
+        // Show description field if receivedChequeValue > 0
+        if (receivedChequeValue > 0) {
+            descriptionContainer.style.display = 'block';
+        }
+    } else {
+        loanTypeContainer.style.display = 'none';    // Hide loan type selection
+        installmentContainer.style.display = 'none'; // Hide installment fields if balance is 0
+        document.getElementById('other-loan-description-container').style.display = 'none'; // Hide description field if balance is 0
+        descriptionContainer.style.display = 'none'; // Hide description field if receivedChequeValue is 0
+    }
+}
+
+    </script>
+<script>
+    let totalLandAmount = 0; // Track total land amounts to subtract from total amount
+    let landCounter = 0; // Counter for dynamically added fields
+
+    // Function to add land details
+    function addLandFields() {
+        landCounter++; // Increment the counter for each new land entry
+
+        // Create a new div for land description and amount
+        const landDiv = document.createElement('div');
+        landDiv.classList.add('land-entry');
+        landDiv.id = `land-entry-${landCounter}`;
+
+        const landHTML = `
+            <div class="form-group">
+                <label for="land_description_${landCounter}">Land Description ${landCounter}</label>
+                <input type="text" class="form-control" id="land_description_${landCounter}" name="land_description[]" placeholder="Enter land description">
+            </div>
+            <div class="form-group">
+                <label for="land_amount_${landCounter}">Land Amount</label>
+                <input type="number" class="form-control" id="land_amount_${landCounter}" name="land_amount[]" placeholder="Enter land amount" oninput="updateLandAmount(${landCounter})">
+            </div>
+            <button type="button" class="btn btn-danger btn-sm" onclick="removeLandDetail(${landCounter})">Remove</button>
+            <hr>
+        `;
+        landDiv.innerHTML = landHTML;
+
+        // Add the new land fields to the container
+        document.getElementById('landFieldsContainer').appendChild(landDiv);
+    }
+
+    // Function to remove a land detail and update the total amount
+    function removeLandDetail(counter) {
+        const landDiv = document.getElementById(`land-entry-${counter}`);
+        const landAmount = parseFloat(document.getElementById(`land_amount_${counter}`).value) || 0;
+
+        // Remove the land entry div
+        landDiv.remove();
+
+        // Subtract the land amount from the total land amount and update total amount
+        totalLandAmount -= landAmount;
+        updateTotalAmount();
+    }
+
+    // Function to update the total amount by subtracting the land amount
+    function updateLandAmount(counter) {
+        const landAmountInput = document.getElementById(`land_amount_${counter}`);
+        const newLandAmount = parseFloat(landAmountInput.value) || 0;
+
+        // Get the previous land amount from the input field (to handle change)
+        const previousLandAmount = parseFloat(landAmountInput.dataset.previousAmount) || 0;
+
+        // If the value is changing, subtract the old value and add the new value
+        if (newLandAmount !== previousLandAmount) {
+            totalLandAmount -= previousLandAmount; // Remove previous value if any
+            totalLandAmount += newLandAmount; // Add the new value
+            landAmountInput.dataset.previousAmount = newLandAmount; // Update the stored previous amount
+        }
+
+        // Update the total amount field
+        updateTotalAmount();
+    }
+
+    // Function to update the total amount by subtracting the land amount
+    function updateTotalAmount() {
+        let saleAmount = parseFloat(document.getElementById('sale_amount').value) || 0;
+        let areaType = document.getElementById('area_calculation_type').value;
+        let totalAmount = 0;
+
+        if (saleAmount && areaType) {
+            if (areaType === 'super_build_up_area') {
+                totalAmount = saleAmount * parseFloat(document.getElementById('build_up_area')?.value || 0);
+            } else if (areaType === 'carpet_area') {
+                totalAmount = saleAmount * parseFloat(document.getElementById('carpet_area')?.value || 0);
+            }
+        }
+
+        // Subtract the total land amount
+        totalAmount -= totalLandAmount;
+
+        // Update the total amount field
+        document.getElementById('total_amount').value = totalAmount.toFixed(2);
+
+        // Recalculate other fields that depend on total amount
+        calculateDiscountFromPercentage();
+    }
+
+    // Event listener for the "+" button
+    document.getElementById('addLandButton').addEventListener('click', addLandFields);
+</script>
+<script>
+    // Function to calculate the total cheque value including additional expenses and parking amount
+    function calculateTotalChequeValueWithAdditional() {
+        let baseChequeValue = parseFloat(document.getElementById('total_cheque_value').value) || 0;
+
+        // Calculate the sum of all additional expenses
+        let totalExpenses = 0;
+        const expenseAmountFields = document.querySelectorAll('.cheque-expense-amount');
+        expenseAmountFields.forEach(field => {
+            totalExpenses += parseFloat(field.value) || 0;
+        });
+
+        // Add the parking amount if the checkbox is checked
+        const addParkingAmountCheckbox = document.getElementById('addParkingAmountCheckbox');
+        let parkingAmount = 0;
+        if (addParkingAmountCheckbox.checked) {
+            parkingAmount = parseFloat(document.getElementById('parkingAmount').value) || 0;
+        }
+
+        // Calculate the total cheque value with additional expenses and parking amount
+        const totalChequeValueWithAdditional = baseChequeValue + totalExpenses + parkingAmount;
+
+        // Update the "Total Cheque Value with Additional Expenses" field
+        document.getElementById('total_cheque_value_with_additional').value = totalChequeValueWithAdditional.toFixed(2);
+        document.getElementById('total_cheque_value_with_additional_hidden').value = totalChequeValueWithAdditional.toFixed(2); // Update hidden field for form submission
+    }
+
+    // Event listeners for input fields to trigger the calculation dynamically
+    document.getElementById('parkingAmount').addEventListener('input', calculateTotalChequeValueWithAdditional);
+    document.getElementById('addParkingAmountCheckbox').addEventListener('change', calculateTotalChequeValueWithAdditional);
+
+    // Add dynamic expense fields with event listeners
+    document.getElementById('add-expense').addEventListener('click', function () {
+        const expenseContainer = document.getElementById('expense-container');
+        const newExpenseEntry = document.createElement('div');
+        newExpenseEntry.classList.add('row', 'mb-2');
+        newExpenseEntry.innerHTML = `
+            <div class="col-md-6">
+                <input type="text" placeholder="Expense Description" class="form-control cheque-expense-description" name="cheque_expense_descriptions[]" />
+            </div>
+            <div class="col-md-6">
+                <input type="number" placeholder="Expense Amount" class="form-control cheque-expense-amount" name="cheque_expense_amounts[]" oninput="calculateTotalChequeValueWithAdditional()" />
+            </div>
+            <div class="col-md-2">
+                <button type="button" class="btn btn-danger remove-expense">Remove</button>
+            </div>
+        `;
+        expenseContainer.appendChild(newExpenseEntry);
+
+        // Add event listener for dynamically added expense inputs and remove buttons
+        newExpenseEntry.querySelector('.cheque-expense-amount').addEventListener('input', calculateTotalChequeValueWithAdditional);
+        newExpenseEntry.querySelector('.remove-expense').addEventListener('click', function () {
+            expenseContainer.removeChild(newExpenseEntry);
+            calculateTotalChequeValueWithAdditional(); // Recalculate total after removal
+        });
+    });
 </script>

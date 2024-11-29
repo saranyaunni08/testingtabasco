@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Building extends Model
+class building extends Model
 {
     use HasFactory;
 
@@ -20,10 +20,10 @@ class Building extends Model
         'pin_code',
         'state',
         'country',
-        'super_built_up_area',         // Super Built-Up Area (sq ft)
-        'carpet_area',                 // Carpet Area (sq ft)
-        'super_built_up_area_sq_m',    // Super Built-Up Area (sq m)
-        'carpet_area_sq_m',            // Carpet Area (sq m)
+        'super_built_up_area',         
+        'carpet_area',                 
+        'super_built_up_area_sq_m',    
+        'carpet_area_sq_m',            
         'building_amenities',
         'additional_amenities',
     ];

@@ -108,7 +108,7 @@ Route::controller(AuthController::class)->group(function () {
         Route::get('/buildingdashboard', [BuildingController::class, 'index'])->name('buildingdashboard');
 
 
-        Route::post('/installments/{sale}/mark-paid', [SaleController::class, 'markInstallmentPaid'])->name('installments.markPaid');
+        // Route::post('/installments/{sale}/mark-paid', [SaleController::class, 'markInstallmentPaid'])->name('installments.markPaid');
 
         
         
@@ -123,12 +123,11 @@ Route::controller(AuthController::class)->group(function () {
         Route::get('/buildings/{building_id}/table-spaces', [RoomController::class, 'showTableSpaces'])->name('table-spaces.index');
 
 
-        Route::put('/installments/markAsPaid', [SaleController::class, 'markAsPaid'])->name('installments.markAsPaid');
+        // Route::put('/installments/markAsPaid', [SaleController::class, 'markAsPaid'])->name('installments.markAsPaid');
 
-        Route::put('/installments/{id}/markAsPaid', [SaleController::class, 'markAsPaid'])
-        ->name('installments.markAsPaid');
-        Route::put('/customers/{customer}/installments/{installment}/markAsPaid', [SaleController::class, 'markAsPaid'])->name('installments.markAsPaid');
-        Route::put('/installments/markMultipleAsPaid', [SaleController::class, 'markMultipleAsPaid'])->name('installments.markMultipleAsPaid');
+        // Route::put('/installments/{id}/markAsPaid', [SaleController::class, 'markAsPaid'])->name('installments.markAsPaid');
+        // Route::put('/customers/{customer}/installments/{installment}/markAsPaid', [SaleController::class, 'markAsPaid'])->name('installments.markAsPaid');
+        // Route::put('/installments/markMultipleAsPaid', [SaleController::class, 'markMultipleAsPaid'])->name('installments.markMultipleAsPaid');
 
         Route::put('/customers/{id}', [SaleController::class, 'update'])->name('customers.update');
 
@@ -137,10 +136,10 @@ Route::controller(AuthController::class)->group(function () {
         Route::get('/customers/{customerName}/download', [SaleController::class, 'downloadCustomerDetails'])->name('customers.download');
         Route::get('/customers/download-pdf/{customerName}', [SaleController::class, 'downloadPdf'])->name('customers.downloadPdf');
 
-        Route::get('/installments/{id}/downloadPdf', [SaleController::class, 'downloadInstallmentPdf'])->name('installments.downloadPdf');
-        Route::get('/test-pdf', function () {
-            return view('test_pdf');
-        });
+        // Route::get('/installments/{id}/downloadPdf', [SaleController::class, 'downloadInstallmentPdf'])->name('installments.downloadPdf');
+        // Route::get('/test-pdf', function () {
+        //     return view('test_pdf');
+        // });
         
         Route::post('/sales/cancel', [SaleController::class, 'cancelSale'])->name('sales.cancel');
         Route::get('/sales/cancelled', [SaleController::class, 'listCancelledSales'])->name('sales.cancelled');

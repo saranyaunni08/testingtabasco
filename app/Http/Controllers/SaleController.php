@@ -47,8 +47,8 @@ class SaleController extends Controller
             'customer_contact' => 'required|string|max:255',
             'sale_amount' => 'required|numeric',
             'area_calculation_type' => 'required|string',
-            'build_up_area' => 'nullable|numeric',
-            'carpet_area' => 'nullable|numeric',
+            'flat_build_up_area' => 'nullable|numeric',
+            'flat_carpet_area' => 'nullable|numeric',
             'total_amount' => 'nullable|numeric',
             'discount_percentage' => 'nullable|numeric|min:0|max:100',
             'discount_amount' => 'nullable|numeric',
@@ -103,6 +103,21 @@ class SaleController extends Controller
             'cash_no_of_installments' => 'nullable|integer|min:1',
             'cash_installment_amount' => 'nullable|numeric|min:0',
 
+            'parking_floor' => 'required|integer|exists:parkings,floor_number', // Validate floor number
+            'parking_id' => 'required|integer|exists:parkings,id',             // Validate parking slot ID
+            'parking_amount_cheque' => 'nullable|numeric|min:0',
+            'parking_amount_cash' => 'nullable|numeric|min:0',  // Add this rule
+            'cheque_description' => 'nullable|string|max:1000',  // Adjust max length if needed
+
+
+            'land_descriptions' => 'nullable|array',
+            'land_amounts' => 'nullable|array',
+            'land_descriptions.*' => 'string|max:255',
+            'land_amounts.*' => 'numeric|min:0',
+
+            'land_description' => 'nullable|string|max:1000',
+            'land_amount' => 'nullable|numeric|min:0', // Validation for land amount
+
 
         ]);
     
@@ -125,6 +140,16 @@ class SaleController extends Controller
             'cash_installment_start_date' => $request->cash_installment_start_date,
             'cash_no_of_installments' => $request->cash_no_of_installments,
             'cash_installment_amount' => $request->cash_installment_amount,
+            'parking_floor' => $request->parking_floor,   // Add parking floor
+            'parking_id' => $request->parking_id,         // Add parking ID
+            'parking_amount_cheque' => $request->parking_amount_cheque,
+            'parking_amount_cash' => $request->input('parking_amount_cash'),
+            'cheque_description' => $request->input('cheque_description'),
+            'land_description' => $request->input('land_description'),
+            'land_amount' => $request->input('land_amount'),
+
+
+
         ]));
     
         // Store partner distributions
@@ -229,56 +254,6 @@ class SaleController extends Controller
         return back()->withErrors(['error' => 'An error occurred while recording the sale. Please try again.']);
     }
 }
-
-    public function showCustomer($saleId)
-    {
-        // Fetch the sale with installments and room details
-        $sale = Sale::with('installments')->findOrFail($saleId);
-        $room = Room::find($sale->room_id);
-
-        // Calculate the total cash expenses
-        $totalCashExpenses = DB::table('cash_expenses')
-            ->where('sale_id', $saleId)
-            ->sum('cash_expense_amount');
-
-        // Retrieve relevant sale values (default to 0 if null)
-        $totalCashValue = $sale->total_cash_value ?? 0;
-        $cashValueAmount = $sale->cash_value_amount ?? 0;
-
-        // Fetch the sum of installment_amounts corresponding to this sale_id
-        $totalChequeAmount = DB::table('installments')
-            ->where('sale_id', $saleId)
-            ->sum('installment_amount');
-
-        $totalCashAmount = DB::table('cash_installments')
-        ->where('sale_id',$saleId)
-        ->sum('installment_amount');
-
-        // Calculate Additional Work (cash): total_cash_value - cash_value_amount
-        $additionalWorkCash = $totalCashValue - $cashValueAmount;
-
-        // Add total cash expenses and cheque installment amounts
-        $additionalWork = $totalCashExpenses + $totalChequeAmount;
-
-        // Calculate total with additional work
-        $totalWithAdditional = $additionalWork + $additionalWorkCash;
-
-        $page = 'customer';
-
-        // Pass all required data to the view
-        return view('customers.show', compact(
-            'sale', 
-            'page', 
-            'room', 
-            'totalCashExpenses', 
-            'additionalWorkCash', 
-            'additionalWork', 
-            'totalWithAdditional', 
-            'totalChequeAmount',
-            'totalCashAmount'
-        ));
-    }
-
     protected function getAreaProperty($room, $areaCalculationType)
     {
         $areaProperties = [
@@ -335,27 +310,46 @@ class SaleController extends Controller
         return redirect()->back();
     }
 
-    // CustomerController.php
-    public function index($buildingId)
+    public function index(Request $request)
     {
-        Log::info('Building ID: ' . $buildingId); // Log the building ID for verification
-    
-        $building = Building::find($buildingId);
-    
-        if (!$building) {
-            return redirect()->back()->withErrors('Building not found.');
+        $search = $request->input('search');
+        $customerNames = Sale::pluck('customer_name')->unique();
+        $salesQuery = Sale::query();
+
+        if ($search) {
+            $salesQuery->where('customer_name', 'like', '%' . $search . '%');
         }
-    
-        // Fetch customers belonging to the rooms in the building
-        $customers = Sale::whereHas('room', function ($query) use ($buildingId) {
-            $query->where('building_id', $buildingId);
-        })->get();
-    
-        $title = "customers";
-        $page = 'customers';
-        return view('customers.index', compact('building', 'customers', 'title', 'page'));
+
+        $sales = $salesQuery->paginate(10);
+        return view('customers.index', compact('customerNames', 'sales', 'search'));
     }
-    
+
+    public function showCustomer($saleId)
+    {
+        $sale = Sale::with('room', 'installments')->findOrFail($saleId);
+        $installments = Installment::where('sale_id', $saleId)->get(); 
+        $room = Room::find($sale->room_id);
+
+        $totalPaidInstallments = $installments->where('status', 'paid')->sum('installment_amount');
+        $emi_amount = $installments->sum('installment_amount');
+        $tenure_months = $installments->count();
+        $emi_start_date = $installments->first()->installment_date ?? null;
+        $emi_end_date = $installments->last()->installment_date ?? null;
+
+        $remainingBalanceAfterInstallments = $sale->remaining_balance - $totalPaidInstallments;
+        $page = 'customer';
+
+        // If the view expects multiple sales, wrap the single sale in a collection
+        $sales = collect([$sale]);
+
+        return view('customers.show', compact(
+            'sales', 'installments', 'page',
+            'remainingBalanceAfterInstallments', 'emi_amount', 'tenure_months',
+            'emi_start_date', 'emi_end_date',
+            'room',
+        ));
+    }
+
     public function getCalculationType(Request $request)
     {
         $roomType = $request->input('room_type');
@@ -596,44 +590,44 @@ class SaleController extends Controller
         return $pdf->download('installment_detail.pdf');
     }
 
-    // public function cancelSale(Request $request)
-    // {
-    //     $request->validate([
-    //         'sale_id' => 'required|exists:sales,id',
-    //         'fine_amount' => 'required|numeric',
-    //         'payment_method' => 'required|in:cash,bank,cheque',
-    //         'bank_id' => 'nullable|required_if:payment_method,bank',
-    //         'cheque_id' => 'nullable|required_if:payment_method,cheque',
-    //     ]);
+    public function cancelSale(Request $request)
+    {
+        $request->validate([
+            'sale_id' => 'required|exists:sales,id',
+            'fine_amount' => 'required|numeric',
+            'payment_method' => 'required|in:cash,bank,cheque',
+            'bank_id' => 'nullable|required_if:payment_method,bank',
+            'cheque_id' => 'nullable|required_if:payment_method,cheque',
+        ]);
 
-    //     // Find the sale record
-    //     $sale = Sale::findOrFail($request->sale_id);
-    //     $sale->cancellation_fine_amount = $request->fine_amount;
-    //     $sale->cancellation_payment_method = $request->payment_method;
+        // Find the sale record
+        $sale = Sale::findOrFail($request->sale_id);
+        $sale->cancellation_fine_amount = $request->fine_amount;
+        $sale->cancellation_payment_method = $request->payment_method;
 
-    //     // Set the payment details
-    //     if ($request->payment_method === 'bank') {
-    //         $sale->cancellation_bank_id = $request->bank_id;
-    //         $sale->cancellation_cheque_id = null;
-    //     } elseif ($request->payment_method === 'cheque') {
-    //         $sale->cancellation_cheque_id = $request->cheque_id;
-    //         $sale->cancellation_bank_id = null;
-    //     } else {
-    //         $sale->cancellation_bank_id = null;
-    //         $sale->cancellation_cheque_id = null;
-    //     }
+        // Set the payment details
+        if ($request->payment_method === 'bank') {
+            $sale->cancellation_bank_id = $request->bank_id;
+            $sale->cancellation_cheque_id = null;
+        } elseif ($request->payment_method === 'cheque') {
+            $sale->cancellation_cheque_id = $request->cheque_id;
+            $sale->cancellation_bank_id = null;
+        } else {
+            $sale->cancellation_bank_id = null;
+            $sale->cancellation_cheque_id = null;
+        }
 
-    //     // Update the status of the sale
-    //     $sale->status = 'cancelled';
-    //     $sale->save();
+        // Update the status of the sale
+        $sale->status = 'cancelled';
+        $sale->save();
 
-    //     // Update the room status to "available"
-    //     $room = Room::findOrFail($sale->room_id);
-    //     $room->status = 'available';
-    //     $room->save();
+        // Update the room status to "available"
+        $room = Room::findOrFail($sale->room_id);
+        $room->status = 'available';
+        $room->save();
 
-    //     return redirect()->back()->with('success', 'Sale has been cancelled successfully and the room status has been updated.');
-    // }
+        return redirect()->back()->with('success', 'Sale has been cancelled successfully and the room status has been updated.');
+    }
 
     public function listCancelledSales()
     {
