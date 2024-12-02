@@ -604,19 +604,19 @@
         updateTotalCashValue();
     }
 
-    function updateTotalCashValue() {
-        let baseCashValue = parseFloat(document.getElementById('cash_value_amount').value) || 0;
-        let additionalAmounts = document.querySelectorAll('.additional-amount');
-        let totalAdditionalAmount = 0;
+    // function updateTotalCashValue() {
+    //     let baseCashValue = parseFloat(document.getElementById('cash_value_amount').value) || 0;
+    //     let additionalAmounts = document.querySelectorAll('.additional-amount');
+    //     let totalAdditionalAmount = 0;
 
-        additionalAmounts.forEach(amountField => {
-            totalAdditionalAmount += parseFloat(amountField.value) || 0;
-        });
+    //     additionalAmounts.forEach(amountField => {
+    //         totalAdditionalAmount += parseFloat(amountField.value) || 0;
+    //     });
 
-        let totalCashValue = baseCashValue + totalAdditionalAmount;
-        document.getElementById('total_cash_value').value = totalCashValue.toFixed(2);
+    //     let totalCashValue = baseCashValue + totalAdditionalAmount;
+    //     document.getElementById('total_cash_value').value = totalCashValue.toFixed(2);
 
-    }
+    // }
 </script>
 <script>
   // Add event listeners to trigger updates
@@ -624,26 +624,26 @@ document.getElementById('cash_value_amount').addEventListener('input', updateTot
 document.querySelectorAll('.additional-amount').forEach(field => field.addEventListener('input', updateTotalCashValue));
 document.getElementById('received_amount').addEventListener('input', updateRemainingCashValue);
 
-function updateTotalCashValue() {
-    let baseCashValue = parseFloat(document.getElementById('cash_value_amount').value) || 0;
-    let additionalAmounts = document.querySelectorAll('.additional-amount');
-    let totalAdditionalAmount = 0;
+// function updateTotalCashValue() {
+//     let baseCashValue = parseFloat(document.getElementById('cash_value_amount').value) || 0;
+//     let additionalAmounts = document.querySelectorAll('.additional-amount');
+//     let totalAdditionalAmount = 0;
 
-    // Sum up all additional amounts
-    additionalAmounts.forEach(amountField => {
-        totalAdditionalAmount += parseFloat(amountField.value) || 0;
-    });
+//     // Sum up all additional amounts
+//     additionalAmounts.forEach(amountField => {
+//         totalAdditionalAmount += parseFloat(amountField.value) || 0;
+//     });
 
-    // Calculate total cash value
-    let totalCashValue = baseCashValue + totalAdditionalAmount;
-    document.getElementById('total_cash_value').value = totalCashValue.toFixed(2);
+//     // Calculate total cash value
+//     let totalCashValue = baseCashValue + totalAdditionalAmount;
+//     document.getElementById('total_cash_value').value = totalCashValue.toFixed(2);
 
-    // Debugging log
-    console.log("Base Cash Value:", baseCashValue);
-    console.log("Total Additional Amounts:", totalAdditionalAmount);
-    console.log("Total Cash Value (with additional amounts):", totalCashValue);
+//     // Debugging log
+//     console.log("Base Cash Value:", baseCashValue);
+//     console.log("Total Additional Amounts:", totalAdditionalAmount);
+//     console.log("Total Cash Value (with additional amounts):", totalCashValue);
 
-    }
+//     }
  
 
 // Function to calculate the installment amount
@@ -893,7 +893,7 @@ partnerCheckboxes.forEach(checkbox => {
 });
 
 </script>
-<script>
+{{-- <script>
     // Function to update the total cash value and remaining cash value
 function updateTotalCashValue() {
     const cashValuePercentage = parseFloat(document.getElementById('cash_value_percentage').value) || 0; // Get cash value percentage
@@ -931,26 +931,36 @@ additionalAmountInputs.forEach(input => {
     input.addEventListener('input', updateTotalCashValue);
 });
 
-</script>
+</script> --}}
 
 
 <script>
     function updateTotalCashValue() {
+    // Get the base cash value
     let baseCashValue = parseFloat(document.getElementById('cash_value_amount').value) || 0;
+
+    // Get the parking amount (cash) if the checkbox is checked
+    let parkingAmountCash = 0;
+    if (document.getElementById('addParkingAmountCashCheckbox').checked) {
+        parkingAmountCash = parseFloat(document.getElementById('parkingAmountCash').value) || 0;
+    }
+
+    // Sum up all additional amounts
     let additionalAmounts = document.querySelectorAll('.additional-amount');
     let totalAdditionalAmount = 0;
 
-    // Sum up all additional amounts
     additionalAmounts.forEach(amountField => {
         totalAdditionalAmount += parseFloat(amountField.value) || 0;
     });
 
-    // Calculate total cash value
-    let totalCashValue = baseCashValue + totalAdditionalAmount;
+    // Calculate total cash value (base + parking + additional)
+    let totalCashValue = baseCashValue + parkingAmountCash + totalAdditionalAmount;
+
+    // Update the total cash value field
     document.getElementById('total_cash_value').value = totalCashValue.toFixed(2);
 
-    // Calculate the total cheque value
-    calculateChequeValue();  // Call the function to update cheque value
+    // Calculate the cheque value if applicable
+    calculateChequeValue();  // Call the function to update cheque value if needed
 }
 
 
@@ -1130,27 +1140,27 @@ document.getElementById('total_cheque_value_with_gst').addEventListener('input',
 <script>
     let remainingCashValue = 0; // This will be updated based on totalCashValue and receivedAmount
 
-    // Function to update Remaining Cash Value and toggle visibility of fields
-    function updateRemainingCashValue() {
-        let totalCashValue = parseFloat(document.getElementById('total_cash_value').value) || 0;
-        let totalReceivedAmount = parseFloat(document.getElementById('total_received_amount').value) || 0;
+    // // Function to update Remaining Cash Value and toggle visibility of fields
+    // function updateRemainingCashValue() {
+    //     let totalCashValue = parseFloat(document.getElementById('total_cash_value').value) || 0;
+    //     let totalReceivedAmount = parseFloat(document.getElementById('total_received_amount').value) || 0;
 
-        // Calculate remaining cash value
-        remainingCashValue = totalCashValue - totalReceivedAmount;
+    //     // Calculate remaining cash value
+    //     remainingCashValue = totalCashValue - totalReceivedAmount;
 
-        // Set remaining cash value in the readonly field
-        document.getElementById('remaining_cash_value').value = remainingCashValue.toFixed(2);
+    //     // Set remaining cash value in the readonly field
+    //     document.getElementById('remaining_cash_value').value = remainingCashValue.toFixed(2);
 
-        // Show loan fields if Total Received Amount is not the same as Total Cash Value
-        const loanTypeContainer = document.getElementById('loan-type-container-cash');
-        if (totalCashValue !== totalReceivedAmount && totalCashValue !== 0) {
-            loanTypeContainer.style.display = 'block';
-        } else {
-            loanTypeContainer.style.display = 'none';
-            document.getElementById('installment-container-cash').style.display = 'none';
-            document.getElementById('other-loan-description-container-cash').style.display = 'none';
-        }
-    }
+    //     // Show loan fields if Total Received Amount is not the same as Total Cash Value
+    //     const loanTypeContainer = document.getElementById('loan-type-container-cash');
+    //     if (totalCashValue !== totalReceivedAmount && totalCashValue !== 0) {
+    //         loanTypeContainer.style.display = 'block';
+    //     } else {
+    //         loanTypeContainer.style.display = 'none';
+    //         document.getElementById('installment-container-cash').style.display = 'none';
+    //         document.getElementById('other-loan-description-container-cash').style.display = 'none';
+    //     }
+    // }
 
     function handleLoanTypeChangeCash() {
         const loanType = document.getElementById('loan_type_cash').value;
