@@ -555,6 +555,108 @@ class StatementController extends Controller
             'page' => 'flats'
         ]);
     }
-
+    public function confirmExchange($saleId)
+    {
+        // Fetch the sale details, including room and installments
+        $sale = Sale::with('installments', 'cash_installments')->findOrFail($saleId);
     
+        // Retrieve rooms associated with the same customer based on name and contact
+        $matchingRooms = Room::whereHas('sale', function($query) use ($sale) {
+            $query->where('customer_name', $sale->customer_name)
+                ->where('customer_contact', $sale->customer_contact);
+        })->get();
+    
+        // Format room numbers for display as "Shop No: 21,22,23,24 & 25"
+        $roomNumbers = $matchingRooms->pluck('room_number')->join(', ');
+    
+        // Calculate totals and additional information as needed
+        $totalCashExpenses = DB::table('cash_expenses')
+            ->where('sale_id', $saleId)
+            ->sum('cash_expense_amount');
+    
+        $totalChequeAmount = DB::table('installments')
+            ->where('sale_id', $saleId)
+            ->sum('installment_amount');
+    
+        $totalCashAmount = DB::table('cash_installments')
+            ->where('sale_id', $saleId)
+            ->sum('installment_amount');
+    
+        // Additional calculations
+        $totalWithAdditional = $totalCashExpenses + $totalChequeAmount;
+        $additionalWork = $totalCashExpenses + $totalChequeAmount;
+    
+        $totalCashValue = $sale->total_cash_value ?? 0;
+        $cashValueAmount = $sale->cash_value_amount ?? 0;
+        $additionalWorkCash = $totalCashValue - $cashValueAmount;
+    
+        $page = 'customer-exchange';
+        $title = 'customer-exchange';
+        $room = $matchingRooms->first();
+        $building = $room->building;
+
+        return view('customers.confirmexchange', compact(
+            'sale', 
+            'page', 
+            'roomNumbers', 
+            'totalCashExpenses', 
+            'totalChequeAmount', 
+            'totalCashAmount',
+            'totalWithAdditional',
+            'room', 
+            'additionalWorkCash',
+            'additionalWork',
+            'building',
+            'title',
+        ));
+    }
+    
+    public function updateExchange($saleId)
+{
+    $sale = Sale::findOrFail($saleId);
+
+        // Update the exchange status (e.g., mark it as confirmed)
+        $sale->exchange_confirmed = true;
+        $sale->save();
+
+        // Define page and title
+        $page = "updateExchange";
+        $title = "updateExchange";
+
+        // Redirect back or to another page with additional data
+        return redirect()->route('admin.customer.info', ['saleId' => $saleId])
+                         ->with('status', 'Exchange confirmed successfully')
+                         ->with('page', $page)
+                         ->with('title', $title);
+}
+public function showAvailability($building_id , $sale_id)
+{
+    $building = Building::findOrFail($building_id);
+    $sale = Sale::findOrFail($sale_id);
+
+    // Additional logic to determine available rooms for exchange
+    $availableRooms = Room::where('building_id', $building_id)
+        ->where('status', 'available') // Example condition
+        ->get();
+
+    $title = 'showAvailableRooms'; 
+    $page = 'showAvailableRooms'; 
+
+    return view('customers.exchangeavailability', compact('building', 'sale', 'availableRooms','title','page'));
+}
+public function showExchangeSellPage($id, $buildingId, $roomId)
+{
+    // Retrieve the sale, building, and room using the provided IDs
+    $sale = Sale::findOrFail($id);
+    $building = Building::findOrFail($buildingId);
+    $room = Room::findOrFail($roomId);
+
+    // Pass the retrieved models to the view
+    
+    return view('customers.exchangeavailability', [
+        'sale' => $sale,
+        'building' => $building,
+        'room' => $room,
+    ]);
+}
 }

@@ -66,6 +66,8 @@ class Sale extends Model
         'parking_amount_cheque',
         'parking_amount_cash',
         'cheque_description',
+        'exchangestatus',
+        'exchange_sale_id',
     ];
     
 
@@ -99,6 +101,18 @@ public function cashExpenses()
 {
     return $this->hasMany(CashExpense::class, 'sale_id');
 }
-
+public function building()
+{
+    return $this->belongsTo(Building::class);
+}
+public function cash_installments()
+    {
+        return $this->hasMany(CashInstallment::class); // Adjust based on your actual model
+    }
+    public function exchangedSale()
+    {
+        return $this->belongsTo(Sale::class, 'exchange_sale_id');
+    }
+    
 }
     

@@ -309,20 +309,30 @@ class SaleController extends Controller
 
         return redirect()->back();
     }
-
-    public function index(Request $request)
+    public function index(Request $request, $buildingId)
     {
-        $search = $request->input('search');
-        $customerNames = Sale::pluck('customer_name')->unique();
-        $salesQuery = Sale::query();
-
-        if ($search) {
-            $salesQuery->where('customer_name', 'like', '%' . $search . '%');
+        $building = Building::find($buildingId);
+        if (!$building) {
+            abort(404, 'Building not found');
         }
-
-        $sales = $salesQuery->paginate(10);
-        return view('customers.index', compact('customerNames', 'sales', 'search'));
+    
+        $title = "Customer list";
+        $page = "Customer list";
+    
+        // Retrieve the customers related to the building
+        $customers = Sale::whereHas('room', function ($query) use ($buildingId) {
+            $query->where('building_id', $buildingId);
+        })->with('room')->get(); // Eager load 'room' relationship
+    
+        // Pass the first customer and its room details (modify based on requirement)
+        $sale = $customers->first(); // Assuming you want to display the first customer's details
+    
+        // Check if a sale is available and has a related room
+        $room = $sale ? $sale->room : null;
+    
+        return view('customers.index', compact('building', 'customers', 'sale', 'room', 'page', 'title'));
     }
+    
 
     public function showCustomer($saleId)
     {
@@ -338,6 +348,7 @@ class SaleController extends Controller
 
         $remainingBalanceAfterInstallments = $sale->remaining_balance - $totalPaidInstallments;
         $page = 'customer';
+        $title = 'customer';
 
         // If the view expects multiple sales, wrap the single sale in a collection
         $sales = collect([$sale]);
@@ -346,11 +357,9 @@ class SaleController extends Controller
             'sales', 'installments', 'page',
             'remainingBalanceAfterInstallments', 'emi_amount', 'tenure_months',
             'emi_start_date', 'emi_end_date',
-            'room',
+            'room','title'
         ));
-    }
-
-    public function getCalculationType(Request $request)
+    }    public function getCalculationType(Request $request)
     {
         $roomType = $request->input('room_type');
         $calculationType = $request->input('calculation_type');
@@ -392,40 +401,40 @@ class SaleController extends Controller
             ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
     }
 
-    public function markMultipleAsPaid(Request $request)
-    {
-        try {
-            $installments = $request->input('installments');
-            $installmentDates = $request->input('installment_dates');
-            $transactionDetails = $request->input('transaction_details');
-            $bankDetails = $request->input('bank_details');
+    // public function markMultipleAsPaid(Request $request)
+    // {
+    //     try {
+    //         $installments = $request->input('installments');
+    //         $installmentDates = $request->input('installment_dates');
+    //         $transactionDetails = $request->input('transaction_details');
+    //         $bankDetails = $request->input('bank_details');
     
-            // Validate that installments is an array
-            if (is_array($installments)) {
-                foreach ($installments as $installmentId) {
-                    $installment = Installment::find($installmentId);
+    //         // Validate that installments is an array
+    //         if (is_array($installments)) {
+    //             foreach ($installments as $installmentId) {
+    //                 $installment = Installment::find($installmentId);
     
-                    if ($installment) {
-                        // Update installment details
-                        $installment->status = 'paid';
-                        $installment->installment_date = $installmentDates[$installmentId] ?? $installment->installment_date;
-                        $installment->transaction_details = $transactionDetails[$installmentId] ?? $installment->transaction_details;
-                        $installment->bank_details = $bankDetails[$installmentId] ?? $installment->bank_details;
-                        $installment->save();
-                    } else {
-                        // Log or handle the case where 'id' is missing
-                        Log::warning('Installment data missing or invalid', ['id' => $installmentId]);
-                    }
-                }
+    //                 if ($installment) {
+    //                     // Update installment details
+    //                     $installment->status = 'paid';
+    //                     $installment->installment_date = $installmentDates[$installmentId] ?? $installment->installment_date;
+    //                     $installment->transaction_details = $transactionDetails[$installmentId] ?? $installment->transaction_details;
+    //                     $installment->bank_details = $bankDetails[$installmentId] ?? $installment->bank_details;
+    //                     $installment->save();
+    //                 } else {
+    //                     // Log or handle the case where 'id' is missing
+    //                     Log::warning('Installment data missing or invalid', ['id' => $installmentId]);
+    //                 }
+    //             }
     
-                return redirect()->back()->with('success', 'Selected installments marked as paid.');
-            }
-        } catch (\Exception $e) {
-            Log::error('Error marking installments as paid: ' . $e->getMessage());
-        }
+    //             return redirect()->back()->with('success', 'Selected installments marked as paid.');
+    //         }
+    //     } catch (\Exception $e) {
+    //         Log::error('Error marking installments as paid: ' . $e->getMessage());
+    //     }
     
-        return redirect()->back()->with('error', 'No installments selected.');
-    }
+    //     return redirect()->back()->with('error', 'No installments selected.');
+    // }
     public function downloadCustomerDetails($customerName)
     {
         // Fetch customer by name

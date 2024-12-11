@@ -166,8 +166,19 @@
         </a>
     </li>
 
-   
-    
+      <li class="nav-item {{ $page == 'customer' ? 'active bg-gradient-info' : '' }}">
+        @if(isset($sale))
+        <a class="nav-link text-white" href="{{ route('admin.customers.show', ['saleId' => $sale->id]) }}">
+    @else
+        <a class="nav-link text-white" href="javascript:void(0);" onclick="alert('No sales data available!');">
+    @endif
+              <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+                <i class="material-icons opacity-10">people</i> <!-- Choose an appropriate icon -->
+            </div>
+            <span class="nav-link-text ms-1">Customer Sales</span>
+        </a>
+    </li>
+      
     
     
 

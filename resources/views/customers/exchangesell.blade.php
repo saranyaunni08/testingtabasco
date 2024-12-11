@@ -3,11 +3,15 @@
 @section('content')
 <div class="container"><br><br>
     <h2>Sell Room</h2>
-    <form action="{{ route('admin.sales.store') }}" method="POST">
+    <form action="{{ route('admin.exchangesales.store') }}" method="POST">
         @csrf
 
+        <input type="hidden" name="exchange_sale_id" value="{{ $exchangedToSaleId }}">
         <input type="hidden" name="room_id" value="{{ $room->id }}">
-        @if ($errors->any())
+
+        
+        
+    @if ($errors->any())
     <div class="alert alert-danger">
         <ul>
             @foreach ($errors->all() as $error)
@@ -18,8 +22,7 @@
 @endif
 
 <!-- Your existing form elements -->
-
-
+     
         <!-- Customer Name -->
         <div class="form-group">
             <label class="font-weight-bold" for="customer_name">Customer Name</label>

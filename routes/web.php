@@ -10,12 +10,14 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MasterSettingsController;
 use App\Http\Controllers\EditDeleteAuthController;
 use App\Http\Controllers\ParkingController;
+use App\Http\Controllers\ExchangeController;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Illuminate\Support\Facades\Log;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Http\Controllers\PartnerController;
 use App\Http\Controllers\RoomTypeController;
 use App\Http\Controllers\StatementController;
+use App\Http\Controllers\InstallmentController;
 
 
 
@@ -210,8 +212,7 @@ Route::controller(AuthController::class)->group(function () {
 
         Route::get('/cheque-statement/download/{id}', [StatementController::class, 'downloadChequeStatement'])->name('cheque-statement.download');
 
-        Route::get('/buildings/{buildingId}/customers', [SaleController::class, 'index'])
-        ->name('building.customers');
+        Route::get('/buildings/{buildingId}/customers', [SaleController::class, 'index'])->name('building.customers');
 
         Route::get('/statements/commercial-sales-report', [StatementController::class, 'commercialSalesReport'])->name('statements.commercial-sales-report');
        //shops
@@ -229,6 +230,25 @@ Route::controller(AuthController::class)->group(function () {
     
         Route::resource('parking', ParkingController::class);
 
+//installment markig section 
+        Route::get('/sales/{saleId}/installments', [InstallmentController::class, 'show'])->name('installments.show');
+        Route::post('/sales/{saleId}/installments/mark-paid', [InstallmentController::class, 'markPayment'])->name('installments.markPayment');
+
+        // web.php
+        Route::get('/installments/download-pdf/{saleId}', [InstallmentController::class, 'downloadPdf'])->name('installments.downloadPdf');
+        //full page download of instllment marking page 
+        Route::get('/admin/installments/{saleId}/download-full-pdf', [InstallmentController::class, 'downloadFullInstallmentPdf'])->name('installments.downloadFullPdf');
+                
+        // New route for the Confirm Exchange page
+        Route::get('/customer/exchange/{saleId}/{building_id}', [StatementController::class, 'confirmExchange'])->name('exchange.confirm');
+        // Route::post('/customer/exchange/update/{saleId}', [StatementController::class, 'updateExchange'])->name('exchange.update');
+        // Route::get('/sales/finalize-exchange/{saleId}', [StatementController::class, 'finalizeExchange'])->name('sales.finalizeexchange');
+        // routes/web.php
+        Route::get('/customer/exchange/availability/{building_id}/{sale_id}', [StatementController::class, 'showAvailability'])->name('exchange.availability');
+
+
+        Route::get('/customer/exchangesell', [ExchangeController::class, 'showExchangeSellPage'])->name('exchangesell');
+        Route::post('/exchangesales/store', [ExchangeController::class, 'store'])->name('exchangesales.store');
 
 
         });

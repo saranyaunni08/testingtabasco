@@ -16,10 +16,16 @@ class Installment extends Model
         'installment_number',
         'installment_amount',
         'status',
+        'paid_amount', 
+        'payment_date',
     ];
 
     public function sale()
     {
         return $this->belongsTo(Sale::class);
+    }
+    public function payments()
+    {
+        return $this->hasMany(InstallmentPayment::class);
     }
 }

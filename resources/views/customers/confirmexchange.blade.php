@@ -1,18 +1,13 @@
-@extends('layouts.default', ['title' => 'Customer Details'])
+@extends('layouts.default', ['title' => 'Confirm Exchange'])
 
 @section('content')
 <div class="container mt-5">
     <div class="text-center mb-4">
-        <h2 class="display-6 fw-bold">TABASCO INN - Customer Details</h2>
+        <h2 class="display-6 fw-bold">Confirm Exchange for Customer: {{ $sale->customer_name }}</h2>
     </div>
-     <!-- Links to Statement Pages -->
-     <div class="d-flex justify-content-center mb-4 gap-3">
-        <a href="{{ route('admin.statement-cash', $sale->id) }}" class="btn btn-outline-primary">Cash Statement</a>
-        <a href="{{ route('admin.statement-cheque', $sale->id) }}" class="btn btn-outline-secondary">Cheque Statement</a>
-        <a href="{{ route('admin.statement-all', $sale->id) }}" class="btn btn-outline-success">All Statements</a>
-        <a href="{{ route('admin.statement-summary', $sale->id) }}" class="btn btn-outline-info">Summary Statement</a>
+    <div class="text-center mt-4">
+        <a href="{{ route('admin.exchange.availability', ['building_id' => $building->id, 'sale_id' => $sale->id]) }}" class="btn btn-primary">Finalize Exchange</a>
     </div>
-
     <table class="table table-bordered shadow-lg">
         <thead class="bg-dark text-white text-center">
             <tr>
@@ -32,11 +27,10 @@
                     <p><strong>Floor:</strong> {{ $room->room_floor }}</p>
                 </td>
                 <td>
-                    <p><strong>{{$room->room_type}} No:</strong> {{ $room->room_number }}</p>
+                    <p><strong>Rooms:</strong> {{ $roomNumbers }}</p>
                     <p><strong>Sqft:</strong> 
                         {{ $sale->area_calculation_type === 'build_up_area' ? $sale->build_up_area : ($sale->area_calculation_type === 'carpet_area' ? $sale->carpet_area : 'N/A') }} sqft
                     </p>
-
                 </td>
             </tr>
 
@@ -58,7 +52,6 @@
                 <td>
                     <p><strong>Cash (with Additional):</strong> ₹{{ number_format($sale->total_cash_value, 2) }}</p>
                     <p><strong>Cheque (with Additional):</strong> ₹{{ number_format($sale->total_cheque_value_with_additional, 2) }}</p>
-                  
                     <p><strong>Additional Work (cash):</strong> ₹{{ $totalCashExpenses }}</p>
                     <p><strong>Additional Work (cheque):</strong> ₹{{ $sale->cheque_expense_amounts }}</p>
                     <p><strong>Additional Work:</strong> ₹{{ $additionalWork }}</p>
@@ -94,21 +87,18 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($sale->installments as $installment) <!-- Assuming all records in installments belong to cheque -->
+                            @foreach ($sale->installments as $installment) 
                                 <tr>
-                                    <td>{{ \Carbon\Carbon::parse($installment->installment_date)->format('d-m-Y') }}</td> <!-- Format date as needed -->
+                                    <td>{{ \Carbon\Carbon::parse($installment->installment_date)->format('d-m-Y') }}</td> 
                                     <td>₹{{ number_format($installment->installment_amount, 2) }}</td>
                                 </tr>
                             @endforeach
                         </tbody>
                     </table>
                 </td>
-                
-
                 <td>
                     <p><strong>Number of Installments:</strong> {{ $sale->cash_no_of_installments }}</p>
                     <p><strong>Installment Amount:</strong> ₹{{ number_format($sale->cash_installment_amount, 2) }}</p>
-                    
                     <table class="table table-hover">
                         <thead class="table-secondary">
                             <tr>
@@ -117,35 +107,32 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @if ($sale->cash_installments && $sale->cash_installments->isNotEmpty())
                             @foreach ($sale->cash_installments as $cash_installment)
                                 <tr>
                                     <td>{{ \Carbon\Carbon::parse($cash_installment->installment_date)->format('d-m-Y') }}</td>
                                     <td>₹{{ number_format($cash_installment->installment_amount, 2) }}</td>
                                 </tr>
                             @endforeach
-                        @else
-                            <tr>
-                                <td colspan="2">No installments available.</td>
-                            </tr>
-                        @endif
-                        
                         </tbody>
                     </table>
                 </td>
-                            </tr>
+            </tr>
 
             <!-- Summary -->
             <tr>
                 <td colspan="2" class="bg-dark text-white fw-bold text-center">Summary</td>
             </tr>
             <tr>
-                {{-- <td colspan="2" class="text-center">
+                <td colspan="2" class="text-center">
                     <p><strong>Total (Cheque):</strong> ₹{{ number_format($totalChequeAmount, 2) }}</p>
                     <p><strong>Cash Total:</strong> ₹{{ number_format($totalCashAmount, 2) }}</p>
-                </td> --}}
+                    <p><strong>Balance Remaining:</strong> ₹{{ number_format($sale->remaining_balance, 2) }}</p>
+                    <p><strong>Pending Work:</strong> ₹{{ $additionalWork }}</p>
+                </td>
             </tr>
         </tbody>
     </table>
+
+   
 </div>
 @endsection
