@@ -17,4 +17,8 @@ class CashInstallment extends Model
         'installment_amount',
         'status',
     ];
+    public function sale()
+    {
+        return $this->belongsTo(Sale::class);
+    }
 }

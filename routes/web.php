@@ -232,8 +232,10 @@ Route::controller(AuthController::class)->group(function () {
 
 //installment markig section 
         Route::get('/sales/{saleId}/installments', [InstallmentController::class, 'show'])->name('installments.show');
-        Route::post('/sales/{saleId}/installments/mark-paid', [InstallmentController::class, 'markPayment'])->name('installments.markPayment');
+        Route::get('/sales/{saleId}/cash-installments', [InstallmentController::class, 'showCashInstallments'])->name('cash_installments.show');
 
+        Route::post('/sales/{saleId}/installments/mark-paid', [InstallmentController::class, 'markPayment'])->name('installments.markPayment');
+        Route::post('/cash-installments/mark-payment/{sale}', [InstallmentController::class, 'cashMarkPayment'])->name('cashInstallments.markPayment');
         // web.php
         Route::get('/installments/download-pdf/{saleId}', [InstallmentController::class, 'downloadPdf'])->name('installments.downloadPdf');
         //full page download of instllment marking page 

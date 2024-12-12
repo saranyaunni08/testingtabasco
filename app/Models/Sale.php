@@ -105,10 +105,15 @@ public function building()
 {
     return $this->belongsTo(Building::class);
 }
-public function cash_installments()
-    {
-        return $this->hasMany(CashInstallment::class); // Adjust based on your actual model
-    }
+// public function cash_installments()
+//     {
+//         return $this->hasMany(CashInstallment::class); // Adjust based on your actual model
+//     }
+    public function cashInstallments()
+{
+    return $this->hasMany(CashInstallment::class, 'sale_id');  // Adjust the relationship based on your schema
+}
+
     public function exchangedSale()
     {
         return $this->belongsTo(Sale::class, 'exchange_sale_id');

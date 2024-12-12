@@ -21,6 +21,11 @@
                  class="btn btn-secondary text-white mb-2">
                 <i class="bi bi-card-checklist"></i> Cheque Installments
               </a>
+              <a href="{{ route('admin.cash_installments.show', ['saleId' => $customer->id]) }}" 
+                class="btn btn-secondary text-white mb-2">
+                 <i class="bi bi-card-checklist"></i> Cash Installments
+             </a>
+             
               <a href="{{ route('admin.exchange.confirm', ['saleId' => $customer->id, 'building_id' => $building->id]) }}" 
                  class="btn btn-warning text-white mt-auto">
                 <i class="bi bi-arrow-repeat"></i> Confirm Exchange

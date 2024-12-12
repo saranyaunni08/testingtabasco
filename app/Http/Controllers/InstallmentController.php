@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Customer;
 use App\Models\Installment;
+use App\Models\CashInstallment;
 use App\Models\InstallmentPayment;
+use App\Models\CashInstallmentPayment;
 use App\Models\Sale;
 use Barryvdh\DomPDF\Facade\Pdf;
 
@@ -42,6 +44,60 @@ class InstallmentController extends Controller
     $payment->save();
 
     // Update the total paid amount for the installment
+    $installment->total_paid += $validatedData['paid_amount'];
+
+    // Update status based on total paid amount
+    if ($installment->total_paid >= $installment->installment_amount) {
+        $installment->status = 'Paid';
+    } else {
+        $installment->status = 'Partially Paid';
+    }
+
+    $installment->save();
+
+    return back()->with('success', 'Payment recorded successfully.');
+}
+public function showCashInstallments($saleId)
+{
+    // Fetch the sale and its associated cash installments
+    $sale = Sale::with('cashInstallments')->findOrFail($saleId);
+
+    // Page and title for the view
+    $page = "cash_installment";
+    $title = "Cash Installment";
+
+    return view('cash_installments.show', compact('sale', 'title', 'page'));
+}
+public function cashMarkPayment(Request $request, $sale)
+{
+    // Retrieve the cash installment using the sale ID
+    $installment = CashInstallment::where('sale_id', $sale)->firstOrFail();
+
+    // Calculate the remaining amount
+    $remainingAmount = $installment->installment_amount - $installment->total_paid;
+
+    // Validate incoming request data
+    $validatedData = $request->validate([
+        'paid_amount' => 'required|numeric|min:0',
+        'payment_date' => 'required|date',
+    ]);
+
+    // Check if the paid amount exceeds the remaining balance
+    if ($validatedData['paid_amount'] > $remainingAmount) {
+        // Redirect back with error message if paid amount exceeds remaining balance
+        return redirect()->back()->withErrors([
+            'paid_amount' => 'Paid amount cannot exceed the remaining balance of ₹' . number_format($remainingAmount, 2),
+        ]);
+    }
+
+    // Record the payment and update installment status if validation passes
+    $payment = new CashInstallmentPayment();
+    $payment->cash_installment_id = $installment->id;
+    $payment->paid_amount = $validatedData['paid_amount'];
+    $payment->payment_date = $validatedData['payment_date'];
+    $payment->save();
+
+    // Update the total paid amount for the cash installment
     $installment->total_paid += $validatedData['paid_amount'];
 
     // Update status based on total paid amount
