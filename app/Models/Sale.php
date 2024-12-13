@@ -66,6 +66,11 @@ class Sale extends Model
         'parking_amount_cheque',
         'parking_amount_cash',
         'cheque_description',
+        'expense_descriptions',
+        'expense_percentages',
+        'expense_amounts',
+        'other_loan_description_cash',
+
         'exchangestatus',
         'exchange_sale_id',
     ];
@@ -105,10 +110,10 @@ public function building()
 {
     return $this->belongsTo(Building::class);
 }
-// public function cash_installments()
-//     {
-//         return $this->hasMany(CashInstallment::class); // Adjust based on your actual model
-//     }
+public function cash_installments()
+    {
+        return $this->hasMany(CashInstallment::class); // Adjust based on your actual model
+    }
     public function cashInstallments()
 {
     return $this->hasMany(CashInstallment::class, 'sale_id');  // Adjust the relationship based on your schema
