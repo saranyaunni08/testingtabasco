@@ -22,46 +22,51 @@
                 <th>Installment Date</th>
                 <th>Installment Amount</th>
                 <th>Paid Amount</th>
+                <th>Remaining Balance</th> 
                 <th>Status</th>
                 <th>Actions</th>
             </tr>
         </thead>
         <tbody>
-            @foreach ($sale->cashInstallments as $installment)
-                @php
-                    // Calculate the remaining amount dynamically for each installment
-                    $remainingAmount = $installment->installment_amount - ($installment->total_paid ?? 0);
-                @endphp
-                <tr>
-                    <td>{{ \Carbon\Carbon::parse($installment->installment_date)->format('d-m-Y') }}</td>
-                    <td>₹{{ number_format($installment->installment_amount, 2) }}</td>
-                    <td>₹{{ number_format($installment->total_paid ?? 0, 2) }}</td>
-                    <td>{{ ucfirst($installment->status) }}</td>
-                    <td>
-                        @if ($installment->status !== 'Paid')
-                        <form action="{{ route('admin.cashInstallments.markPayment', ['sale' => $sale->id]) }}" method="POST">
+              
+          @error('paid_amount')
+            <span class="text-danger">{{ $message }}</span>
+          @enderror
+          @foreach ($sale->cashInstallments as $installment)
+            @php
+                $remainingAmount = $installment->installment_amount - ($installment->total_paid ?? 0);
+            @endphp
+            <tr>
+                <td>{{ \Carbon\Carbon::parse($installment->installment_date)->format('d-m-Y') }}</td>
+                <td>₹{{ number_format($installment->installment_amount, 2) }}</td>
+                <td>₹{{ number_format($installment->total_paid ?? 0, 2) }}</td>
+                <td>₹{{ number_format($remainingAmount, 2) }}</td> 
+                <td>{{ ucfirst($installment->status) }}</td>
+                <td>
+                    @if ($installment->status !== 'Paid')
+                        <form id="payment-form-{{ $installment->id }}" action="{{ route('admin.cashInstallments.markPayment', ['sale' => $sale->id]) }}" method="POST">
                             @csrf
+                            <input type="hidden" name="installment_id" value="{{ $installment->id }}">
+                            
                             <div class="form-group">
                                 <label for="paid_amount_{{ $installment->id }}">Enter Paid Amount</label>
                                 <input type="number" id="paid_amount_{{ $installment->id }}" name="paid_amount" class="form-control" step="0.01" required>
-                                
-                                <!-- Dynamically displayed error message if amount exceeds remaining balance -->
-                                <span id="paid-amount-error-{{ $installment->id }}" class="text-danger" style="display: none;"></span>
-                            </div>
                             
+                            </div>
+                        
                             <div class="form-group">
                                 <label for="payment_date_{{ $installment->id }}">Payment Date</label>
                                 <input type="date" id="payment_date_{{ $installment->id }}" name="payment_date" class="form-control" required>
                             </div>
+                            
                             <button type="submit" class="btn btn-primary">Submit Payment</button>
                         </form>
-                        
-                        @else
-                            <span class="text-success">Fully Paid</span>
-                        @endif
-                    </td>
-                </tr>
-            @endforeach
+                    @else
+                        <span class="text-success">Fully Paid</span>
+                    @endif
+                </td>
+            </tr>
+          @endforeach
         </tbody>
     </table>
     @endif
@@ -70,31 +75,26 @@
 @endsection
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Loop through each installment and handle the dynamic validation for each one
-        @foreach ($sale->cashInstallments as $installment)
-            const remainingAmount{{ $installment->id }} = {{ $installment->installment_amount - ($installment->total_paid ?? 0) }};
-            const paidAmountInput{{ $installment->id }} = document.getElementById('paid_amount_{{ $installment->id }}');
-            const errorMessage{{ $installment->id }} = document.getElementById('paid-amount-error-{{ $installment->id }}');
+document.addEventListener('DOMContentLoaded', function() {
+    @foreach ($sale->cashInstallments as $installment)
+        const remainingAmount{{ $installment->id }} = {{ $installment->installment_amount - ($installment->total_paid ?? 0) }};
+        const form{{ $installment->id }} = document.getElementById('payment-form-{{ $installment->id }}');
+        const paidAmountInput{{ $installment->id }} = document.getElementById('paid_amount_{{ $installment->id }}');
+        const errorMessage{{ $installment->id }} = document.getElementById('paid-amount-error-{{ $installment->id }}');
 
-            paidAmountInput{{ $installment->id }}.addEventListener('input', function() {
-                checkAmount(remainingAmount{{ $installment->id }}, paidAmountInput{{ $installment->id }}, 'paid-amount-error-{{ $installment->id }}');
-            });
-        @endforeach
-    });
+        form{{ $installment->id }}.addEventListener('submit', function(event) {
+            const enteredAmount = parseFloat(paidAmountInput{{ $installment->id }}.value);
 
-    function checkAmount(remainingAmount, input, errorId) {
-        const errorElement = document.getElementById(errorId);
-        const enteredAmount = parseFloat(input.value);
-
-        // Show error if entered amount exceeds remaining amount
-        if (enteredAmount > remainingAmount) {
-            errorElement.textContent = `The paid amount cannot exceed ₹${remainingAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-            errorElement.style.display = 'block';
-        } else {
-            errorElement.style.display = 'none';
-        }
-    }
+            // Check if the paid amount exceeds the remaining amount
+            if (enteredAmount > remainingAmount{{ $installment->id }}) {
+                event.preventDefault(); // Prevent form submission
+                errorMessage{{ $installment->id }}.textContent = `The paid amount cannot exceed ₹${remainingAmount{{ $installment->id }}.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                errorMessage{{ $installment->id }}.style.display = 'block'; // Show the error message
+                paidAmountInput{{ $installment->id }}.classList.add('is-invalid'); // Add invalid class
+            }
+        });
+    @endforeach
+});
 </script>
 
 <style>

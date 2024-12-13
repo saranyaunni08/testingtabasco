@@ -70,27 +70,27 @@ public function showCashInstallments($saleId)
 }
 public function cashMarkPayment(Request $request, $sale)
 {
-    // Retrieve the cash installment using the sale ID
-    $installment = CashInstallment::where('sale_id', $sale)->firstOrFail();
-
-    // Calculate the remaining amount
-    $remainingAmount = $installment->installment_amount - $installment->total_paid;
-
     // Validate incoming request data
     $validatedData = $request->validate([
+        'installment_id' => 'required|exists:cash_installments,id',
         'paid_amount' => 'required|numeric|min:0',
         'payment_date' => 'required|date',
     ]);
 
+    // Retrieve the specific installment
+    $installment = CashInstallment::findOrFail($validatedData['installment_id']);
+
+    // Calculate the remaining amount
+    $remainingAmount = $installment->installment_amount - ($installment->total_paid ?? 0);
+
     // Check if the paid amount exceeds the remaining balance
     if ($validatedData['paid_amount'] > $remainingAmount) {
-        // Redirect back with error message if paid amount exceeds remaining balance
         return redirect()->back()->withErrors([
             'paid_amount' => 'Paid amount cannot exceed the remaining balance of ₹' . number_format($remainingAmount, 2),
         ]);
     }
 
-    // Record the payment and update installment status if validation passes
+    // Record the payment
     $payment = new CashInstallmentPayment();
     $payment->cash_installment_id = $installment->id;
     $payment->paid_amount = $validatedData['paid_amount'];
@@ -98,7 +98,7 @@ public function cashMarkPayment(Request $request, $sale)
     $payment->save();
 
     // Update the total paid amount for the cash installment
-    $installment->total_paid += $validatedData['paid_amount'];
+    $installment->total_paid = ($installment->total_paid ?? 0) + $validatedData['paid_amount'];
 
     // Update status based on total paid amount
     if ($installment->total_paid >= $installment->installment_amount) {
@@ -111,6 +111,7 @@ public function cashMarkPayment(Request $request, $sale)
 
     return back()->with('success', 'Payment recorded successfully.');
 }
+
 
 public function downloadPdf($saleId)
 {
