@@ -319,19 +319,28 @@ class SaleController extends Controller
         $title = "Customer list";
         $page = "Customer list";
     
-        // Retrieve the customers related to the building
+        // Get the search query from the request
+        $search = $request->query('search');
+    
+        // Retrieve the customers related to the building, filtered by search query
         $customers = Sale::whereHas('room', function ($query) use ($buildingId) {
             $query->where('building_id', $buildingId);
-        })->with('room')->get(); // Eager load 'room' relationship
+        })
+        ->with('room')
+        ->when($search, function ($query, $search) {
+            return $query->where(function($subQuery) use ($search) {
+                $subQuery->where('customer_name', 'like', '%' . $search . '%')
+                         ->orWhereHas('room', function ($roomQuery) use ($search) {
+                             $roomQuery->where('room_type', 'like', '%' . $search . '%');
+                         });
+            });
+        })
+        ->get();
     
-        // Pass the first customer and its room details (modify based on requirement)
-        $sale = $customers->first(); // Assuming you want to display the first customer's details
-    
-        // Check if a sale is available and has a related room
-        $room = $sale ? $sale->room : null;
-    
-        return view('customers.index', compact('building', 'customers', 'sale', 'room', 'page', 'title'));
+        // Pass the necessary data to the view
+        return view('customers.index', compact('building', 'customers', 'page', 'title'));
     }
+    
     
 
     public function showCustomer($saleId)
