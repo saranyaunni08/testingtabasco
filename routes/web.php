@@ -153,7 +153,8 @@ Route::controller(AuthController::class)->group(function () {
 
         Route::patch('/sales/{sale}/cancel', [SaleController::class, 'cancel'])->name('sales.cancelled');
 
-        Route::get('/admin/sales/{saleId}/details', [SaleController::class, 'return'])->name('sales.returndetails');
+        Route::get('/sales/{saleId}/details', [SaleController::class, 'return'])->name('sales.returndetails');
+        Route::post('/sales/{sale}/add-deduction', [SaleController::class, 'addDeduction'])->name('sales.addDeduction');
 
 
         
@@ -261,6 +262,10 @@ Route::controller(AuthController::class)->group(function () {
 
         Route::get('/customer/exchangesell', [ExchangeController::class, 'showExchangeSellPage'])->name('exchangesell');
         Route::post('/exchangesales/store', [ExchangeController::class, 'store'])->name('exchangesales.store');
+
+        // return module
+
+        Route::post('/sales/{sale}/returns', [SaleController::class, 'storeReturns'])->name('sales.returns.store');
 
 
         });

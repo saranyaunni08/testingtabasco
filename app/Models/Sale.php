@@ -129,5 +129,14 @@ public function cash_installments()
         return $this->belongsTo(Sale::class, 'exchange_sale_id');
     }
     
+    public function returns()
+{
+    return $this->hasMany(SaleReturn::class);
+}
+public function cashDeductions()
+{
+    return $this->hasMany(CashDeduction::class);
+}
+
 }
     

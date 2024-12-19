@@ -9,6 +9,8 @@ use App\Models\Building;
 use App\Models\CashExpense;
 use App\Models\ChequeExpense;
 use App\Models\CashInstallment;
+use App\Models\SaleReturn;
+use App\Models\CashDeduction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
@@ -19,6 +21,7 @@ use Illuminate\Support\Facades\Storage;
 use League\Csv\Writer;
 use Barryvdh\DomPDF\Facade\Pdf as PDF;
 use App\Models\PartnerDistribution;
+use App\Rules\TotalReturnedAmount;
 
 
 
@@ -796,24 +799,108 @@ public function cancelSale(Request $request, $saleId)
     return redirect()->route('admin.sales.cancelled_details', ['saleId' => $saleId])
                      ->with('success', 'Sale has been successfully cancelled.');
 }
-
 public function return($saleId)
 {
-    $sale = Sale::with(['room', 'installments', 'cash_installments'])->findOrFail($saleId);
-    $room = $sale->room;
-    $roomNumbers = $room ? $room->number : 'N/A'; // Adjust as per your room number logic
-    $totalCashExpenses = $sale->cash_expenses->sum('amount'); // Adjust if you have a relationship for cash expenses
-    $additionalWork = $sale->additional_work; // Adjust based on your data structure
-    $totalWithAdditional = $sale->final_amount + $additionalWork; // Adjust calculation as needed
-    $totalChequeAmount = $sale->installments->sum('installment_amount');
-    $totalCashAmount = $sale->cash_installments->sum('installment_amount');
+    // Fetch the sale with cashDeductions relationship
+    $sale = Sale::with(['room', 'cash_installments', 'returns', 'cashDeductions'])->findOrFail($saleId);
 
-    return view('sales.return_details', compact(
-        'sale', 'room', 'roomNumbers', 'totalCashExpenses',
-        'additionalWork', 'totalWithAdditional', 'totalChequeAmount', 'totalCashAmount'
+    // Calculate the total cash received through installments
+    $totalCashReceivedByInstallments = $sale->cash_installments->sum('total_paid');
+
+    // Fetch the remaining cash value from the sale record
+    $receivedCashValue = $sale->total_received_amount;
+    $totalCashValue = $receivedCashValue + $totalCashReceivedByInstallments;
+
+    // Calculate the total returned amount
+    $totalReturnedAmount = SaleReturn::where('sale_id', $saleId)->sum('returned_amount');
+
+    // Calculate the total deducted amount
+    $totalDeductedAmount = $sale->cashDeductions->isEmpty() ? 0 : $sale->cashDeductions->sum('deducted_amount');
+
+    // Calculate the total received cash value after deductions
+    $totalReceivedAfterDeductions = $totalCashValue - $totalDeductedAmount;
+
+    $title = "Return Sales";
+    $page = "Return Sales";
+
+    // Pass the data to the view, including 'cashDeductions'
+    return view('admin.sales.return_details', compact(
+        'sale',
+        'totalCashReceivedByInstallments',
+        'receivedCashValue',
+        'page',
+        'title',
+        'totalReceivedAfterDeductions',
+        'totalReturnedAmount',
+        'totalDeductedAmount',
+        'totalCashValue'
     ));
 }
 
 
+public function storeReturns(Request $request, $saleId)
+{
+    $request->validate([
+        'returns.*.returned_amount' => 'required|numeric|min:0',
+        'returns.*.description' => 'required|string|max:255',
+        'returns.*.return_date' => 'required|date|date_format:Y-m-d',
+        'returns.*.deducted_amount' => 'nullable|numeric|min:0',
+        'returns.*.deduction_description' => 'nullable|string|max:255',
+    ]);
+
+    foreach ($request->returns as $return) {
+        SaleReturn::create([
+            'sale_id' => $saleId,
+            'returned_amount' => $return['returned_amount'],
+            'description' => $return['description'],
+            'return_date' => $return['return_date'],
+            'deducted_amount' => $return['deducted_amount'] ?? 0, // Default to 0 if not provided
+            'deduction_description' => $return['deduction_description'] ?? null, // Default to null if not provided
+        ]);
+    }
+
+    // Recalculate the total received cash value
+    $totalReturned = SaleReturn::where('sale_id', $saleId)->sum('returned_amount');
+    $totalReceived = $this->calculateTotalReceived($saleId) - $totalReturned;
+
+    return redirect()->route('admin.sales.returndetails', ['saleId' => $saleId])
+                 ->with('success', 'Returns recorded successfully.')
+                 ->with('totalReceived', $totalReceived);
+}
+
+public function calculateTotalReceived($saleId)
+{
+    // Retrieve the sale with its related cash installments
+    $sale = Sale::with('cash_installments')->findOrFail($saleId);
+
+    // Calculate the total cash received through installments
+    $totalCashReceivedByInstallments = $sale->cash_installments->sum('total_paid');
+
+    // Fetch the remaining cash value from the sale record
+    $receivedCashValue = $sale->total_received_amount;
+
+    // Calculate the total received amount
+    $totalReceived = $totalCashReceivedByInstallments + $receivedCashValue;
+
+    return $totalReceived;
+}
+public function addDeduction(Request $request, Sale $sale)
+{
+    // Validate and process the deduction
+    $validated = $request->validate([
+        'deducted_amount' => 'required|numeric|min:0',
+        'deduction_reason' => 'required|string|max:255',
+    ]);
+
+    // Create a new deduction record using the correct relationship
+    $sale->cashDeductions()->create([ // Use cashDeductions instead of deductions
+        'deducted_amount' => $validated['deducted_amount'],
+        'deduction_reason' => $validated['deduction_reason'],
+    ]);
+
+    // Redirect to the sales return details page with a success message
+    return redirect()->route('admin.sales.returndetails', ['saleId' => $sale->id])
+                     ->with('success', 'Deduction added successfully.');
+}
 
 }
