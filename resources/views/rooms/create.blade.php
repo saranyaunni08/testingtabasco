@@ -37,10 +37,10 @@
                                         <div class="col-md-6 mb-4">
                                             <label for="room_type" class="form-label">Room Type</label>
                                             <select id="room_type" name="room_type" class="form-select" style="text-transform: uppercase;" required>
-                                                <option value="" disabled {{ !$room_type ? 'selected' : '' }}>Select Room Type</option>
+                                                <option value="" disabled selected>Select Room Type</option>
                                                 @foreach ($roomTypes as $type)
-                                                    <option value="{{ $type }}" {{ $room_type == $type ? 'selected' : '' }}>
-                                                        {{ $type }}
+                                                    <option value="{{ $type->name }}" {{ old('room_type') == $type->name ? 'selected' : '' }}>
+                                                        {{ $type->name }}
                                                     </option>
                                                 @endforeach
                                             </select>
@@ -137,10 +137,8 @@
                                             <div id="chairSpaceError" style="color: red;"></div>
 
                                             <label for="chair_rate" class="form-label mt-3">Chair Rate (sq ft)</label>
-                                            <input type="text" name="chair_space_rate" class="form-control" style="text-transform: uppercase;">
+                                            <input type="text" name="chair_rate" class="form-control" style="text-transform: uppercase;">
                                         </div>
-
-
                                         <div class="col-md-6 mb-4" id="customFields" style="display: {{ !in_array($room_type, ['Flat', 'Shops', 'Table space', 'Kiosk', 'Chair space']) ? 'block' : 'none' }};">
                                             <label for="custom_name" class="form-label"> Room Type Name</label>
                                             <input type="text" name="custom_name" class="form-control" style="text-transform: uppercase;">

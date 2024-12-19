@@ -73,6 +73,9 @@ class Sale extends Model
 
         'exchangestatus',
         'exchange_sale_id',
+
+        'cancel_description',
+        'status',
     ];
     
 
@@ -90,8 +93,10 @@ class Sale extends Model
     // }
     public function room()
     {
-        return $this->belongsTo(Room::class);
+        return $this->belongsTo(Room::class, 'room_id'); // Assumes `room_id` is the foreign key in `sales` table
     }
+    
+
     // In Sale.php Model
 public function installments()
 {

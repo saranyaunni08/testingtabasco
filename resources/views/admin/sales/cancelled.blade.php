@@ -1,51 +1,58 @@
-@extends('layouts.default', ['title' => 'Cancelled Sales', 'page' => 'cancelled-sales'])
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cancel Sale</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <!-- Cancel Sale Button -->
+        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#cancelSaleModal">
+            Cancel Sale
+        </button>
 
-@section('content')
-
-<div class="container-fluid py-4">
-    <div class="card my-4">
-        <div class="card-header bg-danger text-white">
-            <h2 class="mb-0">Cancelled Sales</h2>
-        </div>
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-hover table-striped table-bordered mb-0">
-                    <thead class="thead-dark">
-                        <tr>
-                            <th class="text-center">No</th>
-                            <th class="text-center">Room Number</th>
-                            <th class="text-center">Shop Model</th>
-                            <th class="text-center">Customer Name</th>
-                            <th class="text-center">Sale Amount (RS)</th>
-                            <th class="text-center">GST Amount</th>
-                            <th class="text-center">Parking Amount</th>
-                            <th class="text-center">Total Amount</th>
-                            <th class="text-center">Cancelled Date</th>
-                            <th class="text-center">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($cancelledSales as $index => $sale)
-                        <tr>
-                            <td class="text-center">{{ $index + 1 }}</td>
-                            <td>{{ $sale->room ? $sale->room->room_number : 'N/A' }}</td>
-                            <td>{{ $sale->room ? $sale->room->shop_type : 'N/A' }}</td>
-                            <td>{{ $sale->customer_name }}</td>
-                            <td class="text-right">{{ $sale->sale_amount }}</td>
-                            <td class="text-right">{{ $sale->gst_amount }}</td>
-                            <td class="text-right">{{ $sale->parking_amount }}</td>
-                            <td class="text-right">{{ $sale->total_amount }}</td>
-                            <td class="text-center">{{ $sale->cancelled_at }}</td>
-                            <td class="text-center">
-                                <a href="{{ route('admin.sales.cancelled_details', $sale->id) }}" class="btn btn-primary btn-sm">View</a>
-                            </td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+        <!-- Cancel Sale Modal -->
+        <div class="modal fade" id="cancelSaleModal" tabindex="-1" aria-labelledby="cancelSaleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="cancelSaleModalLabel">Cancel Sale</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form action="{{ route('admin.sales.cancel', $sale->id) }}" method="POST">
+                        @csrf
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label for="cancelReason" class="form-label">Reason for Cancellation</label>
+                                <textarea class="form-control" id="cancelReason" name="cancel_description" rows="3" required></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-danger">Submit</button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
-    </div>
-</div>
 
-@endsection
+        <!-- Flash Messages -->
+        @if (session('success'))
+            <div class="alert alert-success mt-3">
+                {{ session('success') }}
+            </div>
+        @endif
+        @if (session('error'))
+            <div class="alert alert-danger mt-3">
+                {{ session('error') }}
+            </div>
+        @endif
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

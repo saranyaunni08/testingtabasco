@@ -269,10 +269,10 @@ class RoomController extends Controller
     {
         $building_id = $request->building_id;
         $room_type = $request->room_type;
+        $roomTypes = RoomType::all();
         $building = Building::findOrFail($building_id);
 
         // Fetch room types from the database
-        $roomTypes =  RoomType::pluck('name')->toArray(); 
 
         // Sum the relevant fields from the rooms table for the specified building
         $roomSums = Room::where('building_id', $building_id)
@@ -359,10 +359,10 @@ class RoomController extends Controller
             'parking_floor' => 'nullable|string',
             'parking_slot_id' => 'nullable|exists:parkings,id',
             'parking_amount' => 'nullable|numeric', // New field
-            'cheque_parking_amount' => 'nullable|numeric',
+            'parking_amount_cheque' => 'nullable|numeric',
 
         ]);
-        dd($request->all());
+        // dd($request->all());
 
         // Calculate expected rates
         $expected_custom_rate = isset($validatedData['custom_area']) && isset($validatedData['custom_rate'])
@@ -418,14 +418,7 @@ class RoomController extends Controller
     
         $room->save();
     
-        // Save sale data
-        $sale = new Sale();
-        $sale->room_id = $room->id; // Link the sale to the room
-        $sale->sale_amount = $validatedData['sale_amount'] ?? null; // Example field for sale amount
-        $sale->parking_slot_id = $validatedData['parking_slot_id'] ?? null; // Save parking slot
-        $sale->parking_amount = $validatedData['parking_amount'] ?? null; // Save parking amount
-        $sale->cheque_parking_amount = $validatedData['cheque_parking_amount'] ?? null;  // Store parking amount in the sales table
-        $sale->save();
+       
     
         // Redirect based on room type
         switch ($validatedData['room_type']) {
@@ -910,4 +903,4 @@ class RoomController extends Controller
     }
 
     
-}    
+}

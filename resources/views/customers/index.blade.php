@@ -50,10 +50,26 @@
                    class="btn btn-warning btn-sm">
                    <i class="bi bi-arrow-repeat"></i> Confirm Exchange
                 </a>
+                @if ($customer->status === 'cancelled')
+                <!-- View Cancelled Sale Details -->
+                <a href="{{ route('admin.sales.list_cancelled_details', ['id' => $customer->id]) }}" class="btn btn-danger btn-sm">
+                  <i class="bi bi-x-circle"></i> View Cancelled Details
+              </a>
+              <a href="{{ route('admin.sales.returndetails', ['saleId' => $customer->id]) }}" class="btn btn-secondary btn-sm">
+                <i class="bi bi-arrow-left-circle"></i> Return
+            </a>
+            
+              
+              
+            @else
+                <!-- Cancel Sale Button -->
                 <button type="button" class="btn btn-danger btn-sm" 
-                        onclick="confirmCancelSale({{ $customer->id }})">
-                   <i class="bi bi-x-circle"></i> Cancel Sale
+                  onclick="confirmCancelSale({{ $customer->id }})">
+                  <i class="bi bi-x-circle"></i> Cancel Sale
                 </button>
+
+            @endif
+            
               </td>
             </tr>
           @endforeach
@@ -64,11 +80,13 @@
 </div>
 
 <script>
-  function confirmCancelSale(saleId) {
+
+function confirmCancelSale(saleId) {
     if (confirm("Are you sure you want to cancel this sale?")) {
-      // Redirect to the cancellation form page
-      window.location.href = `/admin/sales/cancel/${saleId}`;
+        window.location.href = `{{ url('admin/sales/details') }}/${saleId}`;
     }
-  }
+}
+
 </script>
+
 @endsection

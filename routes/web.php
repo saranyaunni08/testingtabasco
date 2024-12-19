@@ -143,10 +143,20 @@ Route::controller(AuthController::class)->group(function () {
         //     return view('test_pdf');
         // });
         
-        Route::post('/sales/cancel', [SaleController::class, 'cancelSale'])->name('sales.cancel');
-        Route::get('/sales/cancelled', [SaleController::class, 'listCancelledSales'])->name('sales.cancelled');
-        Route::get('/sales/cancelled/{id}', [SaleController::class, 'viewCancelledSaleDetails'])->name('sales.cancelled_details');
+      
 
+        Route::get('/sales/{saleId}/cancel', [SaleController::class, 'cancelSale'])->name('sales.cancel');
+        Route::post('/sales/{saleId}/cancel', [SaleController::class, 'cancelSale'])->name('sales.cancel');
+
+        Route::get('/sales/cancelleddetails/{id}', [SaleController::class, 'listCancelledSales'])->name('sales.list_cancelled_details');
+        Route::get('sales/details/{saleId}', [SaleController::class, 'showCancelledDetails'])->name('sales.cancelled_details');
+
+        Route::patch('/sales/{sale}/cancel', [SaleController::class, 'cancel'])->name('sales.cancelled');
+
+        Route::get('/admin/sales/{saleId}/details', [SaleController::class, 'return'])->name('sales.returndetails');
+
+
+        
         Route::get('/edit-delete-login', [EditDeleteAuthController::class, 'showLogin'])->name('edit_delete_auth.show_login');
         Route::post('/edit-delete-login', [EditDeleteAuthController::class, 'authenticate'])->name('edit_delete_auth.authenticate');
         Route::post('/edit-delete-logout', [EditDeleteAuthController::class, 'logout'])->name('edit_delete_auth.logout');

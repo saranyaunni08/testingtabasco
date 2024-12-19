@@ -607,101 +607,213 @@ class SaleController extends Controller
         $pdf = PDF::loadView('pdf.installment_detail', $data);
         return $pdf->download('installment_detail.pdf');
     }
+    
+    
+    
+    public function showCancelDetails($saleId)
+{
+    $sale = Sale::with(['room', 'installments', 'cashInstallments'])->findOrFail($saleId);
 
-    public function cancelSale(Request $request)
-    {
-        $request->validate([
-            'sale_id' => 'required|exists:sales,id',
-            'fine_amount' => 'required|numeric',
-            'payment_method' => 'required|in:cash,bank,cheque',
-            'bank_id' => 'nullable|required_if:payment_method,bank',
-            'cheque_id' => 'nullable|required_if:payment_method,cheque',
-        ]);
+    // Calculate additional fields as needed
+    $roomNumbers = $sale->room->room_number ?? 'N/A'; // Example field
+    $additionalWork = $sale->additional_work ?? 0; // Example field
+    $totalWithAdditional = $sale->final_amount + $additionalWork;
+    $cancelledSales = Sale::where('status', 'cancelled')->get();
 
-        // Find the sale record
-        $sale = Sale::findOrFail($request->sale_id);
-        $sale->cancellation_fine_amount = $request->fine_amount;
-        $sale->cancellation_payment_method = $request->payment_method;
+    $totalCashExpenses = DB::table('cash_expenses')
+    ->where('sale_id', $saleId)
+    ->sum('cash_expense_amount');
 
-        // Set the payment details
-        if ($request->payment_method === 'bank') {
-            $sale->cancellation_bank_id = $request->bank_id;
-            $sale->cancellation_cheque_id = null;
-        } elseif ($request->payment_method === 'cheque') {
-            $sale->cancellation_cheque_id = $request->cheque_id;
-            $sale->cancellation_bank_id = null;
-        } else {
-            $sale->cancellation_bank_id = null;
-            $sale->cancellation_cheque_id = null;
-        }
 
-        // Update the status of the sale
-        $sale->status = 'cancelled';
-        $sale->save();
+    $totalChequeAmount = DB::table('installments')
+            ->where('sale_id', $saleId)
+            ->sum('installment_amount');
 
-        // Update the room status to "available"
-        $room = Room::findOrFail($sale->room_id);
-        $room->status = 'available';
-        $room->save();
+     $totalCashAmount = DB::table('cash_installments')
+         ->where('sale_id', $saleId)
+         ->sum('installment_amount');
 
-        return redirect()->back()->with('success', 'Sale has been cancelled successfully and the room status has been updated.');
-    }
 
-    public function listCancelledSales()
+    $page = "cancel page ";
+    $title = "cancel page ";
+    return view('admin.sales.cancelled', [
+        'sale' => $sale,
+        'room' => $sale->room,
+        'roomNumbers' => $roomNumbers,
+        'additionalWork' => $additionalWork,
+        'totalWithAdditional' => $totalWithAdditional,
+        'totalCashExpenses' => $totalCashExpenses,
+        'totalChequeAmount' => $totalChequeAmount,
+        'totalCashAmount' => $totalCashAmount,
+        'page' => $page,
+        'title' => $title,
+
+        'cancelledSales' => $cancelledSales,
+
+
+    ]);
+}
+
+
+
+
+    public function listCancelledSales($id)
     {
         $building = Building::first(); 
         
         $cancelledSales = Sale::with('room')->where('status', 'cancelled')->get();
         $page = 'cancelled-sales';
+        $sale = Sale::with(['room.building', 'installments'])->find($id);
+
         $rooms = Room::all();
 
 
         
-        return view('admin.sales.cancelled', compact('cancelledSales', 'page', 'building','rooms'));
+        return view('admin.sales.cancelled_sale_details', compact('cancelledSales', 
+        'page', 'building','rooms','sale'));
     }
-    public function viewCancelledSaleDetails($id)
-    {
-        // Fetch the sale details by ID with the related room and installments
-        $sale = Sale::with(['room.building', 'installments'])->find($id);
-    
-        // Check if sale is found and status is 'cancelled'
-        if (!$sale || $sale->status !== 'cancelled') {
-            return redirect()->route('admin.sales.cancelled')->withErrors('Sale not found or not cancelled.');
-        }
-    
-        // Fetch the installments related to this sale
-        $installments = Installment::where('sale_id', $id)->get();
-    
-        // Calculate the total tenure as the count of installments
-        $totalTenureMonths = $installments->count();
-    
-        // Calculate the remaining tenure by counting only pending installments
-        $pendingInstallments = $installments->where('status', 'pending');
-        $remainingTenureMonths = $pendingInstallments->count();
-    
-        // Calculate the remaining balance by summing up the amounts of pending installments
-        $remainingBalance = $pendingInstallments->sum('installment_amount');
-    
-        // Calculate the total received amount by summing up the amounts of paid installments
-        $receivedAmount = $installments->where('status', 'paid')->sum('installment_amount');
-    
-        // Fetch the first and last installment dates
-        $firstInstallment = $installments->sortBy('installment_date')->first();
-        $lastInstallment = $installments->sortByDesc('installment_date')->first();
-    
-        $firstInstallmentDate = $firstInstallment ? $firstInstallment->installment_date : null;
-        $lastInstallmentDate = $lastInstallment ? $lastInstallment->installment_date : null;
-    
-        // Get the related building
-        $building = $sale->room ? $sale->room->building : null;
-    
-        // Fetch the cancellation fine amount
-        $cancellationFineAmount = $sale->cancellation_fine_amount;
-    
-        // Calculate the amount to be paid back
-        $amountToPayBack = $receivedAmount + $sale->advance_amount + $sale->cash_in_hand_paid_amount - $cancellationFineAmount;
-    
-        return view('admin.sales.cancelled_details', compact('sale', 'installments', 'building', 'firstInstallment', 'firstInstallmentDate', 'lastInstallmentDate', 'totalTenureMonths', 'remainingTenureMonths', 'remainingBalance', 'receivedAmount', 'cancellationFineAmount', 'amountToPayBack'));
+
+    public function cancel(Request $request, $id)
+{
+    $request->validate([
+        'cancel_description' => 'required|string|max:255',
+    ]);
+
+    // Find the sale and check if it exists
+    $sale = Sale::with('room')->findOrFail($id);
+
+    // Update the sale with cancellation details
+    $sale->update([
+        'cancel_description' => $request->cancel_description,
+        'status' => 'cancelled',
+    ]);
+
+    // Get the building ID from the associated room
+    $buildingId = $sale->room->building_id ?? null;
+
+    if (!$buildingId) {
+        abort(404, 'Building associated with this sale not found.');
     }
+
+    // Redirect to the building customers list
+    return redirect()->route('admin.building.customers', ['buildingId' => $buildingId])
+                     ->with('success', 'Sale has been cancelled successfully.');
+}
+
+//     public function viewCancelledSaleDetails($id)
+// {
+//     // Fetch the sale details by ID with the related room and installments
+//     $sale = Sale::with(['room.building', 'installments'])->find($id);
+
+//     // Check if sale is found and status is 'cancelled'
+//     if (!$sale) {
+//         // Redirect back with error if sale not found
+//         return redirect()->route('admin.sales.cancelled')->withErrors('Sale not found.');
+//     }
+
+//     if ($sale->status !== 'cancelled') {
+//         // Redirect back if the sale is not cancelled
+//         return redirect()->route('admin.sales.cancelled')->withErrors('This sale is not cancelled.');
+//     }
+
+//     // Fetch the installments related to this sale
+//     $installments = Installment::where('sale_id', $id)->get();
+
+//     // Further processing, as done earlier...
+// }
+
+
+public function showCancelledDetails($saleId)
+{
+    $sale = Sale::findOrFail($saleId);
+
+    // Custom query to fetch the related room
+    $room = Room::where('id', $sale->room_id)->first();
+    $roomNumbers = $room ? 1 : 0;
+    $cancelledSales = Sale::where('status', 'cancelled')->get();
+    $page = "cancelled ";
+    $title = "cancelled ";
+
+    $matchingRooms = Room::whereHas('sale', function($query) use ($sale) {
+        $query->where('customer_name', $sale->customer_name)
+            ->where('customer_contact', $sale->customer_contact);
+    })->get();
+
+    // Format room numbers for display as "Shop No: 21,22,23,24 & 25"
+    $roomNumbers = $matchingRooms->pluck('room_number')->join(', ');
+
+    // Calculate totals and additional information as needed
+    $totalCashExpenses = DB::table('cash_expenses')
+        ->where('sale_id', $saleId)
+        ->sum('cash_expense_amount');
+
+    $totalChequeAmount = DB::table('installments')
+        ->where('sale_id', $saleId)
+        ->sum('installment_amount');
+
+    $totalCashAmount = DB::table('cash_installments')
+        ->where('sale_id', $saleId)
+        ->sum('installment_amount');
+
+    // Additional calculations
+    $totalWithAdditional = $totalCashExpenses + $totalChequeAmount;
     
+    $additionalWork = $totalCashExpenses + $totalChequeAmount;
+
+    $totalCashValue = $sale->total_cash_value ?? 0;
+    $cashValueAmount = $sale->cash_value_amount ?? 0;
+    $additionalWorkCash = $totalCashValue - $cashValueAmount;
+
+    $page = 'customer-info';
+
+    return view('admin.sales.cancelled_sale_details', compact('sale', 'room',
+     'roomNumbers','cancelledSales','title','page',
+     'totalCashExpenses', 
+     'totalChequeAmount', 
+     'totalCashAmount',
+     'totalWithAdditional',
+     'room' ,
+     'additionalWorkCash',
+     'additionalWork', ));
+}
+
+public function cancelSale(Request $request, $saleId)
+{
+    // Validate the cancel reason
+    $request->validate([
+        'cancel_reason' => 'required|string|max:255',
+    ]);
+
+    // Find the sale record
+    $sale = Sale::findOrFail($saleId);
+
+    // Update the sale status and cancel description
+    $sale->status = 'cancelled';
+    $sale->cancel_description = $request->cancel_reason;
+    $sale->save();
+
+    // Redirect back to the sale details page with a success message
+    return redirect()->route('admin.sales.cancelled_details', ['saleId' => $saleId])
+                     ->with('success', 'Sale has been successfully cancelled.');
+}
+
+public function return($saleId)
+{
+    $sale = Sale::with(['room', 'installments', 'cash_installments'])->findOrFail($saleId);
+    $room = $sale->room;
+    $roomNumbers = $room ? $room->number : 'N/A'; // Adjust as per your room number logic
+    $totalCashExpenses = $sale->cash_expenses->sum('amount'); // Adjust if you have a relationship for cash expenses
+    $additionalWork = $sale->additional_work; // Adjust based on your data structure
+    $totalWithAdditional = $sale->final_amount + $additionalWork; // Adjust calculation as needed
+    $totalChequeAmount = $sale->installments->sum('installment_amount');
+    $totalCashAmount = $sale->cash_installments->sum('installment_amount');
+
+    return view('sales.return_details', compact(
+        'sale', 'room', 'roomNumbers', 'totalCashExpenses',
+        'additionalWork', 'totalWithAdditional', 'totalChequeAmount', 'totalCashAmount'
+    ));
+}
+
+
+
 }
