@@ -56,7 +56,7 @@
                   <i class="bi bi-x-circle"></i> View Cancelled Details
               </a>
               <a href="{{ route('admin.sales.returndetails', ['saleId' => $customer->id]) }}" class="btn btn-secondary btn-sm">
-                <i class="bi bi-arrow-left-circle"></i> Return
+                <i class="bi bi-arrow-left-circle"></i>Cash Return
             </a>
             
               

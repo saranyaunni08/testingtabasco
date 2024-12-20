@@ -3,6 +3,11 @@
 @section('content')
 <div class="container my-5">
     <h2 class="text-center mb-5">Sale Details for {{ $sale->customer_name }}</h2>
+    
+    <a href="{{ route('admin.sales.chequeInstallments', ['saleId' => $sale->id]) }}" class="btn btn-primary">
+        View Cheque Installments
+    </a>
+    
 
     <!-- Sale Summary Section -->
     <div class="row mb-4">
@@ -119,8 +124,6 @@
                     <tr>
                         <th>Description</th>
                         <th>Returned Amount</th>
-                        <th>Deducted Amount</th>
-                        <th>Deduction Reason</th>
                         <th>Return Date</th>
                         <th>Actions</th>
                     </tr>
@@ -130,13 +133,14 @@
                         <tr>
                             <td>{{ $return->description }}</td>
                             <td>₹{{ number_format($return->returned_amount, 2) }}</td>
-                            <td>₹{{ number_format($return->deducted_amount ?? 0, 2) }}</td>
-                            <td>{{ $return->deduction_description ?? 'N/A' }}</td>
                             <td>{{ $return->return_date?->format('d-m-Y') ?? 'N/A' }}</td>
                             <td>
-                                <!-- Add action buttons here -->
-                                <a href="#" class="btn btn-warning btn-sm">Edit</a>
-                                <a href="#" class="btn btn-danger btn-sm">Delete</a>
+                                <a href="{{ route('admin.sales.returns.edit', [$sale->id, $return->id]) }}" class="btn btn-warning btn-sm">Edit</a>
+                                <form action="{{ route('admin.sales.returns.destroy', [$sale->id, $return->id]) }}" method="POST" style="display:inline-block;">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this return?');">Delete</button>
+                                </form>
                             </td>
                         </tr>
                     @endforeach

@@ -799,6 +799,8 @@ public function cancelSale(Request $request, $saleId)
     return redirect()->route('admin.sales.cancelled_details', ['saleId' => $saleId])
                      ->with('success', 'Sale has been successfully cancelled.');
 }
+
+// cash segment 
 public function return($saleId)
 {
     // Fetch the sale with cashDeductions relationship
@@ -902,5 +904,88 @@ public function addDeduction(Request $request, Sale $sale)
     return redirect()->route('admin.sales.returndetails', ['saleId' => $sale->id])
                      ->with('success', 'Deduction added successfully.');
 }
+
+public function edit(Sale $sale, SaleReturn $return)
+    {
+        $title = "return edit ";
+        $page = "return edit ";
+        return view('admin.sales.returns.edit', compact('sale', 'return','title','page'));
+    }
+
+    public function update(Request $request, Sale $sale, SaleReturn $return)
+    {
+        $validated = $request->validate([
+            'returned_amount' => 'required|numeric|min:0',
+            'description' => 'required|string|max:255',
+            'return_date' => 'required|date',
+        ]);
+
+        $return->update($validated);
+
+        return redirect()->route('admin.sales.returndetails', $sale->id)
+                         ->with('success', 'Return updated successfully.');
+    }
+
+    public function destroy(Sale $sale, SaleReturn $return)
+    {
+        $return->delete();
+
+        return redirect()->route('admin.sales.returndetails', $sale->id)
+                         ->with('success', 'Return deleted successfully.');
+    }
+// cheque segment
+
+public function calculateChequeInstallments($saleId)
+{
+    // Fetch total cheque amount received through installments for the given sale_id
+    $sale = Sale::findOrFail($saleId);
+
+    // Fetch all installments related to the sale and paid via cheque
+    $installments = Installment::where('sale_id', $saleId)
+                                ->get();
+
+    // Calculate the total cheque amount received
+    $totalChequeinstallmentReceived = $installments->sum('total_paid');
+    $recievedChequeValue = $sale->received_cheque_value;
+    $totalChequeValue = $totalChequeinstallmentReceived + $recievedChequeValue;
+    $title ="cheque return";
+    $page ="cheque return";
+    // Pass the data to the blade view
+    return view('admin.sales.cheque_installments', compact('sale', 'installments',
+     'totalChequeinstallmentReceived','title','page',
+    'recievedChequeValue','totalChequeValue'));
+}
+
+
+public function storechequeReturns(Request $request, $saleId)
+{
+    $request->validate([
+        'returns.*.cheque_returned_amount' => 'required|numeric|min:0',
+        'returns.*.cheque_description' => 'required|string|max:255',
+        'returns.*.cheque_return_date' => 'required|date|date_format:Y-m-d',
+        'returns.*.cheque_deducted_amount' => 'nullable|numeric|min:0',
+        'returns.*.cheque_deduction_description' => 'nullable|string|max:255',
+    ]);
+
+    foreach ($request->returns as $return) {
+        SaleReturn::create([
+            'sale_id' => $saleId,
+            'cheque_returned_amount' => $return['cheque_returned_amount'],
+            'cheque_description' => $return['cheque_description'],
+            'cheque_return_date' => $return['cheque_return_date'],
+            'cheque_deducted_amount' => $return['cheque_deducted_amount'] ?? 0, // Default to 0 if not provided
+            'cheque_deduction_description' => $return['cheque_deduction_description'] ?? null, // Default to null if not provided
+        ]);
+    }
+
+    // Recalculate the total received cash value
+    $totalReturned = SaleReturn::where('sale_id', $saleId)->sum('returned_amount');
+    $totalReceived = $this->calculateTotalReceived($saleId) - $totalReturned;
+
+    return redirect()->route('admin.sales.returndetails', ['saleId' => $saleId])
+                 ->with('success', 'Returns recorded successfully.')
+                 ->with('totalReceived', $totalReceived);
+}
+
 
 }

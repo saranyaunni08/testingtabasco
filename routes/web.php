@@ -143,7 +143,7 @@ Route::controller(AuthController::class)->group(function () {
         //     return view('test_pdf');
         // });
         
-      
+    //   cash segment of return and cancel 
 
         Route::get('/sales/{saleId}/cancel', [SaleController::class, 'cancelSale'])->name('sales.cancel');
         Route::post('/sales/{saleId}/cancel', [SaleController::class, 'cancelSale'])->name('sales.cancel');
@@ -156,11 +156,20 @@ Route::controller(AuthController::class)->group(function () {
         Route::get('/sales/{saleId}/details', [SaleController::class, 'return'])->name('sales.returndetails');
         Route::post('/sales/{sale}/add-deduction', [SaleController::class, 'addDeduction'])->name('sales.addDeduction');
 
+        Route::get('/sales/{sale}/returns/{return}/edit', [SaleController::class, 'edit'])->name('sales.returns.edit');
+        Route::put('/sales/{sale}/returns/{return}', [SaleController::class, 'update'])->name('sales.returns.update');
+        Route::delete('/sales/{sale}/returns/{return}', [SaleController::class, 'destroy'])->name('sales.returns.destroy');
 
         
         Route::get('/edit-delete-login', [EditDeleteAuthController::class, 'showLogin'])->name('edit_delete_auth.show_login');
         Route::post('/edit-delete-login', [EditDeleteAuthController::class, 'authenticate'])->name('edit_delete_auth.authenticate');
         Route::post('/edit-delete-logout', [EditDeleteAuthController::class, 'logout'])->name('edit_delete_auth.logout');
+
+    // cheque segment in cancel and return section 
+
+        Route::get('sales/{saleId}/cheque-installments', [SaleController::class, 'calculateChequeInstallments'])->name('sales.chequeInstallments');
+
+
 
         Route::post('/auth', [EditDeleteAuthController::class, 'authenticate'])->name('auth');
         
@@ -266,6 +275,7 @@ Route::controller(AuthController::class)->group(function () {
         // return module
 
         Route::post('/sales/{sale}/returns', [SaleController::class, 'storeReturns'])->name('sales.returns.store');
+        Route::post('/sales/{sale}/chequereturns', [SaleController::class, 'storechequeReturns'])->name('sales.chequereturns.store');
 
 
         });
