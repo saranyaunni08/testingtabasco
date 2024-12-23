@@ -10,6 +10,7 @@ use App\Models\CashExpense;
 use App\Models\ChequeExpense;
 use App\Models\CashInstallment;
 use App\Models\SaleReturn;
+use App\Models\SalesChequeReturn;
 use App\Models\CashDeduction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -938,7 +939,7 @@ public function edit(Sale $sale, SaleReturn $return)
 public function calculateChequeInstallments($saleId)
 {
     // Fetch total cheque amount received through installments for the given sale_id
-    $sale = Sale::findOrFail($saleId);
+    $sale = Sale::with(['room', 'installments', 'SalesChequeReturns', 'chequeDeductions'])->findOrFail($saleId);
 
     // Fetch all installments related to the sale and paid via cheque
     $installments = Installment::where('sale_id', $saleId)
@@ -948,43 +949,68 @@ public function calculateChequeInstallments($saleId)
     $totalChequeinstallmentReceived = $installments->sum('total_paid');
     $recievedChequeValue = $sale->received_cheque_value;
     $totalChequeValue = $totalChequeinstallmentReceived + $recievedChequeValue;
+
+    $totalReturnedChequeAmount = SalesChequeReturn::where('sale_id', $saleId)->sum('returned_amount') ;
+
+    $totalDeductedAmount = $sale->chequeDeductions->isEmpty() ? 0 : $sale->chequeDeductions->sum('cheque_deducted_amount');
+
+    // Calculate the total received cash value after deductions
+    $totalReceivedAfterDeductions = $totalChequeValue - $totalDeductedAmount;
+
+
     $title ="cheque return";
     $page ="cheque return";
     // Pass the data to the blade view
     return view('admin.sales.cheque_installments', compact('sale', 'installments',
      'totalChequeinstallmentReceived','title','page',
-    'recievedChequeValue','totalChequeValue'));
+    'recievedChequeValue','totalChequeValue','totalReturnedChequeAmount','totalReceivedAfterDeductions'));
 }
 
 
-public function storechequeReturns(Request $request, $saleId)
+public function storeChequeReturns(Request $request, $saleId)
 {
-    $request->validate([
-        'returns.*.cheque_returned_amount' => 'required|numeric|min:0',
-        'returns.*.cheque_description' => 'required|string|max:255',
-        'returns.*.cheque_return_date' => 'required|date|date_format:Y-m-d',
-        'returns.*.cheque_deducted_amount' => 'nullable|numeric|min:0',
-        'returns.*.cheque_deduction_description' => 'nullable|string|max:255',
+    $validatedData = $request->validate([
+        'returns.*.returned_amount' => 'required|numeric',
+        'returns.*.description' => 'required|string',
+        'returns.*.return_date' => 'required|date',
     ]);
 
-    foreach ($request->returns as $return) {
-        SaleReturn::create([
-            'sale_id' => $saleId,
-            'cheque_returned_amount' => $return['cheque_returned_amount'],
-            'cheque_description' => $return['cheque_description'],
-            'cheque_return_date' => $return['cheque_return_date'],
-            'cheque_deducted_amount' => $return['cheque_deducted_amount'] ?? 0, // Default to 0 if not provided
-            'cheque_deduction_description' => $return['cheque_deduction_description'] ?? null, // Default to null if not provided
+    $sale = Sale::findOrFail($saleId);
+
+    foreach ($validatedData['returns'] as $return) {
+        Log::info($return); // Log the return data
+
+        // Ensure the returned_amount is included in the create method
+        $sale->SalesChequeReturns()->create([
+            'returned_amount' => $return['returned_amount'],
+            'description' => $return['description'],
+            'return_date' => $return['return_date'],
         ]);
     }
 
-    // Recalculate the total received cash value
-    $totalReturned = SaleReturn::where('sale_id', $saleId)->sum('returned_amount');
-    $totalReceived = $this->calculateTotalReceived($saleId) - $totalReturned;
+    return redirect()->back()->with('success', 'Cheque return recorded successfully.');
+}
 
-    return redirect()->route('admin.sales.returndetails', ['saleId' => $saleId])
-                 ->with('success', 'Returns recorded successfully.')
-                 ->with('totalReceived', $totalReceived);
+
+public function addChequeDeduction(Request $request, Sale $sale)
+{
+    // Validate the input
+    $validated = $request->validate([
+        'cheque_deducted_amount' => 'required|numeric|min:0',
+        'cheque_deduction_reason' => 'required|string|max:255',
+    ]);
+
+    Log::info('Validated Data: ', $validated);
+
+    // Add the deduction to the database
+    $sale->chequeDeductions()->create([
+        'cheque_deducted_amount' => $validated['cheque_deducted_amount'],
+        'cheque_deduction_reason' => $validated['cheque_deduction_reason'],
+    ]);
+
+    // Redirect with a success message
+    return redirect()->route('admin.sales.returndetails', ['saleId' => $sale->id])
+                     ->with('success', 'Deduction added successfully.');
 }
 
 

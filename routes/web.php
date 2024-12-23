@@ -276,6 +276,7 @@ Route::controller(AuthController::class)->group(function () {
 
         Route::post('/sales/{sale}/returns', [SaleController::class, 'storeReturns'])->name('sales.returns.store');
         Route::post('/sales/{sale}/chequereturns', [SaleController::class, 'storechequeReturns'])->name('sales.chequereturns.store');
+        Route::post('/sales/{sale}/add-cheque-deduction', [SaleController::class, 'addChequeDeduction'])->name('sales.addChequeDeduction');
 
 
         });

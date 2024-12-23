@@ -133,10 +133,19 @@ public function cash_installments()
 {
     return $this->hasMany(SaleReturn::class);
 }
+    public function SalesChequeReturns()
+{
+    return $this->hasMany(SalesChequeReturn::class);
+}
 public function cashDeductions()
 {
     return $this->hasMany(CashDeduction::class);
 }
+public function chequeDeductions()
+{
+    return $this->hasMany(ChequeDeduction::class, 'sale_id');
+}
+
 
 }
     
