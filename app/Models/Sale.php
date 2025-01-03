@@ -93,5 +93,16 @@ public function cashInstallments()
 {
     return $this->hasMany(CashInstallment::class);
 }
+public function exchangedSale()
+{
+    return $this->belongsTo(Sale::class, 'exchanged_sale_id');
+}
+
+ // Define the inverse relationship to Parking model
+ public function parking()
+ {
+     return $this->belongsTo(Parking::class, 'parking_id');
+ }
+
 }
     
