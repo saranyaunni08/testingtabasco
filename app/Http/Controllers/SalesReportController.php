@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Room;
 use App\Models\Building;
+use App\Models\RoomType;
 use Illuminate\Support\Facades\DB;
 use Barryvdh\DomPDF\Facade\Pdf as PDF;
 
@@ -49,6 +50,77 @@ class SalesReportController extends Controller
             return optional($room->sale)->total_amount ?: 0;
         });
 
+        // Fetch kiosk sales data
+        $kioskSalesData = Room::where('building_id', $buildingId)
+            ->where('room_type', 'Kiosks')
+            ->where('status', 'sold') // Add condition to fetch only sold kiosks
+            ->with([
+                'sale' => function ($query) {
+                    $query->select('room_id', 'sale_amount', 'customer_name', 'total_amount');
+                }
+            ])
+            ->get(['room_floor', 'room_number', 'room_type', 'kiosk_area']);
+
+        $totalKioskSqft = $kioskSalesData->sum('kiosk_area');
+        $totalKioskSaleAmount = $kioskSalesData->sum(function ($room) {
+            return optional($room->sale)->total_amount ?: 0;
+        });
+
+        // Fetch tablespace sales data
+        $tablespaceSalesData = Room::where('building_id', $buildingId)
+            ->where('room_type', 'Tablespaces')
+            ->where('status', 'sold') // Add condition to fetch only sold tablespaces
+            ->with([
+                'sale' => function ($query) {
+                    $query->select('room_id', 'sale_amount', 'customer_name', 'total_amount');
+                }
+            ])
+            ->get(['room_floor', 'room_number', 'room_type', 'space_area']);
+
+        $totalTablespaceSqft = $tablespaceSalesData->sum('space_area');
+        $totalTablespaceSaleAmount = $tablespaceSalesData->sum(function ($room) {
+            return optional($room->sale)->total_amount ?: 0;
+        });
+
+        // Fetch chairspace sales data
+        $chairspaceSalesData = Room::where('building_id', $buildingId)
+            ->where('room_type', 'Chairspaces')
+            ->where('status', 'sold') // Add condition to fetch only sold chairspaces
+            ->with([
+                'sale' => function ($query) {
+                    $query->select('room_id', 'sale_amount', 'customer_name', 'total_amount');
+                }
+            ])
+            ->get(['room_floor', 'room_number', 'room_type', 'chair_space_in_sq']);
+
+        $totalChairspaceSqft = $chairspaceSalesData->sum('chair_space_in_sq');
+        $totalChairspaceSaleAmount = $chairspaceSalesData->sum(function ($room) {
+            return optional($room->sale)->total_amount ?: 0;
+        });
+
+        // Fetch all room types with counter_status = 'active'
+        $activeRoomTypes = RoomType::where('counter_status', 'active')->pluck('name')->toArray();
+
+        // Fetch counter sales data for the active room types
+        $counterSalesData = Room::where('building_id', $buildingId)
+            ->whereIn('room_type', $activeRoomTypes) // Filter for active room types
+            ->where('status', 'active') // Filter for active counters
+            ->with([
+                'sale' => function ($query) {
+                    $query->select('room_id', 'sale_amount', 'customer_name', 'total_amount');
+                }
+            ])
+            ->get(['room_floor', 'room_number', 'room_type', 'custom_area']);
+
+        // Calculate total custom area
+        $totalCounterCustomArea = $counterSalesData->sum('custom_area');
+
+        // Calculate total counter sales amount
+        $totalCounterSaleAmount = $counterSalesData->sum(function ($room) {
+            return optional($room->sale)->total_amount ?: 0;
+        });
+
+
         $parkingSalesData = DB::table('parkings')
             ->leftJoin('sales', 'parkings.id', '=', 'sales.parking_id') // Use LEFT JOIN to fetch all occupied parkings
             ->where('parkings.status', 'occupied') // Filter for occupied parking slots
@@ -86,7 +158,19 @@ class SalesReportController extends Controller
             'totalparkingnumber',
             'totalSalesAmount',
             'parkingSalesData',
-            'building'
+            'building',
+            'kioskSalesData',
+            'totalKioskSqft',
+            'totalKioskSaleAmount',
+            'tablespaceSalesData',
+            'totalTablespaceSqft',
+            'totalTablespaceSaleAmount',
+            'chairspaceSalesData',
+            'totalChairspaceSqft',
+            'totalChairspaceSaleAmount',
+            'counterSalesData',
+            'totalCounterCustomArea',
+            'totalCounterSaleAmount'
         ));
 
     }
@@ -258,6 +342,76 @@ class SalesReportController extends Controller
             return optional($room->sale)->total_amount ?: 0;
         });
 
+                // Fetch kiosk sales data
+                $kioskSalesData = Room::where('building_id', $buildingId)
+                ->where('room_type', 'Kiosks')
+                ->where('status', 'sold') // Add condition to fetch only sold kiosks
+                ->with([
+                    'sale' => function ($query) {
+                        $query->select('room_id', 'sale_amount', 'customer_name', 'total_amount');
+                    }
+                ])
+                ->get(['room_floor', 'room_number', 'room_type', 'kiosk_area']);
+    
+            $totalKioskSqft = $kioskSalesData->sum('kiosk_area');
+            $totalKioskSaleAmount = $kioskSalesData->sum(function ($room) {
+                return optional($room->sale)->total_amount ?: 0;
+            });
+    
+            // Fetch tablespace sales data
+            $tablespaceSalesData = Room::where('building_id', $buildingId)
+                ->where('room_type', 'Tablespaces')
+                ->where('status', 'sold') // Add condition to fetch only sold tablespaces
+                ->with([
+                    'sale' => function ($query) {
+                        $query->select('room_id', 'sale_amount', 'customer_name', 'total_amount');
+                    }
+                ])
+                ->get(['room_floor', 'room_number', 'room_type', 'space_area']);
+    
+            $totalTablespaceSqft = $tablespaceSalesData->sum('space_area');
+            $totalTablespaceSaleAmount = $tablespaceSalesData->sum(function ($room) {
+                return optional($room->sale)->total_amount ?: 0;
+            });
+    
+            // Fetch chairspace sales data
+            $chairspaceSalesData = Room::where('building_id', $buildingId)
+                ->where('room_type', 'Chairspaces')
+                ->where('status', 'sold') // Add condition to fetch only sold chairspaces
+                ->with([
+                    'sale' => function ($query) {
+                        $query->select('room_id', 'sale_amount', 'customer_name', 'total_amount');
+                    }
+                ])
+                ->get(['room_floor', 'room_number', 'room_type', 'chair_space_in_sq']);
+    
+            $totalChairspaceSqft = $chairspaceSalesData->sum('chair_space_in_sq');
+            $totalChairspaceSaleAmount = $chairspaceSalesData->sum(function ($room) {
+                return optional($room->sale)->total_amount ?: 0;
+            });
+    
+            // Fetch all room types with counter_status = 'active'
+            $activeRoomTypes = RoomType::where('counter_status', 'active')->pluck('name')->toArray();
+    
+            // Fetch counter sales data for the active room types
+            $counterSalesData = Room::where('building_id', $buildingId)
+                ->whereIn('room_type', $activeRoomTypes) // Filter for active room types
+                ->where('status', 'active') // Filter for active counters
+                ->with([
+                    'sale' => function ($query) {
+                        $query->select('room_id', 'sale_amount', 'customer_name', 'total_amount');
+                    }
+                ])
+                ->get(['room_floor', 'room_number', 'room_type', 'custom_area']);
+    
+            // Calculate total custom area
+            $totalCounterCustomArea = $counterSalesData->sum('custom_area');
+    
+            // Calculate total counter sales amount
+            $totalCounterSaleAmount = $counterSalesData->sum(function ($room) {
+                return optional($room->sale)->total_amount ?: 0;
+            });
+
 
         $parkingSalesData = DB::table('parkings')
             ->leftJoin('sales', 'parkings.id', '=', 'sales.parking_id') // Use LEFT JOIN to fetch all occupied parkings
@@ -292,7 +446,19 @@ class SalesReportController extends Controller
             'totalparkingnumber',
             'totalSalesAmount',
             'parkingSalesData',
-            'building'
+            'building',
+            'kioskSalesData',
+            'totalKioskSqft',
+            'totalKioskSaleAmount',
+            'tablespaceSalesData',
+            'totalTablespaceSqft',
+            'totalTablespaceSaleAmount',
+            'chairspaceSalesData',
+            'totalChairspaceSqft',
+            'totalChairspaceSaleAmount',
+            'counterSalesData',
+            'totalCounterCustomArea',
+            'totalCounterSaleAmount'
         ));
 
         return $pdf->download('sales_all_report.pdf');
@@ -351,24 +517,25 @@ class SalesReportController extends Controller
             ->get(['room_floor', 'room_number', 'room_type', 'build_up_area']);
 
         $totalShopSqft = $shopSalesData->sum('build_up_area');
-         // Calculate totalShopSaleAmount (sum of total_amount)
-         $totalShopSaleAmount = $shopSalesData->sum(function ($room) {
+        // Calculate totalShopSaleAmount (sum of total_amount)
+        $totalShopSaleAmount = $shopSalesData->sum(function ($room) {
             return optional($room->sale)->total_amount ?: 0; // Sum total_amount from 'sale'
         });
 
         $pdf = PDF::loadView('pdf.sales_commercial_report_pdf', compact(
-                'building',
-                'shopSalesData',
-                'totalShopSqft',
-                'totalShopSaleAmount'
-            ));
-    
-            return $pdf->download('sales_commercial_report.pdf');
-    
+            'building',
+            'shopSalesData',
+            'totalShopSqft',
+            'totalShopSaleAmount'
+        ));
+
+        return $pdf->download('sales_commercial_report.pdf');
+
 
     }
 
-    public function salesparkingPDF($buildingId){
+    public function salesparkingPDF($buildingId)
+    {
 
         $building = Building::findOrFail($buildingId);
 
@@ -397,23 +564,24 @@ class SalesReportController extends Controller
 
     }
 
-    public function salessummaryPDF($buildingId){
+    public function salessummaryPDF($buildingId)
+    {
 
         $building = Building::findOrFail($buildingId);
 
-         // Get the totals by calling the allSales method and passing the buildingId
-         $salesSummary = $this->allSales($buildingId); // Call the allSales method
+        // Get the totals by calling the allSales method and passing the buildingId
+        $salesSummary = $this->allSales($buildingId); // Call the allSales method
 
-         // Extract values from the allSales method's result
-         $totalShopSqft = $salesSummary->totalShopSqft ?? 0;
-         $totalShopSaleAmount = $salesSummary->totalShopSaleAmount ?? 0;
-         $totalApartmentSqft = $salesSummary->totalApartmentSqft ?? 0;
-         $totalApartmentSaleAmount = $salesSummary->totalApartmentSaleAmount ?? 0;
-         $totalSqft = $salesSummary->totalSqft ?? 0;
-         $totalParkingSales = $salesSummary->totalParkingSales ?? 0;
-         $totalparkingnumber = $salesSummary->totalparkingnumber ?? 0;
+        // Extract values from the allSales method's result
+        $totalShopSqft = $salesSummary->totalShopSqft ?? 0;
+        $totalShopSaleAmount = $salesSummary->totalShopSaleAmount ?? 0;
+        $totalApartmentSqft = $salesSummary->totalApartmentSqft ?? 0;
+        $totalApartmentSaleAmount = $salesSummary->totalApartmentSaleAmount ?? 0;
+        $totalSqft = $salesSummary->totalSqft ?? 0;
+        $totalParkingSales = $salesSummary->totalParkingSales ?? 0;
+        $totalparkingnumber = $salesSummary->totalparkingnumber ?? 0;
 
-         $pdf = PDF::loadView('pdf.sales_summary_report_pdf', compact(
+        $pdf = PDF::loadView('pdf.sales_summary_report_pdf', compact(
             'building',
             'totalShopSqft',
             'totalShopSaleAmount',
