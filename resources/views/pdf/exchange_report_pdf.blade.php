@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Exchange Report PDF</title>
     <style>
-    /* Styling similar to the original page */
+    /* Styling for local photocopy (black-and-white) output */
     body {
         font-family: Arial, sans-serif;
         margin: 0;
@@ -20,11 +20,11 @@
 
     h1 {
         text-align: center;
-        background-color: #00B8B8;
-        color: white;
         padding: 10px;
         margin: 10px 0;
         font-size: 18px; /* Reduced font size */
+        border: 1px solid #000; /* Black border for visual emphasis */
+        font-weight: bold;
     }
 
     table {
@@ -35,7 +35,7 @@
     }
 
     th, td {
-        border: 1px solid #ddd;
+        border: 1px solid #000; /* Solid black border */
         text-align: center;
         padding: 5px; /* Reduced padding */
         word-wrap: break-word;
@@ -43,14 +43,13 @@
     }
 
     th {
-        background-color: #00B8B8;
-        color: white;
+        font-weight: bold; /* Emphasize header text */
         text-transform: uppercase;
     }
 
     .total-row td {
         font-weight: bold;
-        background-color: #EDEDED;
+        border: 1px solid #000; /* Ensure consistent black border */
     }
 
     /* Adjustments for printing */
@@ -75,6 +74,7 @@
 
         h1 {
             font-size: 16px;
+            border: 1px solid #000; /* Ensure border for header */
         }
 
         .container {
@@ -82,6 +82,7 @@
         }
     }
 </style>
+
 
 </head>
 <body>

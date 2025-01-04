@@ -2,6 +2,14 @@
 
 @section('content')
 <div class="container">
+
+    <div style="text-align: right;">
+        <a href="{{ route('admin.availability_shop.pdf', $building->id) }}" class="btn btn-primary">
+            <i class="fas fa-arrow-down"></i> Download PDF
+        </a>
+
+    </div>
+
     <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
         <thead>
             <!-- Title Row -->
@@ -43,9 +51,11 @@
                 <td colspan="4" style="border: 1px solid #ddd; text-align: right; padding: 10px; font-weight: bold;">
                     Total</td>
                 <td style="border: 1px solid #ddd; text-align: center; padding: 10px; font-weight: bold;">
-                    {{ number_format($totalBuildUpArea) }}</td>
+                    {{ number_format($totalBuildUpArea) }}
+                </td>
                 <td style="border: 1px solid #ddd; text-align: center; padding: 10px; font-weight: bold;">
-                    {{ number_format($totalCarpetArea) }}</td>
+                    {{ number_format($totalCarpetArea) }}
+                </td>
             </tr>
         </tfoot>
     </table>

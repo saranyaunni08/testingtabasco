@@ -290,6 +290,10 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
 
         Route::get('/pdf/availability_flat_pdf/{buildingId}',[AvailabilityController::class,'availabilityflatPDF'])->name('availability_flat.pdf');
 
+        Route::get('/pdf/availability_shop_pdf/{buildingId}',[AvailabilityController::class,'availabilityshopPDF'])->name('availability_shop.pdf');
+
+        
+
 
         Route::get('/admin/bankaccount/{bankName}account/{buildingId}', [BankAccountController::class, 'show'])
             ->name('admin.bankaccount.dynamicaccount');

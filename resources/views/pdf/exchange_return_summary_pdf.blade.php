@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Exchange Return Summary Report PDF</title>
     <style>
-    /* Styling similar to the original page */
+    /* Styling similar to the original page but without colors */
     body {
         font-family: Arial, sans-serif;
         margin: 0;
@@ -20,11 +20,10 @@
 
     h1 {
         text-align: center;
-        background-color: #00B8B8;
-        color: white;
         padding: 10px;
         margin: 10px 0;
         font-size: 18px; /* Reduced font size */
+        border: 1px solid #000; /* Border for visual separation */
     }
 
     table {
@@ -35,7 +34,7 @@
     }
 
     th, td {
-        border: 1px solid #ddd;
+        border: 1px solid #000; /* Black border */
         text-align: center;
         padding: 5px; /* Reduced padding */
         word-wrap: break-word;
@@ -43,14 +42,13 @@
     }
 
     th {
-        background-color: #00B8B8;
-        color: white;
+        font-weight: bold; /* Emphasize headers */
         text-transform: uppercase;
     }
 
     .total-row td {
         font-weight: bold;
-        background-color: #EDEDED;
+        border: 1px solid #000; /* Ensure black border */
     }
 
     /* Adjustments for printing */
@@ -75,6 +73,7 @@
 
         h1 {
             font-size: 16px;
+            border: 1px solid #000; /* Border for separation in print */
         }
 
         .container {
@@ -82,6 +81,7 @@
         }
     }
 </style>
+
 </head>
 <body>
     <!-- RETURN SUMMARY SECTION -->
