@@ -363,6 +363,7 @@ class SaleController extends Controller
             ->header('Content-Type', 'text/csv')
             ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
     }
+    
 
     // public function markMultipleAsPaid(Request $request)
     // {

@@ -18,6 +18,7 @@
                     <th>ID</th>
                     <th>Room Type Name</th>
                     <th>Created At</th>
+                    <th><i class="fas fa-check-circle"></i> Counter Status</th>
                 </tr>
             </thead>
             <tbody>
@@ -26,7 +27,14 @@
                         <td>{{ $roomType->id }}</td>
                         <td>{{ $roomType->name }}</td>
                         <td>{{ $roomType->created_at }}</td>
+                        <td>{{ ucfirst($roomType->counter_status) }}</td> <!-- Capitalize first letter -->
                     </tr>
+                    @empty
+                        <tr>
+                            <td colspan="3" class="text-center">No room types found.</td>
+                            <td colspan="4" class="text-center">No room types found.</td>
+                        </tr>
+                    @endforelse
                 @endforeach
             </tbody>
         </table>

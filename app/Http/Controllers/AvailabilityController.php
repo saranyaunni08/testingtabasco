@@ -29,10 +29,17 @@ class AvailabilityController extends Controller
                 return $room;
             });
 
-        $counterRooms = Room::where('building_id', $buildingId)
-            ->where('room_type', 'Counter') // Filter only counter rooms
-            ->select(['room_floor', 'custom_type', 'room_number', 'room_type']) // Select required columns
+        $counterRooms = Room::join('room_types', 'rooms.room_type', '=', 'room_types.name') // Join the room_types table
+            ->where('rooms.status', 'Available') // Filter rooms with status = available
+            ->where('room_types.counter_status', 'Active') // Filter room_types with counter_status = active
+            ->select([
+                'rooms.room_floor',
+                'rooms.room_number',
+                'rooms.room_type'
+            ]) // Select required columns from the rooms table
             ->get();
+
+
 
         // Pass the data to the view
         $title = 'Total Availability';
@@ -164,6 +171,18 @@ class AvailabilityController extends Controller
         $totalcarpet = $totalCarpetArea + $totalFlatCarpetArea;
 
 
+        $counterRooms = Room::join('room_types', 'rooms.room_type', '=', 'room_types.name') // Join the room_types table
+            ->where('rooms.status', 'Available') // Filter rooms with status = available
+            ->where('room_types.counter_status', 'Active') // Filter room_types with counter_status = active
+            ->select([
+                'rooms.room_floor',
+                'rooms.room_number',
+                'rooms.room_type'
+            ]) // Select required columns from the rooms table
+            ->get();
+        $totalCounter = $counterRooms->count(); // Count the number of counter rooms
+
+
 
 
         // Define the page title and name
@@ -171,7 +190,7 @@ class AvailabilityController extends Controller
         $page = 'summary';
 
         // Pass data to the view
-        return view('availability.summary', compact('building', 'title', 'page', 'totalBuildUpArea', 'totalCarpetArea', 'totalShops', 'totalFlats', 'totalFlatCarpetArea', 'totalFlatBuildUpArea', 'totalnos', 'totalbuildup', 'totalcarpet', 'totalparking'));
+        return view('availability.summary', compact('building', 'title', 'page', 'totalBuildUpArea', 'totalCarpetArea', 'totalShops', 'totalFlats', 'totalFlatCarpetArea', 'totalFlatBuildUpArea', 'totalnos', 'totalbuildup', 'totalcarpet', 'totalparking', 'counterRooms', 'totalCounter'));
     }
 
     public function totalavailabilityPDF($buildingId)
@@ -194,10 +213,16 @@ class AvailabilityController extends Controller
                 return $room;
             });
 
-        $counterRooms = Room::where('building_id', $buildingId)
-            ->where('room_type', 'Counter') // Filter only counter rooms
-            ->select(['room_floor', 'custom_type', 'room_number', 'room_type']) // Select required columns
+        $counterRooms = Room::join('room_types', 'rooms.room_type', '=', 'room_types.name') // Join the room_types table
+            ->where('rooms.status', 'Available') // Filter rooms with status = available
+            ->where('room_types.counter_status', 'Active') // Filter room_types with counter_status = active
+            ->select([
+                'rooms.room_floor',
+                'rooms.room_number',
+                'rooms.room_type'
+            ]) // Select required columns from the rooms table
             ->get();
+
 
         $pdf = PDF::loadView('pdf.total_availability_pdf', compact('building', 'availability', 'parkings', 'counterRooms'));
 
@@ -258,20 +283,94 @@ class AvailabilityController extends Controller
         $totalBuildUpArea = $availability->sum('build_up_area');
         $totalCarpetArea = $availability->sum('carpet_area');
 
-        
-        $pdf = PDF::loadView('pdf.availability_shop_pdf', compact('building', 'availability',
+
+        $pdf = PDF::loadView('pdf.availability_shop_pdf', compact(
+            'building',
+            'availability',
             'totalBuildUpArea',
-            'totalCarpetArea'));
+            'totalCarpetArea'
+        ));
 
         return $pdf->download('availability_shop.pdf');
 
 
+    }
 
+    public function availabilityparkingPDF($buildingId)
+    {
+
+        // Fetch the building details using the given building ID
+        $building = Building::findOrFail($buildingId);
+        $parkings = Parking::all();
+
+        $pdf = PDF::loadView('pdf.availability_parking_pdf', compact('building', 'parkings'));
+
+        return $pdf->download('availability_parking.pdf');
 
 
     }
 
 
+    public function availabilitysummaryPDF($buildingId){
+              
+           // Fetch the building details using the given building ID
+           $building = Building::findOrFail($buildingId);
+
+        // Assuming you have a 'Parking' model
+        $parkings = Parking::where('status', 'available') // Filter available parking spots
+            ->get();
+
+        // Fetch shops data
+        $shops = Room::where('building_id', $buildingId)
+            ->where('room_type', 'Shops')
+            ->where('status', 'available')
+            ->select(['build_up_area', 'carpet_area'])
+            ->get();
+
+        // Calculate totals
+        $totalBuildUpArea = $shops->sum('build_up_area');
+        $totalCarpetArea = $shops->sum('carpet_area');
+        $totalShops = $shops->count();
+
+        // Fetch flats data
+        $flats = Room::where('building_id', $buildingId)
+            ->where('room_type', 'Flats') // Filter flats only
+            ->where('status', 'available') // Filter available flats
+            ->select(['flat_build_up_area', 'flat_carpet_area'])
+            ->get();
+
+        // Calculate totals for flats
+        $totalFlatBuildUpArea = $flats->sum('flat_build_up_area');
+        $totalFlatCarpetArea = $flats->sum('flat_carpet_area');
+        $totalFlats = $flats->count();
+
+        $totalparking = $parkings->count();
+
+
+
+        $totalnos = $totalShops + $totalFlats + $totalparking;
+        $totalbuildup = $totalBuildUpArea + $totalFlatBuildUpArea;
+        $totalcarpet = $totalCarpetArea + $totalFlatCarpetArea;
+
+
+        $counterRooms = Room::join('room_types', 'rooms.room_type', '=', 'room_types.name') // Join the room_types table
+            ->where('rooms.status', 'Available') // Filter rooms with status = available
+            ->where('room_types.counter_status', 'Active') // Filter room_types with counter_status = active
+            ->select([
+                'rooms.room_floor',
+                'rooms.room_number',
+                'rooms.room_type'
+            ]) // Select required columns from the rooms table
+            ->get();
+        $totalCounter = $counterRooms->count(); // Count the number of counter rooms
+
+
+        $pdf = PDF::loadView('pdf.availability_summary_pdf', compact('building','totalBuildUpArea', 'totalCarpetArea', 'totalShops', 'totalFlats', 'totalFlatCarpetArea', 'totalFlatBuildUpArea', 'totalnos', 'totalbuildup', 'totalcarpet', 'totalparking', 'counterRooms', 'totalCounter'));
+
+        return $pdf->download('availability_summary.pdf');
+
+
+    }
 
 
 

@@ -13,7 +13,8 @@ class RoomType extends Model
     protected $table = 'room_types';
 
     // Allow mass assignment for the 'name' column
-    protected $fillable = ['name'];
+    protected $fillable = ['name','counter_status'];
+  
 
     // Define any relationships or additional functionality here if needed
 }

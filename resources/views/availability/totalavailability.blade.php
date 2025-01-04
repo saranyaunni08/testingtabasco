@@ -76,8 +76,7 @@
             </th>
             <th style="border: 1px solid #000; text-align: center; padding: 8px; background-color: #d9d9d9;">PARKING
                 NUMBER</th>
-            <th style="border: 1px solid #000; text-align: center; padding: 8px; background-color: #d9d9d9;">NAME
-            </th>
+            
         </tr>
     </thead>
     <tbody>
@@ -88,7 +87,7 @@
                     <td style="border: 1px solid #000; text-align: center; padding: 8px;">{{ $item['floor_number'] }}</td>
                     <td style="border: 1px solid #000; text-align: center; padding: 8px;">Parking</td>
                     <td style="border: 1px solid #000; text-align: center; padding: 8px;">{{ $item['slot_number'] }}</td>
-                    <td style="border: 1px solid #000; text-align: center; padding: 8px;">{{ $item['purchaser_name'] }}</td>
+                    
                 </tr>
             @endif
         @endforeach
@@ -111,7 +110,6 @@
             <th style="border: 1px solid #000; text-align: center; padding: 12px; background-color: #d9d9d9;">FLOOR</th>
             <th style="border: 1px solid #000; text-align: center; padding: 12px; background-color: #d9d9d9;">TYPE</th>
             <th style="border: 1px solid #000; text-align: center; padding: 12px; background-color: #d9d9d9;">COUNTER NUMBER</th>
-            <th style="border: 1px solid #000; text-align: center; padding: 12px; background-color: #d9d9d9;">NAME</th>
         </tr>
     </thead>
     <tbody>
@@ -119,9 +117,9 @@
             <tr>
                 <td style="border: 1px solid #000; text-align: center; padding: 10px;">{{ $index + 1 }}</td>
                 <td style="border: 1px solid #000; text-align: center; padding: 10px;">{{ $room->room_floor }}</td>
-                <td style="border: 1px solid #000; text-align: center; padding: 10px;">{{ $room->custom_type }}</td>
+                <td style="border: 1px solid #000; text-align: center; padding: 10px;">{{ $room->room_type }}</td>
                 <td style="border: 1px solid #000; text-align: center; padding: 10px;">{{ $room->room_number }}</td>
-                <td style="border: 1px solid #000; text-align: center; padding: 10px;">---</td>
+
             </tr>
         @empty
             <tr>

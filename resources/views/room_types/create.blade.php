@@ -29,7 +29,18 @@
             <label for="name" class="form-label">Room Type Name</label>
             <input type="text" name="name" class="form-control" id="name" placeholder="Enter room type" required>
         </div>
-        <button type="submit" class="btn btn-primary">Add Room Type</button>
+
+        <div class="form-group mt-3">
+                <label for="counter_status">Does this room type come under a counter?</label>
+                <select class="form-control" id="counter_status" name="counter_status" required>
+                    <option value="inactive">No</option>
+                    <option value="active">Yes</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary mt-4">Create Room Type</button>
+            <div class="d-grid">
+                <button type="submit" class="btn btn-primary btn-lg"><i class="fas fa-plus-circle"></i> Add Room Type</button>
+            </div>
     </form>
 
     <!-- Link to go back to the room types listing page -->

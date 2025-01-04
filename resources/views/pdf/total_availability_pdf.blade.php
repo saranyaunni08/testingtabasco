@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Total Availability PDF</title>
     <style>
@@ -25,7 +26,8 @@
         table-layout: fixed;
     }
 
-    th, td {
+    th,
+    td {
         border: 1px solid #000;
         padding: 6px;
         text-align: center;
@@ -39,6 +41,18 @@
 
     td {
         font-size: 11px;
+    }
+
+    /* Specific styles for Counter Table */
+    table.counter-table th,
+    table.counter-table td {
+        /* No specific styles for Counter Table to ensure a uniform appearance */
+    }
+
+    /* Specific styles for Parking Table */
+    table.parking-table th,
+    table.parking-table td {
+        /* No specific styles for Parking Table to ensure a uniform appearance */
     }
 
     /* Adjustments for better print alignment */
@@ -55,8 +69,8 @@
 </style>
 
 </head>
+
 <body>
-    
     <!-- Availability Table -->
     <table>
         <thead>
@@ -87,17 +101,16 @@
     </table>
 
     <!-- Parking Table -->
-    <table>
+    <table class="parking-table">
         <thead>
             <tr>
-                <th colspan="5">PARKING</th>
+                <th colspan="4">PARKING</th>
             </tr>
             <tr>
                 <th>NO</th>
                 <th>FLOOR</th>
                 <th>TYPE</th>
                 <th>PARKING NUMBER</th>
-                <th>NAME</th>
             </tr>
         </thead>
         <tbody>
@@ -108,42 +121,43 @@
                         <td>{{ $item['floor_number'] }}</td>
                         <td>Parking</td>
                         <td>{{ $item['slot_number'] }}</td>
-                        <td>{{ $item['purchaser_name'] }}</td>
                     </tr>
                 @endif
             @endforeach
         </tbody>
     </table>
 
+
     <!-- Counter Table -->
-    <table>
+    <table class="counter-table">
         <thead>
             <tr>
-                <th colspan="5">COUNTER</th>
+                <th colspan="4">COUNTER</th>
             </tr>
             <tr>
                 <th>NO</th>
                 <th>FLOOR</th>
                 <th>TYPE</th>
                 <th>COUNTER NUMBER</th>
-                <th>NAME</th>
             </tr>
         </thead>
         <tbody>
-            @forelse ($counterRooms->sortBy('room_floor') as $index => $room)
+            @forelse ($counterRooms->sortBy('room_floor') as $index => $room) <!-- Sorting by room_floor -->
                 <tr>
                     <td>{{ $index + 1 }}</td>
                     <td>{{ $room->room_floor }}</td>
-                    <td>{{ $room->custom_type }}</td>
+                    <td>{{ $room->room_type }}</td>
                     <td>{{ $room->room_number }}</td>
-                    <td>---</td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="5">No counters available.</td>
+                    <td colspan="4">
+                        No counters available.
+                    </td>
                 </tr>
             @endforelse
         </tbody>
     </table>
 </body>
+
 </html>

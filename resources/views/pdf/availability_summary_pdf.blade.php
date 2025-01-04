@@ -1,69 +1,40 @@
-@extends('layouts.default')
-
-@section('content')
-<style>
-    body {
-        font-family: Arial, sans-serif;
-        margin: 0;
-        padding: 0;
-        background-color: #f8f9fa;
-    }
-
-    .table-container {
-        width: 80%;
-        margin: 20px auto;
-        background: #ffffff;
-        padding: 20px;
-        border: 1px solid #ddd;
-        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-        border-radius: 8px;
-    }
-
-    h2 {
-        text-align: center;
-        background-color: #008080;
-        color: #ffffff;
-        padding: 10px;
-        border-radius: 4px;
-    }
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Availability Summary PDF</title>
+    <style>
     table {
         width: 100%;
         border-collapse: collapse;
-        margin-top: 20px;
     }
-
-    th,
-    td {
+    th, td {
+        border: 1px solid #000;
         text-align: center;
-        padding: 10px;
-        border: 1px solid #ddd;
+        padding: 8px;
     }
-
     th {
-        background-color: #008080;
-        color: #ffffff;
+        background-color: #fff; /* Set background to white */
+        font-weight: bold;     /* Use bold text for headers */
     }
-
-    tr:nth-child(even) {
-        background-color: #f2f2f2;
+    .title-row th {
+        background-color: #fff; /* White background for title row */
+        color: #000;            /* Black text for title */
+        font-size: 20px;
+        font-weight: bold;      /* Make title stand out */
+        padding: 10px;
     }
-
-    tfoot {
+    tfoot td {
         font-weight: bold;
+        border: 1px solid #000; /* Ensure visible borders for totals */
+        text-align: right;
+        padding: 10px;
     }
 </style>
-
-
-
-<div class="table-container">
-<div style="text-align: right;">
-        <a href="{{ route('admin.availability_summary.pdf', $building->id) }}" class="btn btn-primary">
-            <i class="fas fa-arrow-down"></i> Download PDF
-        </a>
-
-    </div>
-    <h2>Availability Summary</h2>
+</head>
+<body>
+<h2>Availability Summary</h2>
     <table>
         <thead>
             <tr>
@@ -109,5 +80,6 @@
             </tr>
         </tfoot>
     </table>
-</div>
-@endsection
+
+</body>
+</html>

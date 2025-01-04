@@ -23,10 +23,12 @@ class RoomTypeController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
+            'counter_status' => 'required|in:active,inactive', // Validation for dropdown
         ]);
 
         RoomType::create([
             'name' => $request->name,
+            'counter_status' => $request->counter_status,
         ]);
 
         return redirect()->route('admin.room_types.index')->with('success', 'Room type added successfully!');

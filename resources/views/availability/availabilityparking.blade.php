@@ -2,6 +2,12 @@
 
 @section('content')
 <div class="container">
+<div style="text-align: right;">
+        <a href="{{ route('admin.availability_parking.pdf', $building->id) }}" class="btn btn-primary">
+            <i class="fas fa-arrow-down"></i> Download PDF
+        </a>
+
+    </div>
 
     <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
         <thead>
@@ -18,7 +24,7 @@
                 <th style="border: 1px solid #000; text-align: center; padding: 8px; background-color: #d9d9d9;">FLOOR</th>
                 <th style="border: 1px solid #000; text-align: center; padding: 8px; background-color: #d9d9d9;">TYPE</th>
                 <th style="border: 1px solid #000; text-align: center; padding: 8px; background-color: #d9d9d9;">PARKING NUMBER</th>
-                <th style="border: 1px solid #000; text-align: center; padding: 8px; background-color: #d9d9d9;">NAME</th>
+                
             </tr>
         </thead>
         <tbody>
@@ -29,7 +35,7 @@
                         <td style="border: 1px solid #000; text-align: center; padding: 8px;">{{ $item['floor_number'] }}</td>
                         <td style="border: 1px solid #000; text-align: center; padding: 8px;">Parking</td>
                         <td style="border: 1px solid #000; text-align: center; padding: 8px;">{{ $item['slot_number'] }}</td>
-                        <td style="border: 1px solid #000; text-align: center; padding: 8px;">{{ $item['purchaser_name'] }}</td>
+                       
                     </tr>
                 @endif
             @endforeach
