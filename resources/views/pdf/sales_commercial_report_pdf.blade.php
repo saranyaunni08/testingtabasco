@@ -1,66 +1,43 @@
-@extends('layouts.default')
-
-@section('content')
-<style>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sales Commercial Report PDF</title>
+    <style>
     body {
-        font-family: Arial, sans-serif;
-    }
+    font-family: Arial, sans-serif;
+}
 
-    table {
-        border-collapse: collapse;
-        width: 100%;
-    }
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
 
-    th,
-    td {
-        border: 1px solid #ddd;
-        padding: 8px;
-        text-align: center;
-    }
+th, td {
+    border: 1px solid #000; /* Solid black border for a more print-friendly appearance */
+    padding: 8px;
+    text-align: center;
+}
 
-    th {
-        background-color: #009688;
-        color: white;
-        font-weight: bold;
-    }
+th {
+    font-weight: bold; /* Keep text bold in the header */
+}
 
-    .title-row td {
-        font-size: 20px;
-        font-weight: bold;
-        color: #ffffff;
-        text-align: center;
-        background-color: #009688;
-        border: none;
-        padding: 20px;
-    }
+.title-row td {
+    font-size: 20px;
+    font-weight: bold;
+    text-align: center;
+    border: none; /* No border for title row */
+    padding: 20px;
+}
 
-    .subheading {
-        background-color: #f2f2f2;
-        color: black;
-    }
+.subheading {
+    color: black; /* No background or color for subheading */
+}
 
-    .note {
-        color: red;
-        font-style: italic;
-        margin-top: 10px;
-    }
 
-    .footer-note {
-        margin-top: 20px;
-        font-size: 12px;
-        font-style: italic;
-        color: red;
-        text-align: left;
-    }
-</style>
-
-<div class="container">
-<div style="text-align: right;">
-    <a href="{{ route('admin.sales_commercial_report.pdf', $building->id) }}" class="btn btn-primary">
-    <i class="fas fa-arrow-down"></i> Download PDF
-</a>
-
-</div>
+    </style>
+</head>
+<body>
 <table>
     <thead>
         <tr class="title-row">
@@ -117,8 +94,5 @@
 </table>
 
 
-
-
-
-</div>
-@endsection
+</body>
+</html>

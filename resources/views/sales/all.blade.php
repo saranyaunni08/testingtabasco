@@ -63,8 +63,15 @@
 
   
 </div>
+
+<div style="text-align: right;">
+    <a href="{{ route('admin.sales_all_report.pdf', $building->id) }}" class="btn btn-primary">
+    <i class="fas fa-arrow-down"></i> Download PDF
+</a>
+
+</div>
    <!-- Commercial Sales Report -->
-<table>
+   <table>
     <thead>
         <tr class="title-row">
             <td colspan="7">COMMERCIAL SALES REPORT</td>
@@ -80,32 +87,47 @@
         </tr>
     </thead>
     <tbody>
-        @foreach ($shopSalesData->sortBy('room_floor') as $row) <!-- Sort by room_floor -->
-        <tr>
-            <td>{{ $row->room_floor }}</td>
-            <td>{{ $row->room_number }}</td>
-            <td>{{ $row->room_type }}</td>
-            <td>{{ number_format($row->build_up_area) }}</td>
-            <td>{{ number_format($row->sale_amount) }}</td>
-            <td>{{ number_format($row->build_up_area * $row->sale_amount, 2) }}</td>
-            <td>{{ $row->customer_name }}</td>
-        </tr>
+        @php
+            // Group the sales data by floor
+            $groupedByFloor = $shopSalesData->groupBy('room_floor');
+        @endphp
+
+        @foreach ($groupedByFloor as $floor => $floorData)
+            @php
+                // Calculate totals for the current floor
+                $floorTotalSqft = $floorData->sum('build_up_area');
+                $floorTotalSaleAmount = $floorData->sum(function ($row) {
+                    return optional($row->sale)->total_amount ?: 0;
+                });
+            @endphp
+
+            <!-- Display floor-wise data -->
+            @foreach ($floorData as $row)
+                <tr>
+                    <td>{{ $row->room_floor }}</td>
+                    <td>{{ $row->room_number }}</td>
+                    <td>{{ $row->room_type }}</td>
+                    <td>{{ number_format($row->build_up_area) }}</td>
+                    <td>{{ number_format($row->sales_amount) }}</td>
+                    <td>{{ number_format(optional($row->sale)->total_amount, 2) }}</td>
+                    <td>{{ $row->customer_name }}</td>
+                </tr>
+            @endforeach
+
+            <!-- Display total for the current floor -->
+            <tr>
+                <td colspan="3" style="font-weight: bold;">TOTAL</td>
+                <td>{{ number_format($floorTotalSqft) }}</td>
+                <td></td>
+                <td>{{ number_format($floorTotalSaleAmount) }}</td>
+                <td></td>
+            </tr>
         @endforeach
     </tbody>
-    <tfoot>
-        <tr>
-            <td colspan="3" style="font-weight: bold;">TOTAL</td>
-            <td>{{ number_format($totalShopSqft) }}</td>
-            <td></td>
-            <td>{{ number_format($totalShopSaleAmount) }}</td>
-            <td></td>
-        </tr>
-    </tfoot>
 </table>
 
-
  <!-- Apartment Sales Report -->
-<table>
+ <table>
     <thead>
         <tr class="title-row">
             <td colspan="7">APARTMENT SALES REPORT</td>
@@ -121,27 +143,43 @@
         </tr>
     </thead>
     <tbody>
-        @foreach ($apartmentSalesData->sortBy('room_floor') as $row) <!-- Sort by room_floor -->
-        <tr>
-            <td>{{ $row->room_floor }}</td>
-            <td>{{ $row->room_number }}</td>
-            <td>{{ $row->room_type }}</td>
-            <td>{{ number_format($row->flat_build_up_area) }}</td>
-            <td>{{ number_format($row->sale_amount) }}</td>
-            <td>{{ number_format($row->build_up_area * $row->sale_amount, 2) }}</td>
-            <td>{{ $row->customer_name }}</td>
-        </tr>
+        @php
+            // Group the apartment sales data by floor
+            $groupedByFloor = $apartmentSalesData->groupBy('room_floor');
+        @endphp
+
+        @foreach ($groupedByFloor as $floor => $floorData)
+            @php
+                // Calculate totals for the current floor
+                $floorTotalSqft = $floorData->sum('flat_build_up_area');
+                $floorTotalSaleAmount = $floorData->sum(function ($row) {
+                    return optional($row->sale)->total_amount ?: 0;
+                });
+            @endphp
+
+            <!-- Display floor-wise data -->
+            @foreach ($floorData as $row)
+                <tr>
+                    <td>{{ $row->room_floor }}</td>
+                    <td>{{ $row->room_number }}</td>
+                    <td>{{ $row->room_type }}</td>
+                    <td>{{ number_format($row->flat_build_up_area) }}</td>
+                    <td>{{ number_format($row->sales_amount) }}</td>
+                    <td>{{ number_format(optional($row->sale)->total_amount, 2) }}</td>
+                    <td>{{ $row->customer_name }}</td>
+                </tr>
+            @endforeach
+
+            <!-- Display total for the current floor -->
+            <tr>
+                <td colspan="3" style="font-weight: bold;">TOTAL</td>
+                <td>{{ number_format($floorTotalSqft) }}</td>
+                <td></td>
+                <td>{{ number_format($floorTotalSaleAmount) }}</td>
+                <td></td>
+            </tr>
         @endforeach
     </tbody>
-    <tfoot>
-        <tr>
-            <td colspan="3" style="font-weight: bold;">TOTAL</td>
-            <td>{{ number_format($totalApartmentSqft) }}</td>
-            <td></td>
-            <td>{{ number_format($totalApartmentSaleAmount) }}</td>
-            <td></td>
-        </tr>
-    </tfoot>
 </table>
 
 <!-- Parking Sales Report -->

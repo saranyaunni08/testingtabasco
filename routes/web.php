@@ -292,6 +292,16 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
 
         Route::get('/pdf/availability_shop_pdf/{buildingId}',[AvailabilityController::class,'availabilityshopPDF'])->name('availability_shop.pdf');
 
+        Route::get('/pdf/sales_all_report_pdf/{buildingId}',[SalesReportController::class,'salesallPDF'])->name('sales_all_report.pdf');
+
+        Route::get('/pdf/sales_apartment_report_pdf/{buildingId}',[SalesReportController::class,'salesapartmentPDF'])->name('sales_apartment_report.pdf');
+
+        Route::get('/pdf/sales_commercial_report_pdf/{buildingId}',[SalesReportController::class,'salescommercialPDF'])->name('sales_commercial_report.pdf');
+
+        Route::get('/pdf/sales_parking_report_pdf/{buildingId}',[SalesReportController::class,'salesparkingPDF'])->name('sales_parking_report.pdf');
+
+        Route::get('/pdf/sales_summary_report_pdf/{buildingId}',[SalesReportController::class,'salessummaryPDF'])->name('sales_summary_report.pdf');
+
         
 
 

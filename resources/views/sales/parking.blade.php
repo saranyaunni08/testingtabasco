@@ -55,6 +55,13 @@
 </style>
 
 <div class="container">
+
+<div class="container">
+<div style="text-align: right;">
+    <a href="{{ route('admin.sales_parking_report.pdf', $building->id) }}" class="btn btn-primary">
+    <i class="fas fa-arrow-down"></i> Download PDF
+</a>
+</div>
  <!-- Parking Sales Report -->
  <table>
     <thead>

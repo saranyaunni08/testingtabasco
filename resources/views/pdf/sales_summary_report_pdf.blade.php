@@ -1,13 +1,43 @@
-@extends('layouts.default')
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sales Summary Report PDF</title>
+    <style>
+    body {
+    font-family: Arial, sans-serif;
+}
 
-@section('content')
-<div class="container">
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
 
-<div style="text-align: right;">
-    <a href="{{ route('admin.sales_summary_report.pdf', $building->id) }}" class="btn btn-primary">
-    <i class="fas fa-arrow-down"></i> Download PDF
-</a>
-</div>
+th, td {
+    border: 1px solid #000; /* Solid black border for a more print-friendly appearance */
+    padding: 8px;
+    text-align: center;
+}
+
+th {
+    font-weight: bold; /* Keep text bold in the header */
+}
+
+.title-row td {
+    font-size: 20px;
+    font-weight: bold;
+    text-align: center;
+    border: none; /* No border for title row */
+    padding: 20px;
+}
+
+.subheading {
+    color: black; /* No background or color for subheading */
+}
+
+
+    </style>
+</head>
+<body>
 <table>
     <thead>
         <!-- SALES SUMMARY Header Inside Table -->
@@ -52,58 +82,6 @@
     </tbody>
 </table>
 
-</div>
 
-<style>
-    /* General Page Styling */
-    .container {
-        margin: 0 auto;
-        padding: 20px;
-        font-family: Arial, sans-serif;
-        max-width: 800px;
-    }
-
-    /* Table Styling */
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 20px;
-        text-align: center;
-        font-size: 14px;
-    }
-
-    th, td {
-        border: 1px solid #ddd;
-        padding: 10px;
-    }
-
-    th {
-        background-color: #009688;
-        color: white;
-        font-weight: bold;
-    }
-
-    tr:nth-child(even) {
-        background-color: #f9f9f9;
-    }
-
-    tr:hover {
-        background-color: #f1f1f1;
-    }
-
-    .total-row {
-        font-weight: bold;
-        background-color: #e0f2f1;
-    }
-
-    /* Table Header Styling */
-    .table-header {
-        text-align: center;
-        font-size: 20px;
-        font-weight: bold;
-        background-color: #009688;
-        color: white;
-        padding: 15px;
-    }
-</style>
-@endsection
+</body>
+</html>
