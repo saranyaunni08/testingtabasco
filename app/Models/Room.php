@@ -34,4 +34,9 @@ class Room extends Model
     {
         return $this->hasOne(Sale::class);
     }
+    public function roomtype()
+    {
+        return $this->belongsTo(RoomType::class, 'room_type_id');
+    }
+    
 }

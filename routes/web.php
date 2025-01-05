@@ -306,6 +306,14 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
 
         Route::get('/pdf/sales_summary_report_pdf/{buildingId}',[SalesReportController::class,'salessummaryPDF'])->name('sales_summary_report.pdf');
 
+        Route::get('/pdf/sales_return_report_all_pdf/{buildingId}',[SalesReturnReportController::class,'salesreturnallPDF'])->name('sales_return_report_all.pdf');
+
+        Route::get('/pdf/sales_return_parking_report_pdf/{buildingId}',[SalesReturnReportController::class,'salesreturnparkingPDF'])->name('sales_return_parking_report.pdf');
+
+        Route::get('/pdf/sale_return_commercial_report_pdf/{buildingId}',[SalesReturnReportController::class,'salesreturncommercialPDF'])->name('sales_return_commercial_report.pdf');
+
+        Route::get('/pdf/sales_return_apartment_report_pdf/{buildingId}',[SalesReturnReportController::class,'salesreturnapartmentPDF'])->name('sales_return_apartment_report.pdf');
+
         
 
 

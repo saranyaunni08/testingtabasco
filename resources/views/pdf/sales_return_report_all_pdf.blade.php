@@ -1,87 +1,51 @@
-@extends('layouts.default')
-
-@section('content')
-<style>
-    /* General Styles */
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sales Return Report All PDF</title>
+    <style>
     body {
         font-family: Arial, sans-serif;
-        margin: 20px;
-    }
-
-    .report-title {
-        text-align: center;
-        font-size: 20px;
-        font-weight: bold;
-        background-color: #F89A6B;
-        /* Orange */
-        color: white;
-        padding: 10px 0;
-        margin-bottom: 5px;
-    }
-
-    .section-header {
-        text-align: center;
-        font-weight: bold;
-        font-size: 16px;
-        background-color: #00838F;
-        /* Teal */
-        color: white;
-        padding: 8px;
     }
 
     table {
-        width: 100%;
         border-collapse: collapse;
-        margin-bottom: 20px;
+        width: 100%;
     }
 
-    th,
-    td {
-        border: 1px solid #ddd;
-        text-align: center;
+    th, td {
+        border: 1px solid #000; /* Solid black border for a more print-friendly appearance */
         padding: 8px;
-        font-size: 14px;
+        text-align: center;
     }
 
     th {
-        background-color: #00838F;
-        /* Teal Header */
-        color: white;
+        font-weight: bold; /* Keep text bold in the header */
     }
 
-    .total-row {
+    .title-row td {
+        font-size: 20px;
         font-weight: bold;
+        text-align: center;
+        border: none; /* No border for title row */
+        padding: 20px;
     }
 
-    .note {
-        color: red;
-        font-size: 12px;
-        margin-left: 10px;
+    .subheading {
+        font-weight: bold; /* Keep subheading bold */
     }
 
-    tr:nth-child(even) {
-        background-color: #f9f9f9;
+    /* Section Header Style */
+    .section-header {
+        font-size: 24px; /* Adjust font size for section header */
+        font-weight: bold;
+        text-align: center; /* Center align the text */
+        margin-top: 20px; /* Add space above the section header */
+        margin-bottom: 20px; /* Add space below the section header */
     }
 </style>
-<div class="container">
-    <div class="d-flex justify-content-center mb-4 gap-3">
-        <a href="{{ route('admin.salesreturn.commercial', $building->id) }}"
-            class="btn btn-outline-primary">Commercial</a>
-        <a href="{{ route('admin.salesreturn.apartment', $building->id)}}"
-            class="btn btn-outline-secondary">Apartment</a>
-        <a href="{{ route('admin.salesreturn.parking', $building->id)}}" class="btn btn-outline-success">Parking</a>
 
-
-
-    </div>
-
-    <div style="text-align: right;">
-        <a href="{{ route('admin.sales_return_report_all.pdf', $building->id) }}" class="btn btn-primary">
-            <i class="fas fa-arrow-down"></i> Download PDF
-        </a>
-
-    </div>
-
+</head>
+<body>
     <!-- REPORT TITLE -->
     <div class="report-title">SALES RETURN REPORT</div>
 
@@ -532,5 +496,5 @@
             </tr>
         </tbody>
     </table>
-
-    @endsection
+</body>
+</html>
