@@ -24,4 +24,9 @@ class CashInstallment extends Model
     {
         return $this->belongsTo(Sale::class);
     }
+
+    public function cashInstallmentPayments()
+    {
+        return $this->hasMany(CashInstallmentPayment::class);
+    }
 }

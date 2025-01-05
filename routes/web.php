@@ -206,10 +206,8 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
 
         // Bank Account Excel Controller 
         Route::get('/bank-account/bank_account/{building_id}', [BankAccountController::class, 'bankaccount'])->name('bankaccount.bank_account');
-        Route::get('/bankaccount.bank_axisbankaccount/{building_id}', [BankAccountController::class, 'axisbank'])->name('bankaccount.axisbankaccount');
-        Route::get('/bankaccount/canarabankaccount/{building_id}', [BankAccountController::class, 'canarabank'])->name('bankaccount.canarabankaccount');
-        Route::get('/bankaccount/sbiaccount/{building_id}', [BankAccountController::class, 'sbi'])->name('bankaccount.sbiaccount');
-
+        Route::get('/bankaccount.banknames_bank/{building_id}', [BankAccountController::class, 'banknames'])->name('bankaccount.banknames_bank');
+    
         // Bank Module Controller 
 
         Route::get('/banks/create', [BankController::class, 'create'])->name('banks.create');
@@ -314,11 +312,14 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
 
         Route::get('/pdf/sales_return_apartment_report_pdf/{buildingId}',[SalesReturnReportController::class,'salesreturnapartmentPDF'])->name('sales_return_apartment_report.pdf');
 
+        Route::get('/pdf/bank_account_report_pdf/{buildingId}',[BankAccountController::class,'bankaccountPDF'])->name('bank_account_report.pdf');
+
+        Route::get('/pdf/banknames_report_pdf/{buildingId}',[BankAccountController::class,'banknamesreportPDF'])->name('banknames_report.pdf');
+
         
 
 
-        Route::get('/admin/bankaccount/{bankName}account/{buildingId}', [BankAccountController::class, 'show'])
-            ->name('admin.bankaccount.dynamicaccount');
+      
 
 
 

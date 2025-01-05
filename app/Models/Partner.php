@@ -33,4 +33,9 @@ class Partner extends Model
         return $this->hasMany(PartnerDistribution::class);
     }
 
+    public function partnerCashInstallments()
+    {
+        return $this->hasMany(PartnerCashInstallment::class);
+    }
+
 }

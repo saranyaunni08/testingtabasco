@@ -1,68 +1,52 @@
-@extends('layouts.default')
-
-@section('content')
-<div class="container">
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Bank Account PDF</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-        }
+    body {
+        font-family: Arial, sans-serif;
+    }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
 
-        th,
-        td {
-            border: 1px solid #ccc;
-            padding: 8px;
-            text-align: center;
-        }
+    th,
+    td {
+        border: 1px solid #000; /* Black border for a simple photostat style */
+        padding: 8px;
+        text-align: center;
+    }
 
-        th {
-            background-color: #bfbfbf;
-        }
+    th {
+        font-weight: bold; /* Bold headers for clarity */
+    }
 
-        .balance {
-            font-weight: bold;
-        }
+    .balance {
+        font-weight: bold; /* Bold the balance column */
+    }
 
-        .note {
-            color: red;
-            font-size: 12px;
-        }
+    .note {
+        font-size: 12px; /* Smaller font for notes */
+    }
 
-        .highlight {
-            background-color: #d6f5d6;
-            /* Light green */
-        }
+    .highlight {
+        background-color: transparent; /* No highlight color */
+    }
 
-        .sub-total {
-            font-weight: bold;
-            text-align: right;
-        }
-    </style>
-   <div class="d-flex justify-content-center mb-4 gap-3">
-    @foreach ($bankNames as $bankName)
-        <a href="{{ route('admin.bankaccount.banknames_bank', ['building_id' => $building->id, 'bank_name' => $bankName]) }}"
-            class="btn btn-outline-{{ $loop->index % 2 == 0 ? 'primary' : 'secondary' }}">
-            {{ $bankName }} Account
-        </a>
-    @endforeach
-</div>
+    .sub-total {
+        font-weight: bold;
+        text-align: right;
+    }
+</style>
 
-<div style="text-align: right;">
-        <a href="{{ route('admin.bank_account_report.pdf', $building->id) }}" class="btn btn-primary">
-            <i class="fas fa-arrow-down"></i> Download PDF
-        </a>
-
-    </div>
-
-
+    </head>
+    <body>
     <div style="text-align: center;">
         <h2>TABASCO INN</h2>
         <h3>STATEMENT OF ACCOUNT</h3>
-        <p><strong>BANK BANK ACCOUNTS (COMBINED)</strong></p>
+        <p><strong>{{ $bankName }} Account</strong></p>
         <p>
             From
             {{ $installments->min('installment_date') ? \Carbon\Carbon::parse($installments->min('installment_date'))->format('d-m-Y') : 'N/A' }}
@@ -70,14 +54,13 @@
             {{ $installments->max('installment_date') ? \Carbon\Carbon::parse($installments->max('installment_date'))->format('d-m-Y') : 'N/A' }}
         </p>
     </div>
-
-    <table>
+    <table class="table table-bordered">
         <thead>
             <tr>
                 <th>Date</th>
                 <th>Vno</th>
                 <th>Description</th>
-                <th>CHEQUE NO</th>
+                <th>Cheque No</th>
                 <th>Debit</th>
                 <th>Credit</th>
                 <th>Balance</th>
@@ -92,24 +75,23 @@
 
             @foreach ($installments as $index => $installment)
                         @php
+                            // Calculate balance (Debit - Credit)
                             $balance = floatval($installment->paid_amount) - floatval($installment->partner_amounts);
 
-                            // Update totals with typecasting
+                            // Update totals
                             $total_debit += floatval($installment->paid_amount);
                             $total_credit += floatval($installment->partner_amounts);
                             $total_balance += $balance;
                         @endphp
 
-
                         <tr @if($index % 2 == 0) class="highlight" @endif>
                             <td>{{ $installment->payment_date }}</td>
                             <td></td>
-                            <td>{{ $installment->installment_number }} Installment {{ $installment->customer_name }}</td>
+                            <td>{{ $installment->installment_number }} Installment for {{ $installment->customer_name }}</td>
                             <td>{{ $installment->cheque_number }}</td>
                             <td>{{ number_format(floatval($installment->paid_amount), 2) }}</td>
                             <td>{{ number_format(floatval($installment->partner_amounts), 2) }}</td>
                             <td class="balance">{{ number_format(floatval($balance), 2) }}</td>
-
                         </tr>
             @endforeach
         </tbody>
@@ -131,10 +113,7 @@
                 <td class="balance">{{ number_format($total_balance, 2) }}</td>
             </tr>
         </tfoot>
-    </table>
+        </table>
 
-
-
-</div>
-
-@endsection
+    </body>
+    </html>

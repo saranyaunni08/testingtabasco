@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Building;
 use Illuminate\Support\Facades\DB;
+use Barryvdh\DomPDF\Facade\Pdf as PDF;
 
 class BankAccountController extends Controller
 {
@@ -13,13 +14,14 @@ class BankAccountController extends Controller
         // Fetch the building details
         $building = Building::findOrFail($buildingId);
 
-        // Fetch unique bank names from installment_payments table without filtering by building_id
+        // Fetch unique, non-empty bank names from installment_payments table
         $bankNames = DB::table('installment_payments')
             ->join('installments', 'installment_payments.installment_id', '=', 'installments.id')
             ->join('sales', 'installments.sale_id', '=', 'sales.id')
+            ->whereNotNull('installment_payments.bank_name')  // Ensure no null values
             ->distinct()
-            ->pluck('bank_name'); // Get unique bank names
-
+            ->pluck('bank_name')
+            ->filter(); // Remove any null or empty values
 
         // Fetch installment details
         $installments = DB::table('installments')
@@ -30,8 +32,10 @@ class BankAccountController extends Controller
                 'installments.installment_number',
                 'installments.paid_amount',
                 'sales.customer_name',
+                'sales.partner_amounts', // This fetches partner amounts for each sale_id
                 'installment_payments.bank_name',
-                'installment_payments.payment_date'
+                'installment_payments.payment_date',
+                'installment_payments.cheque_number'
             )
             ->get();
 
@@ -48,109 +52,138 @@ class BankAccountController extends Controller
         ));
     }
 
-
-
-    public function axisbank($buildingId)
+    public function banknames($buildingId)
     {
         // Fetch the building details
         $building = Building::findOrFail($buildingId);
-
-        // Fetch installment details along with related customer and bank information
-        // Filter by bank_name = 'Axis Bank'
+        $title = 'Bank Account';
+        $page = 'bank account';
+    
+        // Retrieve the bank_name from the query string
+        $bankName = request()->query('bank_name');
+    
+        // Fetch unique, non-empty bank names from installment_payments table
+        $bankNames = DB::table('installment_payments')
+            ->join('installments', 'installment_payments.installment_id', '=', 'installments.id')
+            ->join('sales', 'installments.sale_id', '=', 'sales.id')
+            ->whereNotNull('installment_payments.bank_name')  // Ensure no null values
+            ->distinct()
+            ->pluck('bank_name')
+            ->filter(); // Remove any null or empty values
+    
+        // Fetch installments for a specific bank_name
         $installments = DB::table('installments')
-            ->join('sales', 'installments.sale_id', '=', 'sales.id') // Join sales to fetch customer_name
-            ->join('installment_payments', 'installments.id', '=', 'installment_payments.installment_id') // Join installment_payments to fetch bank_name
+            ->join('sales', 'installments.sale_id', '=', 'sales.id')
+            ->join('installment_payments', 'installments.id', '=', 'installment_payments.installment_id')
+            ->where('installment_payments.bank_name', $bankName) // Filter by bank_name
             ->select(
                 'installments.installment_date',
                 'installments.installment_number',
                 'installments.paid_amount',
                 'sales.customer_name',
+                'sales.partner_amounts', // This fetches partner amounts for each sale_id
                 'installment_payments.bank_name',
-                'installment_payments.payment_date' // Fetch the payment_date
+                'installment_payments.payment_date',
+                'installment_payments.cheque_number'
             )
-            ->where('installment_payments.bank_name', '=', 'Axis Bank') // Add condition for Axis Bank
             ->get();
-
-        $title = 'Axis Bank Account';
-        $page = 'axis bank account';
-
-        // Return view with the data
-        return view('bankaccount.axisbankaccount', compact(
+    
+        // Return view with the filtered data
+        return view('bankaccount.banknames_bank', compact(
             'building',
             'installments',
+            'bankNames', // Pass the list of bank names to the view
             'title',
-            'page'
+            'page',
+            'bankName' // Make sure this variable is passed to the view
         ));
     }
+    
+    public function bankaccountPDF($buildingId){
 
+          // Fetch the building details
+          $building = Building::findOrFail($buildingId);
 
-    public function canarabank($buildingId)
-    {
-        // Fetch the building details
-        $building = Building::findOrFail($buildingId);
+          // Fetch unique, non-empty bank names from installment_payments table
+          $bankNames = DB::table('installment_payments')
+              ->join('installments', 'installment_payments.installment_id', '=', 'installments.id')
+              ->join('sales', 'installments.sale_id', '=', 'sales.id')
+              ->whereNotNull('installment_payments.bank_name')  // Ensure no null values
+              ->distinct()
+              ->pluck('bank_name')
+              ->filter(); // Remove any null or empty values
+  
+          // Fetch installment details
+          $installments = DB::table('installments')
+              ->join('sales', 'installments.sale_id', '=', 'sales.id')
+              ->join('installment_payments', 'installments.id', '=', 'installment_payments.installment_id')
+              ->select(
+                  'installments.installment_date',
+                  'installments.installment_number',
+                  'installments.paid_amount',
+                  'sales.customer_name',
+                  'sales.partner_amounts', // This fetches partner amounts for each sale_id
+                  'installment_payments.bank_name',
+                  'installment_payments.payment_date',
+                  'installment_payments.cheque_number'
+              )
+              ->get();
 
-        // Fetch installment details along with related customer and bank information
-        // Filter by bank_name = 'Canara Bank'
+              $pdf = PDF::loadView('pdf.bank_account_report_pdf', compact(
+                'building',
+            'installments',
+            'bankNames',
+           
+            ));
+    
+            return $pdf->download('bank_account_report.pdf');
+    }
+
+    public function banknamesreportPDF($buildingId){
+
+         // Fetch the building details
+         $building = Building::findOrFail($buildingId);
+         // Retrieve the bank_name from the query string
+        $bankName = request()->query('bank_name');
+    
+        // Fetch unique, non-empty bank names from installment_payments table
+        $bankNames = DB::table('installment_payments')
+            ->join('installments', 'installment_payments.installment_id', '=', 'installments.id')
+            ->join('sales', 'installments.sale_id', '=', 'sales.id')
+            ->whereNotNull('installment_payments.bank_name')  // Ensure no null values
+            ->distinct()
+            ->pluck('bank_name')
+            ->filter(); // Remove any null or empty values
+    
+        // Fetch installments for a specific bank_name
         $installments = DB::table('installments')
-            ->join('sales', 'installments.sale_id', '=', 'sales.id') // Join sales to fetch customer_name
-            ->join('installment_payments', 'installments.id', '=', 'installment_payments.installment_id') // Join installment_payments to fetch bank_name
+            ->join('sales', 'installments.sale_id', '=', 'sales.id')
+            ->join('installment_payments', 'installments.id', '=', 'installment_payments.installment_id')
+            ->where('installment_payments.bank_name', $bankName) // Filter by bank_name
             ->select(
                 'installments.installment_date',
                 'installments.installment_number',
-                'installments.paid_amount as debit',
+                'installments.paid_amount',
                 'sales.customer_name',
+                'sales.partner_amounts', // This fetches partner amounts for each sale_id
                 'installment_payments.bank_name',
-                'installment_payments.payment_date' // Fetch the payment_date
+                'installment_payments.payment_date',
+                'installment_payments.cheque_number'
             )
-            ->where('installment_payments.bank_name', '=', 'Canara Bank') // Change this condition for Canara Bank
             ->get();
 
-        $title = 'Canara Bank Account';
-        $page = 'canara bank account';
-
-        // Return view with the data
-        return view('bankaccount.canarabankaccount', compact(
-            'building',
+            $pdf = PDF::loadView('pdf.banknames_report_pdf', compact(
+                'building',
             'installments',
-            'title',
-            'page'
-        ));
+            'bankNames', // Pass the list of bank names to the view
+            'bankName' ,
+           
+            ));
+    
+            return $pdf->download('banknames_report.pdf');
+    
+
     }
-
-
-    public function sbi($buildingId)
-    {
-        // Fetch the building details
-        $building = Building::findOrFail($buildingId);
-
-        // Fetch installment details along with related customer and bank information
-        // Filter by bank_name = 'SBI'
-        $installments = DB::table('installments')
-            ->join('sales', 'installments.sale_id', '=', 'sales.id') // Join sales to fetch customer_name
-            ->join('installment_payments', 'installments.id', '=', 'installment_payments.installment_id') // Join installment_payments to fetch bank_name
-            ->select(
-                'installments.installment_date',
-                'installments.installment_number',
-                'installments.paid_amount as debit',
-                'sales.customer_name',
-                'installment_payments.bank_name',
-                'installment_payments.payment_date' // Fetch the payment_date
-            )
-            ->where('installment_payments.bank_name', '=', 'SBI') // Change this condition for SBI
-            ->get();
-
-        $title = 'SBI Account';
-        $page = 'sbi account';
-
-        // Return view with the data
-        return view('bankaccount.sbiaccount', compact(
-            'building',
-            'installments',
-            'title',
-            'page'
-        ));
-    }
-
 
 }
 

@@ -25,6 +25,7 @@ class CashBookController extends Controller
             'installments.paid_amount',
             'installments.sale_id',
             'sales.customer_name',
+            'sales.partner_amounts',
             'partners.first_name',
             'sales_partners.percentage',
             'sales_partners.partner_id'

@@ -42,27 +42,20 @@
             text-align: right;
         }
     </style>
-   <div class="d-flex justify-content-center mb-4 gap-3">
-    @foreach ($bankNames as $bankName)
-        <a href="{{ route('admin.bankaccount.banknames_bank', ['building_id' => $building->id, 'bank_name' => $bankName]) }}"
-            class="btn btn-outline-{{ $loop->index % 2 == 0 ? 'primary' : 'secondary' }}">
-            {{ $bankName }} Account
-        </a>
-    @endforeach
-</div>
 
 <div style="text-align: right;">
-        <a href="{{ route('admin.bank_account_report.pdf', $building->id) }}" class="btn btn-primary">
-            <i class="fas fa-arrow-down"></i> Download PDF
-        </a>
+<a href="{{ route('admin.banknames_report.pdf', ['buildingId' => $building->id]) }}?bank_name={{ urlencode($bankName) }}"
 
-    </div>
+       class="btn btn-primary">
+        <i class="fas fa-arrow-down"></i> Download PDF
+    </a>
+</div>
 
 
     <div style="text-align: center;">
         <h2>TABASCO INN</h2>
         <h3>STATEMENT OF ACCOUNT</h3>
-        <p><strong>BANK BANK ACCOUNTS (COMBINED)</strong></p>
+        <p><strong>{{ $bankName }} Account</strong></p>
         <p>
             From
             {{ $installments->min('installment_date') ? \Carbon\Carbon::parse($installments->min('installment_date'))->format('d-m-Y') : 'N/A' }}
@@ -70,14 +63,13 @@
             {{ $installments->max('installment_date') ? \Carbon\Carbon::parse($installments->max('installment_date'))->format('d-m-Y') : 'N/A' }}
         </p>
     </div>
-
-    <table>
+    <table class="table table-bordered">
         <thead>
             <tr>
                 <th>Date</th>
                 <th>Vno</th>
                 <th>Description</th>
-                <th>CHEQUE NO</th>
+                <th>Cheque No</th>
                 <th>Debit</th>
                 <th>Credit</th>
                 <th>Balance</th>
@@ -92,24 +84,23 @@
 
             @foreach ($installments as $index => $installment)
                         @php
+                            // Calculate balance (Debit - Credit)
                             $balance = floatval($installment->paid_amount) - floatval($installment->partner_amounts);
 
-                            // Update totals with typecasting
+                            // Update totals
                             $total_debit += floatval($installment->paid_amount);
                             $total_credit += floatval($installment->partner_amounts);
                             $total_balance += $balance;
                         @endphp
 
-
                         <tr @if($index % 2 == 0) class="highlight" @endif>
                             <td>{{ $installment->payment_date }}</td>
                             <td></td>
-                            <td>{{ $installment->installment_number }} Installment {{ $installment->customer_name }}</td>
+                            <td>{{ $installment->installment_number }} Installment for {{ $installment->customer_name }}</td>
                             <td>{{ $installment->cheque_number }}</td>
                             <td>{{ number_format(floatval($installment->paid_amount), 2) }}</td>
                             <td>{{ number_format(floatval($installment->partner_amounts), 2) }}</td>
                             <td class="balance">{{ number_format(floatval($balance), 2) }}</td>
-
                         </tr>
             @endforeach
         </tbody>

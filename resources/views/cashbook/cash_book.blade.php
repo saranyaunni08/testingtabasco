@@ -42,19 +42,25 @@
             @foreach ($installments as $installment)
                         <tr>
                             <td style="border: 1px solid #ccc; padding: 10px; text-align: center;">
-                                {{ \Carbon\Carbon::parse($installment->installment_date)->format('d-m-Y') }}
+                                {{ \Carbon\Carbon::parse($installment->payment_date)->format('d-m-Y') }}
                             </td>
-                            <td style="border: 1px solid #ccc; padding: 10px; text-align: center;">
+                            <td style="border: 1px solid #ccc; padding: 10px;"></td>
+
+                            <td style="border: 1px solid #ccc; padding: 10px;">
                                 {{ $installment->installment_number }} Installment ({{ $installment->customer_name }})
                             </td>
 
                             <td style="border: 1px solid #ccc; padding: 10px; text-align: center;">
-                                {{ number_format($installment->paid_amount, 2) }}
+                                {{ number_format((float) $installment->paid_amount ?: 0, 2) }}
                             </td>
-                            <td style="border: 1px solid #ccc; padding: 10px;"></td>
+                            <td style="border: 1px solid #ccc; padding: 10px; text-align: center;">
+                                {{ number_format((float) $installment->partner_amounts ?: 0, 2) }}
+                            </td>
+                            </td>
                             <td style="border: 1px solid #ccc; padding: 10px; text-align: center;">
                                 @php
-                                    $balance += $installment->paid_amount;
+                                    $net_balance = (float) ($installment->paid_amount ?? 0) - (float) ($installment->partner_amounts ?? 0);
+                                    $balance += $net_balance;
                                 @endphp
                                 {{ number_format($balance, 2) }}
                             </td>
@@ -70,13 +76,16 @@
                                     <td style="border: 1px solid #ccc; padding: 10px;">
                                         Transfer to {{ $transfer->first_name }} Current Account ({{ $transfer->percentage }}%)
                                     </td>
-                                    <td style="border: 1px solid #ccc; padding: 10px;"></td>
                                     <td style="border: 1px solid #ccc; padding: 10px; text-align: center;">
-                                        {{ number_format(($installment->paid_amount * ($transfer->percentage / 100)), 2) }}
-                                    </td>
+                                {{ number_format((float) $installment->paid_amount ?: 0, 2) }}
+                            </td>
+                            <td style="border: 1px solid #ccc; padding: 10px; text-align: center;">
+                                {{ number_format((float) $installment->partner_amounts ?: 0, 2) }}
+                            </td>
                                     <td style="border: 1px solid #ccc; padding: 10px; text-align: center;">
                                         @php
-                                            $balance -= ($installment->paid_amount * ($transfer->percentage / 100));
+                                            $net_balance = (float) ($installment->paid_amount ?? 0) - (float) ($installment->partner_amounts ?? 0);
+                                            $balance += $net_balance;
                                         @endphp
                                         {{ number_format($balance, 2) }}
                                     </td>

@@ -1,62 +1,48 @@
-@extends('layouts.default')
-
-@section('content')
-<div class="container">
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Bank Account PDF</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-        }
+    body {
+        font-family: Arial, sans-serif;
+    }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
 
-        th,
-        td {
-            border: 1px solid #ccc;
-            padding: 8px;
-            text-align: center;
-        }
+    th,
+    td {
+        border: 1px solid #000; /* Black border for a simple photostat style */
+        padding: 8px;
+        text-align: center;
+    }
 
-        th {
-            background-color: #bfbfbf;
-        }
+    th {
+        font-weight: bold; /* Bold headers for clarity */
+    }
 
-        .balance {
-            font-weight: bold;
-        }
+    .balance {
+        font-weight: bold; /* Bold the balance column */
+    }
 
-        .note {
-            color: red;
-            font-size: 12px;
-        }
+    .note {
+        font-size: 12px; /* Smaller font for notes */
+    }
 
-        .highlight {
-            background-color: #d6f5d6;
-            /* Light green */
-        }
+    .highlight {
+        background-color: transparent; /* No highlight color */
+    }
 
-        .sub-total {
-            font-weight: bold;
-            text-align: right;
-        }
-    </style>
-   <div class="d-flex justify-content-center mb-4 gap-3">
-    @foreach ($bankNames as $bankName)
-        <a href="{{ route('admin.bankaccount.banknames_bank', ['building_id' => $building->id, 'bank_name' => $bankName]) }}"
-            class="btn btn-outline-{{ $loop->index % 2 == 0 ? 'primary' : 'secondary' }}">
-            {{ $bankName }} Account
-        </a>
-    @endforeach
-</div>
+    .sub-total {
+        font-weight: bold;
+        text-align: right;
+    }
+</style>
 
-<div style="text-align: right;">
-        <a href="{{ route('admin.bank_account_report.pdf', $building->id) }}" class="btn btn-primary">
-            <i class="fas fa-arrow-down"></i> Download PDF
-        </a>
-
-    </div>
+    </head>
+    <body>
 
 
     <div style="text-align: center;">
@@ -132,9 +118,5 @@
             </tr>
         </tfoot>
     </table>
-
-
-
-</div>
-
-@endsection
+    </body>
+</html>

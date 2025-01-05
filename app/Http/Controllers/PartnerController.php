@@ -16,7 +16,7 @@ class PartnerController extends Controller
         $page = 'create-partner'; // Define the page variable
         return view('partners.create', compact('title', 'page'));
     }
-    
+
 
     public function store(Request $request)
     {
@@ -50,19 +50,19 @@ class PartnerController extends Controller
             ')
             ->groupBy('partners.id', 'partners.first_name', 'partners.last_name')
             ->get();
-    
+
         $data = [];
-    
+
         foreach ($partners as $partner) {
             $sales = Sale::where('cash_in_hand_partner_name', $partner->id)
                 ->whereNull('deleted_at')
                 ->get();
-    
+
             $partnersData = [];
-    
+
             foreach ($sales as $sale) {
                 $amountReceived = ($sale->in_hand_amount * $sale->cash_in_hand_percent) / 100;
-    
+
                 $partnersData[] = [
                     'sale_id' => $sale->id,
                     'partner_name' => $partner->first_name . ' ' . $partner->last_name,
@@ -77,19 +77,19 @@ class PartnerController extends Controller
                     'amount_received' => $amountReceived
                 ];
             }
-    
+
             $data[] = [
                 'partner_id' => $partner->id,
                 'partners' => $partnersData
             ];
         }
-    
+
         $title = 'Cash In Hand';
         $page = 'cash_in_hand';  // Define the current page
-    
+
         return view('partners.cash_in_hand', compact('data', 'title', 'page'));
     }
-    
+
     public function markAsPaid(Request $request, Partner $partner)
     {
         $validated = $request->validate([
@@ -98,9 +98,9 @@ class PartnerController extends Controller
         ]);
 
         $sale = Sale::where('cash_in_hand_partner_name', $partner->id)
-                    ->whereNull('deleted_at')
-                    ->orderBy('created_at', 'desc')
-                    ->first();
+            ->whereNull('deleted_at')
+            ->orderBy('created_at', 'desc')
+            ->first();
 
         if ($sale) {
             $sale->cash_in_hand_paid_amount = $validated['payment_amount'];
@@ -141,5 +141,35 @@ class PartnerController extends Controller
         }
 
         return redirect()->back()->with('error', 'No installments selected.');
+    }
+    public function listPartners()
+    {
+        $partners = Partner::all(); // Fetch all partners from the database
+        $title = 'List of Partners';
+        $page = 'List of Partners';
+        return view('partners.list', compact('partners', 'title', 'page')); // Pass data to the view
+
+    }
+    public function edit($id)
+    {
+        $partner = Partner::findOrFail($id); // Fetch the partner using the ID
+        $title = 'List of Partners';
+        $page = 'List of Partners';
+        return view('partners.edit', compact('partner', 'title', 'page')); // Return an edit form view
+    }
+    public function destroy($id)
+    {
+        $partner = Partner::findOrFail($id); // Fetch the partner using thpe ID
+        $partner->delete(); // Delete the partner
+
+
+        return redirect()->route('admin.partners.list')->with('success', 'Partner deleted successfully.');
+    }
+    public function update(Request $request, $id)
+    {
+        $partner = Partner::findOrFail($id);
+        $partner->update($request->only(['first_name', 'last_name', 'email', 'phone_number', 'address']));
+
+        return redirect()->route('admin.partners.list')->with('success', 'Partner updated successfully.');
     }
 }
