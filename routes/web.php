@@ -255,8 +255,7 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
 
         // Cashbook Excel
         Route::get('/cash-book/cash_book/{building_id}', [CashBookController::class, 'cashbook'])->name('cashbook.cash_book');
-        Route::get('/cashbook.BasheerCurrentAccount/{building_id}', [CashBookController::class, 'basheercurrentaccount'])->name('cashbook.BasheerCurrentAccount');
-        Route::get('/cashbook.PavoorCurrentAccount/{building_id}', [CashBookController::class, 'pavoorcurrentaccount'])->name('cashbook.PavoorCurrentAccount');
+        Route::get('/cashbook.partner_bank/{building_id}', [CashbookController::class, 'bankpartner'])->name('cashbook.partner_bank');
 
         // Accounts payable excel
 
@@ -315,6 +314,12 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
         Route::get('/pdf/bank_account_report_pdf/{buildingId}',[BankAccountController::class,'bankaccountPDF'])->name('bank_account_report.pdf');
 
         Route::get('/pdf/banknames_report_pdf/{buildingId}',[BankAccountController::class,'banknamesreportPDF'])->name('banknames_report.pdf');
+
+        Route::get('/pdf/cash_account_report_pdf/{buildingId}',[CashbookController::class,'cashbookPDF'])->name('cash_account_report.pdf');
+
+        Route::get('/pdf/partner_bank_report_pdf/{buildingId}',[CashBookController::class,'cashpartnerPDF'])->name('partner_bank_report.pdf');
+
+
 
         
 

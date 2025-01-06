@@ -84,42 +84,47 @@
             </tr>
         </thead>
         <tbody>
-            @php
-                $total_debit = 0; // Initialize total debit
-                $total_credit = 0; // Initialize total credit
-                $total_balance = 0; // Initialize total balance
-            @endphp
+    @php
+        $total_debit = 0; // Initialize total debit
+        $total_credit = 0; // Initialize total credit
+        $total_balance = 0; // Initialize total balance
+    @endphp
 
-            @foreach ($installments as $index => $installment)
-                        @php
-                            $balance = floatval($installment->paid_amount) - floatval($installment->partner_amounts);
+@php
+    $total_debit = 0;
+    $current_balance = 0; // Initialize cumulative balance
+@endphp
 
-                            // Update totals with typecasting
-                            $total_debit += floatval($installment->paid_amount);
-                            $total_credit += floatval($installment->partner_amounts);
-                            $total_balance += $balance;
-                        @endphp
+@foreach ($installments as $index => $installment)
+    @php
+        $paid_amount = floatval($installment->paid_amount);
+        
+        // Update totals
+        $total_debit += $paid_amount;
+        $current_balance += $paid_amount; // Add current paid amount to cumulative balance
+        $total_balance +=$current_balance;
+    @endphp
 
+    <tr @if($index % 2 == 0) class="highlight" @endif>
+        <td>{{ \Carbon\Carbon::parse($installment->payment_date)->format('d-m-Y') }}</td>
+        <td></td>
+        <td>{{ $installment->installment_number }} Installment ({{ $installment->customer_name }})</td>
+        <td>{{ $installment->cheque_number }}</td>
+        <td>{{ number_format($paid_amount, 2) }}</td>
+        <td></td>
+        <td class="balance">{{ number_format($current_balance, 2) }}</td> <!-- Show cumulative balance -->
+    </tr>
+@endforeach
 
-                        <tr @if($index % 2 == 0) class="highlight" @endif>
-                            <td>{{ $installment->payment_date }}</td>
-                            <td></td>
-                            <td>{{ $installment->installment_number }} Installment {{ $installment->customer_name }}</td>
-                            <td>{{ $installment->cheque_number }}</td>
-                            <td>{{ number_format(floatval($installment->paid_amount), 2) }}</td>
-                            <td>{{ number_format(floatval($installment->partner_amounts), 2) }}</td>
-                            <td class="balance">{{ number_format(floatval($balance), 2) }}</td>
+</tbody>
 
-                        </tr>
-            @endforeach
-        </tbody>
 
         <tfoot>
             <!-- Subtotal Row -->
             <tr>
                 <td colspan="4" class="sub-total">Sub Total</td>
                 <td>{{ number_format($total_debit, 2) }}</td>
-                <td>{{ number_format($total_credit, 2) }}</td>
+                <td></td>
                 <td class="balance">{{ number_format($total_balance, 2) }}</td>
             </tr>
 
@@ -127,7 +132,7 @@
             <tr>
                 <td colspan="4" class="sub-total">Grand Total</td>
                 <td>{{ number_format($total_debit, 2) }}</td>
-                <td>{{ number_format($total_credit, 2) }}</td>
+                <td></td>
                 <td class="balance">{{ number_format($total_balance, 2) }}</td>
             </tr>
         </tfoot>

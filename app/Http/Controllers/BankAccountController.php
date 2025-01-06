@@ -13,7 +13,7 @@ class BankAccountController extends Controller
     {
         // Fetch the building details
         $building = Building::findOrFail($buildingId);
-
+    
         // Fetch unique, non-empty bank names from installment_payments table
         $bankNames = DB::table('installment_payments')
             ->join('installments', 'installment_payments.installment_id', '=', 'installments.id')
@@ -22,7 +22,7 @@ class BankAccountController extends Controller
             ->distinct()
             ->pluck('bank_name')
             ->filter(); // Remove any null or empty values
-
+    
         // Fetch installment details
         $installments = DB::table('installments')
             ->join('sales', 'installments.sale_id', '=', 'sales.id')
@@ -30,18 +30,23 @@ class BankAccountController extends Controller
             ->select(
                 'installments.installment_date',
                 'installments.installment_number',
-                'installments.paid_amount',
                 'sales.customer_name',
                 'sales.partner_amounts', // This fetches partner amounts for each sale_id
                 'installment_payments.bank_name',
                 'installment_payments.payment_date',
-                'installment_payments.cheque_number'
+                'installment_payments.cheque_number',
+                'installment_payments.paid_amount'
             )
-            ->get();
-
+            ->get()
+            ->map(function ($installment) {
+                // Decode partner_amounts if it is a JSON string
+                $installment->partner_amounts = json_decode($installment->partner_amounts, true);
+                return $installment;
+            });
+    
         $title = 'Bank Account';
         $page = 'bank account';
-
+    
         // Return view with the data
         return view('bankaccount.bank_account', compact(
             'building',
@@ -51,6 +56,7 @@ class BankAccountController extends Controller
             'page'
         ));
     }
+    
 
     public function banknames($buildingId)
     {
@@ -79,12 +85,12 @@ class BankAccountController extends Controller
             ->select(
                 'installments.installment_date',
                 'installments.installment_number',
-                'installments.paid_amount',
                 'sales.customer_name',
                 'sales.partner_amounts', // This fetches partner amounts for each sale_id
                 'installment_payments.bank_name',
                 'installment_payments.payment_date',
-                'installment_payments.cheque_number'
+                'installment_payments.cheque_number',
+                'installment_payments.paid_amount'
             )
             ->get();
     
@@ -120,12 +126,12 @@ class BankAccountController extends Controller
               ->select(
                   'installments.installment_date',
                   'installments.installment_number',
-                  'installments.paid_amount',
                   'sales.customer_name',
                   'sales.partner_amounts', // This fetches partner amounts for each sale_id
                   'installment_payments.bank_name',
                   'installment_payments.payment_date',
-                  'installment_payments.cheque_number'
+                  'installment_payments.cheque_number',
+                  'installment_payments.paid_amount'
               )
               ->get();
 
@@ -163,12 +169,12 @@ class BankAccountController extends Controller
             ->select(
                 'installments.installment_date',
                 'installments.installment_number',
-                'installments.paid_amount',
                 'sales.customer_name',
                 'sales.partner_amounts', // This fetches partner amounts for each sale_id
                 'installment_payments.bank_name',
                 'installment_payments.payment_date',
-                'installment_payments.cheque_number'
+                'installment_payments.cheque_number',
+                'installment_payments.paid_amount'
             )
             ->get();
 
