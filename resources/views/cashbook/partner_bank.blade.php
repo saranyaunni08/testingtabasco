@@ -14,12 +14,14 @@
     <!-- Header -->
     <h3 class="text-center font-weight-bold">TABASCO INN</h3>
     <h4 class="text-center font-weight-bold">STATEMENT OF ACCOUNT</h4>
-    <h5 class="text-center">{{ $partner->first_name }} Current Account</h5>
+    <h5 class="text-center">{{ $partnerName }} Current Account</h5>
+
+
     <p style="text-align: center;">
         From
-        {{ $installments->min('installment_date') ? \Carbon\Carbon::parse($installments->min('installment_date'))->format('d-m-Y') : 'N/A' }}
+        {{ $cashInstallments->min('installment_date') ? \Carbon\Carbon::parse($cashInstallments->min('installment_date'))->format('d-m-Y') : 'N/A' }}
         To
-        {{ $installments->max('installment_date') ? \Carbon\Carbon::parse($installments->max('installment_date'))->format('d-m-Y') : 'N/A' }}
+        {{ $cashInstallments->max('installment_date') ? \Carbon\Carbon::parse($cashInstallments->max('installment_date'))->format('d-m-Y') : 'N/A' }}
     </p>
 
 
@@ -28,10 +30,10 @@
         <thead>
             <tr class="table-header">
                 <th>Date</th>
-                <th>Vno</th>
+                <!-- <th>Vno</th> -->
                 <th>Description</th>
                 <th>Debit</th>
-                <th>Credit</th>
+                <!-- <th>Credit</th> -->
                 <th>Balance</th>
             </tr>
         </thead>
@@ -43,43 +45,39 @@
                 $totalBalance = 0; // Initialize total balance
             @endphp
 
-            @foreach ($installments as $installment)
+            @foreach ($cashInstallments as $installment)
                         @php
-                            $paidAmount = floatval($installment->paid_amount); // Convert to float
-                            $partnerAmount = floatval($installment->partner_amounts); // Convert to float
-                            $balance = $paidAmount - $partnerAmount;
+                            $paidAmount = $installment->paid_amount; // Convert to float
+                            $partnerAmount = $installment->amount; // Convert to float
+                            $balance += $partnerAmount;
 
                             // Add to the running totals
-                            $totalDebit += $paidAmount;
                             $totalCredit += $partnerAmount;
+                            
                             $totalBalance += $balance;
                         @endphp
                         <tr class="{{ $loop->iteration % 2 == 0 ? 'even-row' : 'odd-row' }}">
                             <td>{{ \Carbon\Carbon::parse($installment->payment_date)->format('d-m-Y') }}</td>
-                            <td></td>
-                            <td>{{ $installment->installment_number }} installment ({{ $installment->first_name }})</td>
-                            <td>{{ number_format($paidAmount, 2) }}</td>
+                            <td>{{ $installment->installment_number }} installment ({{ $installment->customer_name }})</td>
                             <td>{{ number_format($partnerAmount, 2) }}</td>
                             <td>{{ number_format($balance, 2) }}</td> <!-- Balance after each installment -->
-                            <td></td> <!-- Empty cell for any additional info -->
+        
                         </tr>
             @endforeach
 
         </tbody>
         <tfoot>
             <tr>
-                <td colspan="3"><strong>Sub Total</strong></td>
-                <td><strong>{{ number_format($totalDebit, 2) }}</strong></td>
+                <td colspan="2"><strong>Sub Total</strong></td>
                 <td><strong>{{ number_format($totalCredit, 2) }}</strong></td>
                 <td><strong>{{ number_format($totalBalance, 2) }}</strong></td>
-                <td></td>
+        
             </tr>
             <tr>
-                <td colspan="3"><strong>Sub Total</strong></td>
-                <td><strong>{{ number_format($totalDebit, 2) }}</strong></td>
+                <td colspan="2"><strong>Sub Total</strong></td>
                 <td><strong>{{ number_format($totalCredit, 2) }}</strong></td>
                 <td><strong>{{ number_format($totalBalance, 2) }}</strong></td>
-                <td></td>
+    
             </tr>
 
         </tfoot>
