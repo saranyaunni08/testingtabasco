@@ -32,7 +32,7 @@
         <thead>
             <tr>
                 <th style="border: 1px solid #ccc; padding: 10px; background-color: #444; color: white;">Date</th>
-                <th style="border: 1px solid #ccc; padding: 10px; background-color: #444; color: white;">Vno</th>
+                <!-- <th style="border: 1px solid #ccc; padding: 10px; background-color: #444; color: white;">Vno</th> -->
                 <th style="border: 1px solid #ccc; padding: 10px; background-color: #444; color: white;">Description
                 </th>
                 <th style="border: 1px solid #ccc; padding: 10px; background-color: #444; color: white;">Debit</th>
@@ -41,29 +41,26 @@
             </tr>
         </thead>
         <tbody>
-            @php
-                $balance = 0; // Initialize balance
-                $totalDebit = 0; // Initialize total for paid_amount
-                $totalCredit = 0; // Initialize total for partner_amounts
-            @endphp
+@php
+    $totalDebit = 0; // Total Debit
+    $totalCredit = 0; // Total Credit
+    $balance = 0; // Current Balance
+    $totalBalanceSum = 0; // Sum of all balances
+@endphp
 
 @foreach ($cashInstallments as $installment)
     @php
-        $debit = $installment->paid_amount ?: 0;
-        $credit = $installment->amount ?: 0;
-        $net_balance = $debit - $credit;
-        $balance += $net_balance;
-
-        // Add to running totals
-        $totalDebit += $debit;
-        $totalCredit += $credit;
+        $debit = $installment->paid_amount ?: 0; // Debit value
+        $credit = $installment->amount ?: 0; // Credit value
+        $totalDebit += $debit; // Add to total debit
     @endphp
 
+    <!-- Row for Debit (Installment Paid) -->
     <tr>
         <td style="border: 1px solid #ccc; padding: 10px; text-align: center;">
             {{ \Carbon\Carbon::parse($installment->payment_date)->format('d-m-Y') }}
         </td>
-        <td></td>
+        <!-- <td></td> -->
         <td style="border: 1px solid #ccc; padding: 10px;">
             {{ $installment->installment_number }} Installment ({{ $installment->customer_name }})
         </td>
@@ -71,20 +68,25 @@
             {{ number_format($debit, 2) }}
         </td>
         <td style="border: 1px solid #ccc; padding: 10px; text-align: center;">
+            <!-- Leave blank for credit -->
         </td>
         <td style="border: 1px solid #ccc; padding: 10px; text-align: center;">
-            {{ number_format($net_balance, 2) }}
+            @php
+                $balance += $debit; // Update balance with debit
+                $totalBalanceSum += $balance; // Add current balance to total balance sum
+            @endphp
+            {{ number_format($balance, 2) }}
         </td>
     </tr>
 
-    <!-- Loop through unique partners and display transfer details -->
+    <!-- Loop through unique partners for Credit (Transfer Details) -->
     @foreach ($uniquePartners->where('id', $installment->partner_id) as $partner)
         @if ($installment->installment_number == $installment->installment_number)
             <tr style="background-color: #d9f2d9;">
                 <td style="border: 1px solid #ccc; padding: 10px; text-align: center;">
                     {{ \Carbon\Carbon::parse($installment->payment_date)->format('d-m-Y') }}
                 </td>
-                <td></td>
+                <!-- <td></td> -->
                 <td style="border: 1px solid #ccc; padding: 10px;">
                     Transfer to {{ $partner->first_name }} Current Account ({{ $installment->percentage }}%)
                 </td>
@@ -95,44 +97,49 @@
                     {{ number_format($credit, 2) }}
                 </td>
                 <td style="border: 1px solid #ccc; padding: 10px; text-align: center;">
-                    {{ number_format($net_balance, 2) }}
+                    @php
+                        $balance -= $credit; // Subtract credit from balance
+                        $totalCredit += $credit; // Add to total credit
+                        $totalBalanceSum += $balance; // Add current balance to total balance sum
+                    @endphp
+                    {{ number_format($balance, 2) }}
                 </td>
             </tr>
         @endif
     @endforeach
 @endforeach
 
+</tbody>
+<tfoot>
+    <tr style="background-color: #f2f2f2; font-weight: bold; color: #333; text-align:center;">
+        <td colspan="2" class="sub-total">Sub Total</td>
+        <td style="border: 1px solid #ccc; padding: 10px; text-align: center; background-color: #e0e0e0;">
+            {{ number_format($totalDebit, 2) }}
+        </td>
+        <td style="border: 1px solid #ccc; padding: 10px; text-align: center; background-color: #e0e0e0;">
+            {{ number_format($totalCredit, 2) }}
+        </td>
+        <td class="balance"
+            style="border: 1px solid #ccc; padding: 10px; text-align: center; background-color: #e0e0e0;">
+            {{ number_format($totalBalanceSum, 2) }} <!-- Total Balance Sum -->
+        </td>
+    </tr>
 
-        </tbody>
-        <tfoot>
-            <tr style="background-color: #f2f2f2; font-weight: bold; color: #333; text-align:center;">
-                <td colspan="3" class="sub-total">Sub Total</td>
-                <td style="border: 1px solid #ccc; padding: 10px; text-align: center; background-color: #e0e0e0;">
-                    {{ number_format($totalDebit, 2) }}
-                </td>
-                <td style="border: 1px solid #ccc; padding: 10px; text-align: center; background-color: #e0e0e0;">
-                    {{ number_format($totalCredit, 2) }}
-                </td>
-                <td class="balance"
-                    style="border: 1px solid #ccc; padding: 10px; text-align: center; background-color: #e0e0e0;">
-                    {{ number_format($balance, 2) }}
-                </td>
-            </tr>
+    <tr style="background-color: #f2f2f2; font-weight: bold; color: #333; text-align:center;">
+        <td colspan="2" class="sub-total">Grand Total</td>
+        <td style="border: 1px solid #ccc; padding: 10px; text-align: center; background-color: #e0e0e0;">
+            {{ number_format($totalDebit, 2) }}
+        </td>
+        <td style="border: 1px solid #ccc; padding: 10px; text-align: center; background-color: #e0e0e0;">
+            {{ number_format($totalCredit, 2) }}
+        </td>
+        <td class="balance"
+            style="border: 1px solid #ccc; padding: 10px; text-align: center; background-color: #e0e0e0;">
+            {{ number_format($totalBalanceSum, 2) }} <!-- Total Balance Sum -->
+        </td>
+    </tr>
+</tfoot>
 
-            <tr style="background-color: #f2f2f2; font-weight: bold; color: #333; text-align:center;">
-                <td colspan="3" class="sub-total">Grand Total</td>
-                <td style="border: 1px solid #ccc; padding: 10px; text-align: center; background-color: #e0e0e0;">
-                    {{ number_format($totalDebit, 2) }}
-                </td>
-                <td style="border: 1px solid #ccc; padding: 10px; text-align: center; background-color: #e0e0e0;">
-                    {{ number_format($totalCredit, 2) }}
-                </td>
-                <td class="balance"
-                    style="border: 1px solid #ccc; padding: 10px; text-align: center; background-color: #e0e0e0;">
-                    {{ number_format($balance, 2) }}
-                </td>
-            </tr>
-        </tfoot>
     </table>
 
 

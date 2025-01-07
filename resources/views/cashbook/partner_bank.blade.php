@@ -74,7 +74,7 @@
         
             </tr>
             <tr>
-                <td colspan="2"><strong>Sub Total</strong></td>
+                <td colspan="2"><strong>Grand Total</strong></td>
                 <td><strong>{{ number_format($totalCredit, 2) }}</strong></td>
                 <td><strong>{{ number_format($totalBalance, 2) }}</strong></td>
     

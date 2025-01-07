@@ -65,11 +65,11 @@
         <thead>
             <tr>
                 <th>Date</th>
-                <th>Vno</th>
+                <!-- <th>Vno</th> -->
                 <th>Description</th>
                 <th>Cheque No</th>
                 <th>Debit</th>
-                <th>Credit</th>
+                <!-- <th>Credit</th> -->
                 <th>Balance</th>
             </tr>
         </thead>
@@ -97,11 +97,11 @@
 
                         <tr @if($index % 2 == 0) class="highlight" @endif>
                             <td>{{ \Carbon\Carbon::parse($installment->payment_date)->format('d-m-Y') }}</td>
-                            <td></td>
+                            <!-- <td></td> -->
                             <td>{{ $installment->installment_number }} Installment ({{ $installment->customer_name }})</td>
                             <td>{{ $installment->cheque_number }}</td>
                             <td>{{ number_format($paid_amount, 2) }}</td>
-                            <td></td>
+                            <!-- <td></td> -->
                             <td class="balance">{{ number_format($current_balance, 2) }}</td> <!-- Show cumulative balance -->
                         </tr>
             @endforeach
@@ -112,17 +112,17 @@
         <tfoot>
             <!-- Subtotal Row -->
             <tr>
-                <td colspan="4" class="sub-total">Sub Total</td>
+                <td colspan="3" class="sub-total" style="text-align:center;">Sub Total</td>
                 <td>{{ number_format($total_debit, 2) }}</td>
-                <td></td>
+                <!-- <td></td> -->
                 <td class="balance">{{ number_format($total_balance, 2) }}</td>
             </tr>
 
             <!-- Grand Total Row -->
             <tr>
-                <td colspan="4" class="sub-total">Grand Total</td>
+                <td colspan="3" class="sub-total" style="text-align:center;">Grand Total</td>
                 <td>{{ number_format($total_debit, 2) }}</td>
-                <td></td>
+                <!-- <td></td> -->
                 <td class="balance">{{ number_format($total_balance, 2) }}</td>
             </tr>
         </tfoot>
